@@ -91,3 +91,80 @@ class ID(BaseModel):
 
 
 # **************************************************************************************
+
+
+class OrbitalElements(BaseModel):
+    drag: Annotated[
+        float,
+        Field(
+            description="The B*, the drag term, or radiation pressure coefficient (decimal point assumed)",
+        ),
+    ]
+
+    raan: Annotated[
+        float,
+        Field(
+            description="Right Ascension of the ascending node (in degrees)",
+        ),
+    ]
+
+    inclination: Annotated[
+        float,
+        Field(
+            description="The orbital inclination of the satellite (in degrees)",
+        ),
+    ]
+
+    eccentricity: Annotated[
+        float,
+        Field(
+            description="The orbital eccentricity of the satellite (dimensionless)",
+        ),
+    ]
+
+    argument_of_perigee: Annotated[
+        float,
+        Field(
+            description="The argument of perigee of the satellite (in degrees)",
+        ),
+    ]
+
+    mean_anomaly: Annotated[
+        float,
+        Field(
+            description="The mean anomaly of the satellite (in degrees)",
+        ),
+    ]
+
+    mean_motion: Annotated[
+        float,
+        Field(
+            gt=0,
+            description="The mean motion (revolutions per day) of the satellite",
+        ),
+    ]
+
+    first_derivative_of_mean_motion: Annotated[
+        float,
+        Field(
+            description="The first derivative of mean motion (decimal point assumed) of the satellite 'the ballistic coefficient'",
+        ),
+    ]
+
+    second_derivative_of_mean_motion: Annotated[
+        float,
+        Field(
+            description="Second derivative of mean motion (decimal point assumed) of the satellite",
+        ),
+    ]
+
+    number_of_revolutions: Annotated[
+        int,
+        Field(
+            ge=0,
+            description="The number of complete revolutions the satellite has made around the Earth at the Epoch time",
+        ),
+    ]
+
+
+# **************************************************************************************
