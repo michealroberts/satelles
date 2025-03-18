@@ -10,7 +10,7 @@ from typing import Any, Dict
 
 from pydantic import ValidationError
 
-from satelles.satellite import ID
+from satelles.satellite import ID, OrbitalElements
 
 # **************************************************************************************
 
@@ -76,6 +76,56 @@ class TestIDModel(unittest.TestCase):
         data["classification"] = "X"
         with self.assertRaises(ValidationError):
             ID(**data)
+
+
+# **************************************************************************************
+
+
+class TestOrbitalElements(unittest.TestCase):
+    def setUp(self) -> None:
+        self.valid_data: Dict[str, Any] = {
+            "drag": 0.00002182,
+            "raan": 257.8333,
+            "inclination": 51.6433,
+            "eccentricity": 0.0001675,
+            "argument_of_perigee": 296.7755,
+            "mean_anomaly": 73.3782,
+            "mean_motion": 15.542259,
+            "first_derivative_of_mean_motion": -0.00002182,
+            "second_derivative_of_mean_motion": 0.0,
+            "number_of_revolutions": 12345,
+        }
+
+    def test_valid_orbital_elements(self) -> None:
+        model: OrbitalElements = OrbitalElements(**self.valid_data)
+        self.assertAlmostEqual(model.drag, 0.00002182)
+        self.assertAlmostEqual(model.raan, 257.8333)
+        self.assertAlmostEqual(model.inclination, 51.6433)
+        self.assertAlmostEqual(model.eccentricity, 0.0001675)
+        self.assertAlmostEqual(model.argument_of_perigee, 296.7755)
+        self.assertAlmostEqual(model.mean_anomaly, 73.3782)
+        self.assertAlmostEqual(model.mean_motion, 15.542259)
+        self.assertAlmostEqual(model.first_derivative_of_mean_motion, -0.00002182)
+        self.assertAlmostEqual(model.second_derivative_of_mean_motion, 0.0)
+        self.assertEqual(model.number_of_revolutions, 12345)
+
+    def test_motion_positive(self) -> None:
+        data: Dict[str, Any] = self.valid_data.copy()
+        data["mean_motion"] = 0
+        with self.assertRaises(ValidationError):
+            OrbitalElements(**data)
+
+    def test_revolution_non_negative(self) -> None:
+        data: Dict[str, Any] = self.valid_data.copy()
+        data["number_of_revolutions"] = -1
+        with self.assertRaises(ValidationError):
+            OrbitalElements(**data)
+
+    def test_missing_field(self) -> None:
+        data: Dict[str, Any] = self.valid_data.copy()
+        del data["drag"]
+        with self.assertRaises(ValidationError):
+            OrbitalElements(**data)
 
 
 # **************************************************************************************
