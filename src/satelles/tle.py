@@ -309,9 +309,10 @@ def parse_number_of_revolutions_field(value: Any) -> Optional[int]:
 # **************************************************************************************
 
 
-def parse_tle(tle: str) -> Optional[Satellite]:
+def parse_tle(tle: str) -> Satellite:
     """
-    Parse a TLE string and return a Satellite instance if successful, otherwise return None.
+    Parse a TLE string and return a Satellite instance if successful, otherwise raise a
+    ValueError.
 
     The TLE string can be in one of two formats:
       - Three-line set (name, line1, line2)
@@ -320,8 +321,11 @@ def parse_tle(tle: str) -> Optional[Satellite]:
     Args:
         tle: The TLE string to parse.
 
+    Raises:
+        ValueError: If the TLE string is not in a valid format or if any of the fields are invalid.
+
     Returns:
-        A Satellite instance if parsing is successful, otherwise None.
+        A Satellite instance if parsing is successful.
     """
     # Split the TLE into lines and remove any empty lines:
     lines = [line.strip() for line in tle.splitlines() if line.strip()]
@@ -333,7 +337,7 @@ def parse_tle(tle: str) -> Optional[Satellite]:
         name = lines[0]
         line1, line2 = lines[1], lines[2]
     else:
-        return None
+        raise ValueError("Invalid TLE format")
 
     # Match the TLE to the line 1 regular expression:
     m1 = line1_regex.match(line1)
@@ -342,7 +346,7 @@ def parse_tle(tle: str) -> Optional[Satellite]:
     m2 = line2_regex.match(line2)
 
     if not m1 or not m2:
-        return None
+        raise ValueError("Invalid TLE format")
 
     id_field = m1.group("id")
     classification_field = m1.group("classification")
@@ -365,102 +369,96 @@ def parse_tle(tle: str) -> Optional[Satellite]:
     id = parse_id_field(id_field)
 
     if id is None:
-        return None
+        raise ValueError("Invalid ID field")
 
     classification = parse_classification_field(classification_field)
 
     if classification is None:
-        return None
+        raise ValueError("Invalid classification field")
 
     designator = parse_designator_field(designator_field)
 
     if designator is None:
-        return None
+        raise ValueError("Invalid designator field")
 
     epoch = parse_epoch_field(f"{year_field}{day_field}")
     if epoch is None:
-        return None
+        raise ValueError("Invalid epoch field")
 
     year, day, jd = epoch
 
     fdmm = parse_first_derivative_of_mean_motion_field(fdmm_field)
     if fdmm is None:
-        return None
+        raise ValueError("Invalid first derivative of mean motion field")
 
     sdmm = parse_second_derivative_of_mean_motion_field(sdmm_field)
     if sdmm is None:
-        return None
+        raise ValueError("Invalid second derivative of mean motion field")
 
     drag = parse_bstar_drag_term_field(drag_field)
     if drag is None:
-        return None
+        raise ValueError("Invalid b* drag field")
 
     ephemeris = parse_ephemeris_type_field(ephemeris_field)
     if ephemeris is None:
-        return None
+        raise ValueError("Invalid ephemeris type field")
 
-    set = parse_set_number_field(set_field)
-    if set is None:
-        return None
+    set_number = parse_set_number_field(set_field)
+    if set_number is None:
+        raise ValueError("Invalid set number field")
 
     inclination = parse_inclination_field(inclination_field)
     if inclination is None:
-        return None
+        raise ValueError("Invalid inclination field")
 
     raan = parse_raan_field(raan_field)
     if raan is None:
-        return None
+        raise ValueError("Invalid raan field")
 
     eccentricity = parse_eccentricity_field(eccentricity_field)
     if eccentricity is None:
-        return None
+        raise ValueError("Invalid eccentricity field")
 
     argument_of_perigee = parse_argument_of_perigee_field(argument_of_perigee_field)
     if argument_of_perigee is None:
-        return None
+        raise ValueError("Invalid argument of perigee field")
 
     mean_anomaly = parse_mean_anomaly_field(mean_anomaly_field)
     if mean_anomaly is None:
-        return None
+        raise ValueError("Invalid mean anomaly field")
 
     mean_motion = parse_mean_motion_field(mean_motion_field)
     if mean_motion is None:
-        return None
+        raise ValueError("Invalid mean motion field")
 
     number_of_revolutions = parse_number_of_revolutions_field(
         number_of_revolutions_field
     )
     if number_of_revolutions is None:
-        return None
+        raise ValueError("Invalid number of revolutions field")
 
     # Assemble the satellite using the parsed fields and return it:
-    try:
-        satellite = Satellite(
-            id=id,
-            name=name,
-            classification=classification,
-            designator=designator,
-            year=year,
-            day=day,
-            jd=jd,
-            ephemeris=ephemeris,
-            set=set,
-            drag=drag,
-            raan=raan,
-            inclination=inclination,
-            eccentricity=eccentricity,
-            argument_of_perigee=argument_of_perigee,
-            mean_anomaly=mean_anomaly,
-            mean_motion=mean_motion,
-            first_derivative_of_mean_motion=fdmm,
-            second_derivative_of_mean_motion=sdmm,
-            number_of_revolutions=number_of_revolutions,
-        )
-    except Exception as error:
-        print(error)
-        return None
-
-    return satellite
+    return Satellite(
+        id=id,
+        name=name,
+        classification=classification,
+        designator=designator,
+        year=year,
+        day=day,
+        jd=jd,
+        ephemeris=ephemeris,
+        set=set_number,
+        drag=drag,
+        raan=raan,
+        inclination=inclination,
+        eccentricity=eccentricity,
+        argument_of_perigee=argument_of_perigee,
+        mean_anomaly=mean_anomaly,
+        mean_motion=mean_motion,
+        first_derivative_of_mean_motion=fdmm,
+        second_derivative_of_mean_motion=sdmm,
+        number_of_revolutions=number_of_revolutions,
+    )
 
 
 # **************************************************************************************
