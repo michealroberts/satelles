@@ -33,7 +33,7 @@ class TestIDModel(unittest.TestCase):
         model: ID = ID(**self.valid_data)
         self.assertEqual(model.id, 25544)
         self.assertEqual(model.name, "ISS (ZARYA)")
-        self.assertEqual(model.classification, "U")
+        self.assertEqual(model.classification, "Unclassified")
         self.assertEqual(model.designator, "1998-067A")
         self.assertEqual(model.year, 2021)
         self.assertEqual(model.day, 123.456789)
