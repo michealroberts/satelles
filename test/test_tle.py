@@ -334,8 +334,8 @@ class TestTLEParser(unittest.TestCase):
         self.assertEqual(satellite.id, 23754532)
 
     def test_invalid_tle(self):
-        satellite = parse_tle("")
-        self.assertIsNone(satellite, "Invalid TLE string should return None")
+        with self.assertRaises(ValueError, msg="Invalid TLE format"):
+            parse_tle("")
 
 
 # **************************************************************************************
