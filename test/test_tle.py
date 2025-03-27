@@ -12,6 +12,7 @@ from typing import Dict, Optional, Tuple
 from satelles.tle import (
     line1_regex,
     line2_regex,
+    parse_tle,
 )
 
 # **************************************************************************************
@@ -235,6 +236,106 @@ class TestTLERegex(unittest.TestCase):
         }
         self.check_line1(line1, expected_line1)
         self.check_line2(line2, expected_line2)
+
+
+# **************************************************************************************
+
+
+class TestTLEParser(unittest.TestCase):
+    def test_parse_tle_defined(self):
+        # Simply verify that parse_tle is defined and callable:
+        self.assertTrue(callable(parse_tle))
+
+    def test_parse_2le(self):
+        satellite = parse_tle(iss2LE)
+        self.assertIsNotNone(satellite, "2LE TLE should be parsed successfully")
+        self.assertEqual(satellite.name, "")
+        self.assertEqual(satellite.classification, "Unclassified")
+        self.assertEqual(satellite.designator, "98067A")
+        self.assertEqual(satellite.year, 2020)
+        self.assertAlmostEqual(satellite.day, 62.59097222)
+        self.assertAlmostEqual(satellite.inclination, 51.6442)
+        self.assertAlmostEqual(satellite.raan, 147.1064)
+        self.assertAlmostEqual(satellite.eccentricity, 0.0004607)
+        self.assertAlmostEqual(satellite.argument_of_perigee, 95.6506)
+        self.assertAlmostEqual(satellite.mean_anomaly, 329.8285)
+        self.assertAlmostEqual(satellite.mean_motion, 15.49249062)
+        self.assertAlmostEqual(satellite.first_derivative_of_mean_motion, 0.00016717)
+        self.assertAlmostEqual(satellite.second_derivative_of_mean_motion, 0.0)
+        self.assertEqual(satellite.number_of_revolutions, 2423)
+
+    def test_parse_3le_unclassified(self):
+        satellite = parse_tle(iss3LE)
+        self.assertIsNotNone(satellite, "3LE TLE should be parsed successfully")
+        self.assertEqual(satellite.name, "ISS (ZARYA)")
+        self.assertEqual(satellite.classification, "Unclassified")
+        self.assertEqual(satellite.designator, "98067A")
+        self.assertEqual(satellite.year, 2020)
+        self.assertAlmostEqual(satellite.day, 62.59097222)
+        self.assertAlmostEqual(satellite.inclination, 51.6442)
+        self.assertAlmostEqual(satellite.raan, 147.1064)
+        self.assertAlmostEqual(satellite.eccentricity, 0.0004607)
+        self.assertAlmostEqual(satellite.argument_of_perigee, 95.6506)
+        self.assertAlmostEqual(satellite.mean_anomaly, 329.8285)
+        self.assertAlmostEqual(satellite.mean_motion, 15.49249062)
+        self.assertAlmostEqual(satellite.first_derivative_of_mean_motion, 0.00016717)
+        self.assertAlmostEqual(satellite.second_derivative_of_mean_motion, 0.0)
+        self.assertEqual(satellite.number_of_revolutions, 2423)
+
+    def test_parse_3le_classified(self):
+        satellite = parse_tle(iss3LEClassified)
+        self.assertIsNotNone(
+            satellite, "3LE TLE with Classified should be parsed successfully"
+        )
+        self.assertEqual(satellite.name, "ISS (ZARYA)")
+        self.assertEqual(satellite.classification, "Classified")
+        self.assertEqual(satellite.designator, "98067A")
+        self.assertEqual(satellite.year, 2020)
+        self.assertAlmostEqual(satellite.day, 62.59097222)
+        self.assertAlmostEqual(satellite.inclination, 51.6442)
+        self.assertAlmostEqual(satellite.raan, 147.1064)
+        self.assertAlmostEqual(satellite.eccentricity, 0.0004607)
+        self.assertAlmostEqual(satellite.argument_of_perigee, 95.6506)
+        self.assertAlmostEqual(satellite.mean_anomaly, 329.8285)
+        self.assertAlmostEqual(satellite.mean_motion, 15.49249062)
+        self.assertAlmostEqual(satellite.first_derivative_of_mean_motion, 0.00016717)
+        self.assertAlmostEqual(satellite.second_derivative_of_mean_motion, 0.0)
+        self.assertEqual(satellite.number_of_revolutions, 2423)
+
+    def test_parse_3le_secret(self):
+        satellite = parse_tle(iss3LESecret)
+        self.assertIsNotNone(
+            satellite, "3LE TLE with Secret should be parsed successfully"
+        )
+        self.assertEqual(satellite.name, "ISS (ZARYA)")
+        self.assertEqual(satellite.classification, "Secret")
+        self.assertEqual(satellite.designator, "98067A")
+        self.assertEqual(satellite.year, 2020)
+        self.assertAlmostEqual(satellite.day, 62.59097222)
+        self.assertAlmostEqual(satellite.inclination, 51.6442)
+        self.assertAlmostEqual(satellite.raan, 147.1064)
+        self.assertAlmostEqual(satellite.eccentricity, 0.0004607)
+        self.assertAlmostEqual(satellite.argument_of_perigee, 95.6506)
+        self.assertAlmostEqual(satellite.mean_anomaly, 329.8285)
+        self.assertAlmostEqual(satellite.mean_motion, 15.49249062)
+        self.assertAlmostEqual(satellite.first_derivative_of_mean_motion, 0.00016717)
+        self.assertAlmostEqual(satellite.second_derivative_of_mean_motion, 0.0)
+        self.assertEqual(satellite.number_of_revolutions, 2423)
+
+    def test_parse_3le_with_alpha5(self):
+        satellite = parse_tle(iss3LEWithAlpha5)
+        self.assertIsNotNone(
+            satellite, "3LE TLE with alpha-5 should be parsed successfully"
+        )
+        self.assertEqual(satellite.name, "ISS (ZARYA)")
+        self.assertEqual(satellite.classification, "Unclassified")
+        # The id field is parsed using base-36 when the first character is a letter.
+        # Expected value for "E5544" in base-36 is 23754532.
+        self.assertEqual(satellite.id, 23754532)
+
+    def test_invalid_tle(self):
+        satellite = parse_tle("")
+        self.assertIsNone(satellite, "Invalid TLE string should return None")
 
 
 # **************************************************************************************
