@@ -85,7 +85,7 @@ class ID(BaseModel):
     @field_validator("classification")
     def validate_classification(cls, value: str) -> str:
         mapping = {"U": "Unclassified", "C": "Classified", "S": "Secret"}
-        if value not in mapping:
+        if value not in mapping.keys():
             raise ValueError(f"Classification must be one of {list(mapping.keys())}")
         return mapping[value]
 
