@@ -462,3 +462,98 @@ def parse_tle(tle: str) -> Satellite:
 
 
 # **************************************************************************************
+
+
+class TLE:
+    _satellite: Satellite
+
+    def __init__(self, tle_string: str) -> None:
+        # Parse the TLE string and create a Satellite instance:
+        try:
+            satellite = parse_tle(tle_string)
+        except ValueError as e:
+            raise ValueError(f"Invalid TLE string: {e}")
+
+        self._satellite = satellite
+
+    def __repr__(self) -> str:
+        return f"<TLE(name={self._satellite.name!r}, id={self._satellite.id})>"
+
+    @property
+    def name(self) -> str:
+        return self._satellite.name
+
+    @property
+    def id(self) -> int:
+        return self._satellite.id
+
+    @property
+    def classification(self) -> str:
+        return self._satellite.classification
+
+    @property
+    def designator(self) -> str:
+        return self._satellite.designator
+
+    @property
+    def year(self) -> int:
+        return self._satellite.year
+
+    @property
+    def day(self) -> float:
+        return self._satellite.day
+
+    @property
+    def julian_date(self) -> float:
+        return self._satellite.jd
+
+    @property
+    def ephemeris(self) -> int:
+        return self._satellite.ephemeris
+
+    @property
+    def set(self) -> int:
+        return self._satellite.set
+
+    @property
+    def b_star_drag(self) -> float:
+        return self._satellite.drag
+
+    @property
+    def right_ascension_of_the_ascending_node(self) -> float:
+        return self._satellite.raan
+
+    @property
+    def inclination(self) -> float:
+        return self._satellite.inclination
+
+    @property
+    def eccentricity(self) -> float:
+        return self._satellite.eccentricity
+
+    @property
+    def argument_of_perigee(self) -> float:
+        return self._satellite.argument_of_perigee
+
+    @property
+    def mean_anomaly(self) -> float:
+        return self._satellite.mean_anomaly
+
+    @property
+    def mean_motion(self) -> float:
+        return self._satellite.mean_motion
+
+    @property
+    def first_derivative_of_mean_motion(self) -> float:
+        return self._satellite.first_derivative_of_mean_motion
+
+    @property
+    def second_derivative_of_mean_motion(self) -> float:
+        return self._satellite.second_derivative_of_mean_motion
+
+    @property
+    def number_of_revolutions(self) -> int:
+        return self._satellite.number_of_revolutions
+
+
+# **************************************************************************************

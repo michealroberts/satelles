@@ -7,8 +7,10 @@
 
 import re
 import unittest
+from math import isclose as is_close
 from typing import Dict, Optional, Tuple
 
+from satelles import TLE
 from satelles.tle import (
     line1_regex,
     line2_regex,
@@ -336,6 +338,107 @@ class TestTLEParser(unittest.TestCase):
     def test_invalid_tle(self):
         with self.assertRaises(ValueError, msg="Invalid TLE format"):
             parse_tle("")
+
+
+# **************************************************************************************
+
+
+class TestTLE(unittest.TestCase):
+    def assertAlmostEqualFloat(self, a, b, tol=1e-8):
+        self.assertTrue(is_close(a, b, rel_tol=tol), f"{a} != {b}")
+
+    def test_parse_2le(self):
+        tle = TLE(iss2LE)
+        self.assertEqual(tle.name, "")
+        self.assertEqual(tle.classification, "Unclassified")
+        self.assertEqual(tle.designator, "98067A")
+        self.assertEqual(tle.year, 2020)
+        self.assertAlmostEqualFloat(tle.day, 62.59097222)
+        self.assertAlmostEqualFloat(tle.right_ascension_of_the_ascending_node, 147.1064)
+        self.assertAlmostEqualFloat(tle.inclination, 51.6442)
+        self.assertAlmostEqualFloat(tle.eccentricity, 0.0004607)
+        self.assertAlmostEqualFloat(tle.argument_of_perigee, 95.6506)
+        self.assertAlmostEqualFloat(tle.mean_anomaly, 329.8285)
+        self.assertAlmostEqualFloat(tle.mean_motion, 15.49249062)
+        self.assertAlmostEqualFloat(tle.first_derivative_of_mean_motion, 0.00016717)
+        self.assertAlmostEqualFloat(tle.second_derivative_of_mean_motion, 0.0)
+        self.assertEqual(tle.number_of_revolutions, 2423)
+        self.assertEqual(tle.ephemeris, 0)
+        self.assertEqual(tle.set, 9006)
+        # b_star_drag is parsed from "10270-3": 10270/1e5 * 10^-3 = 0.00010270
+        self.assertAlmostEqualFloat(tle.b_star_drag, 0.00010270)
+
+    def test_parse_3le_unclassified(self):
+        tle = TLE(iss3LE)
+        self.assertEqual(tle.name, "ISS (ZARYA)")
+        self.assertEqual(tle.classification, "Unclassified")
+        self.assertEqual(tle.designator, "98067A")
+        self.assertEqual(tle.year, 2020)
+        self.assertAlmostEqualFloat(tle.day, 62.59097222)
+        self.assertAlmostEqualFloat(tle.right_ascension_of_the_ascending_node, 147.1064)
+        self.assertAlmostEqualFloat(tle.inclination, 51.6442)
+        self.assertAlmostEqualFloat(tle.eccentricity, 0.0004607)
+        self.assertAlmostEqualFloat(tle.argument_of_perigee, 95.6506)
+        self.assertAlmostEqualFloat(tle.mean_anomaly, 329.8285)
+        self.assertAlmostEqualFloat(tle.mean_motion, 15.49249062)
+        self.assertAlmostEqualFloat(tle.first_derivative_of_mean_motion, 0.00016717)
+        self.assertAlmostEqualFloat(tle.second_derivative_of_mean_motion, 0.0)
+        self.assertEqual(tle.number_of_revolutions, 2423)
+        self.assertEqual(tle.ephemeris, 0)
+        self.assertEqual(tle.set, 9006)
+        self.assertAlmostEqualFloat(tle.b_star_drag, 0.00010270)
+
+    def test_parse_3le_classified(self):
+        tle = TLE(iss3LEClassified)
+        self.assertEqual(tle.name, "ISS (ZARYA)")
+        self.assertEqual(tle.classification, "Classified")
+        self.assertEqual(tle.designator, "98067A")
+        self.assertEqual(tle.year, 2020)
+        self.assertAlmostEqualFloat(tle.day, 62.59097222)
+        self.assertAlmostEqualFloat(tle.right_ascension_of_the_ascending_node, 147.1064)
+        self.assertAlmostEqualFloat(tle.inclination, 51.6442)
+        self.assertAlmostEqualFloat(tle.eccentricity, 0.0004607)
+        self.assertAlmostEqualFloat(tle.argument_of_perigee, 95.6506)
+        self.assertAlmostEqualFloat(tle.mean_anomaly, 329.8285)
+        self.assertAlmostEqualFloat(tle.mean_motion, 15.49249062)
+        self.assertAlmostEqualFloat(tle.first_derivative_of_mean_motion, 0.00016717)
+        self.assertAlmostEqualFloat(tle.second_derivative_of_mean_motion, 0.0)
+        self.assertEqual(tle.number_of_revolutions, 2423)
+        self.assertEqual(tle.ephemeris, 0)
+        self.assertEqual(tle.set, 9006)
+        self.assertAlmostEqualFloat(tle.b_star_drag, 0.00010270)
+
+    def test_parse_3le_secret(self):
+        tle = TLE(iss3LESecret)
+        self.assertEqual(tle.name, "ISS (ZARYA)")
+        self.assertEqual(tle.classification, "Secret")
+        self.assertEqual(tle.designator, "98067A")
+        self.assertEqual(tle.year, 2020)
+        self.assertAlmostEqualFloat(tle.day, 62.59097222)
+        self.assertAlmostEqualFloat(tle.right_ascension_of_the_ascending_node, 147.1064)
+        self.assertAlmostEqualFloat(tle.inclination, 51.6442)
+        self.assertAlmostEqualFloat(tle.eccentricity, 0.0004607)
+        self.assertAlmostEqualFloat(tle.argument_of_perigee, 95.6506)
+        self.assertAlmostEqualFloat(tle.mean_anomaly, 329.8285)
+        self.assertAlmostEqualFloat(tle.mean_motion, 15.49249062)
+        self.assertAlmostEqualFloat(tle.first_derivative_of_mean_motion, 0.00016717)
+        self.assertAlmostEqualFloat(tle.second_derivative_of_mean_motion, 0.0)
+        self.assertEqual(tle.number_of_revolutions, 2423)
+        self.assertEqual(tle.ephemeris, 0)
+        self.assertEqual(tle.set, 9006)
+        self.assertAlmostEqualFloat(tle.b_star_drag, 0.00010270)
+
+    def test_parse_3le_with_alpha5(self):
+        tle = TLE(iss3LEWithAlpha5)
+        self.assertEqual(tle.name, "ISS (ZARYA)")
+        self.assertEqual(tle.classification, "Unclassified")
+        # The id field is parsed using base-36 when the first character is a letter.
+        # Expected value for "E5544" in base-36 is 23754532.
+        self.assertEqual(tle.id, 23754532)
+
+    def test_invalid_tle(self):
+        with self.assertRaises(ValueError):
+            TLE("")
 
 
 # **************************************************************************************
