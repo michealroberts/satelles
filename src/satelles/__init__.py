@@ -12,7 +12,10 @@ from .earth import (
     EARTH_MEAN_RADIUS,
     EARTH_POLAR_RADIUS,
 )
-from .kepler import get_semi_major_axis
+from .kepler import (
+    get_eccentric_anomaly,
+    get_semi_major_axis,
+)
 from .satellite import Satellite
 from .tle import TLE
 
@@ -32,6 +35,7 @@ __all__: list[str] = [
     "EARTH_POLAR_RADIUS",
     "EARTH_MEAN_RADIUS",
     "GRAVITATIONAL_CONSTANT",
+    "get_eccentric_anomaly",
     "get_semi_major_axis",
     "Satellite",
     "TLE",
