@@ -7,6 +7,7 @@
 
 from .common import CartesianCoordinate
 from .constants import GRAVITATIONAL_CONSTANT
+from .coordinates import get_perifocal_coordinate
 from .earth import (
     EARTH_EQUATORIAL_RADIUS,
     EARTH_MASS,
@@ -40,6 +41,7 @@ __all__: list[str] = [
     "GRAVITATIONAL_CONSTANT",
     "get_eccentric_anomaly",
     "get_orbital_radius",
+    "get_perifocal_coordinate",
     "get_semi_major_axis",
     "get_true_anomaly",
     "Satellite",
