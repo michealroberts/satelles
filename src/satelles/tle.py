@@ -9,6 +9,7 @@ import re
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional, Tuple
 
+from .kepler import get_semi_major_axis
 from .satellite import Satellite
 
 # **************************************************************************************
@@ -554,6 +555,21 @@ class TLE:
     @property
     def number_of_revolutions(self) -> int:
         return self._satellite.number_of_revolutions
+
+    def get_semi_major_axis(self, mass: float = 0.0) -> float:
+        """
+        Calculate the semi-major axis of the satellite's orbit in meters.
+
+        The semi-major axis is calculated using the mean motion and the gravitational
+        constant of the Earth.
+
+        Args:
+            mass: The mass of the satellite in kilograms. Default is 0.0 (for a point mass).
+
+        Returns:
+            The semi-major axis (in SI meters).
+        """
+        return get_semi_major_axis(self.mean_motion, mass=mass)
 
 
 # **************************************************************************************
