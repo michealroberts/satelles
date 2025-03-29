@@ -5,7 +5,7 @@
 
 # **************************************************************************************
 
-from math import atan2, cos, degrees, pi, sin, sqrt
+from math import atan2, cos, degrees, pi, radians, sin, sqrt
 from typing import Optional
 
 from .constants import GRAVITATIONAL_CONSTANT
@@ -56,7 +56,7 @@ def get_eccentric_anomaly(
     the update is smaller than the specified tolerance.
 
     Args:
-        mean_anomaly: The mean anomaly (M) (in radians).
+        mean_anomaly: The mean anomaly (M) (in degrees)
         eccentricity: The orbital eccentricity (e), (unitless).
         tolerance: Convergence tolerance. Defaults to 1e-8.
 
@@ -68,13 +68,15 @@ def get_eccentric_anomaly(
         float: The eccentric anomaly (E) (in radians)
     """
     # Start with an initial guess for the eccentric anomaly equal to the mean anomaly:
-    E = mean_anomaly
+    E = radians(mean_anomaly)
+
+    M = E
 
     iteration = 0
 
     while iteration < 1_000_000:
         # Compute the value of Kepler's function: f(E) = E - e*sin(E) - M:
-        f_value = E - eccentricity * sin(E) - mean_anomaly
+        f_value = E - eccentricity * sin(E) - M
 
         # Compute the derivative: f'(E) = 1 - e*cos(E):
         f_derivative = 1 - eccentricity * cos(E)

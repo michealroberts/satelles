@@ -73,7 +73,7 @@ class TestEccentricAnomaly(unittest.TestCase):
         """
         for M in [0, pi / 6, pi, 2 * pi]:
             with self.subTest(mean_anomaly=M):
-                E = get_eccentric_anomaly(M, 0)
+                E = get_eccentric_anomaly(degrees(M), 0)
                 self.assertAlmostEqual(E, M, places=8)
 
     def test_convergence_residual(self):
@@ -85,7 +85,7 @@ class TestEccentricAnomaly(unittest.TestCase):
         # Test a range of mean anomaly values.
         for M in [0.0, 0.1, 1.0, pi / 2, pi, 3 * pi / 2, 2 * pi]:
             with self.subTest(mean_anomaly=M):
-                E = get_eccentric_anomaly(M, e)
+                E = get_eccentric_anomaly(degrees(M), e)
                 # The residual should be close to zero.
                 residual = E - e * sin(E) - M
                 self.assertAlmostEqual(residual, 0, places=8)
@@ -96,7 +96,7 @@ class TestEccentricAnomaly(unittest.TestCase):
         """
         e = 0.1
         M = -0.5  # radians
-        E = get_eccentric_anomaly(M, e)
+        E = get_eccentric_anomaly(degrees(M), e)
         residual = E - e * sin(E) - M
         self.assertAlmostEqual(residual, 0, places=8)
 
@@ -119,7 +119,7 @@ class TestTrueAnomaly(unittest.TestCase):
             2 * pi,
         ]:
             with self.subTest(mean_anomaly=mean_anomaly):
-                ν = get_true_anomaly(mean_anomaly, eccentricity)
+                ν = get_true_anomaly(degrees(mean_anomaly), eccentricity)
                 # Normalize mean_anomaly to [0, 2pi) for comparison.
                 expected = mean_anomaly % (2 * pi)
                 self.assertAlmostEqual(ν, degrees(expected), places=8)
