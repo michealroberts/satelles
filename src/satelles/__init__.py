@@ -6,6 +6,7 @@
 # **************************************************************************************
 
 from .constants import GRAVITATIONAL_CONSTANT
+from .earth import EARTH_MASS
 from .satellite import Satellite
 from .tle import TLE
 
@@ -20,6 +21,7 @@ __license__ = "MIT"
 # **************************************************************************************
 
 __all__: list[str] = [
+    "EARTH_MASS",
     "GRAVITATIONAL_CONSTANT",
     "Satellite",
     "TLE",
