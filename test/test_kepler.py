@@ -6,13 +6,14 @@
 # **************************************************************************************
 
 import unittest
-from math import pi, sin
+from math import atan2, cos, degrees, pi, sin, sqrt
 
 from satelles import (
     EARTH_MASS,
     GRAVITATIONAL_CONSTANT,
     get_eccentric_anomaly,
     get_semi_major_axis,
+    get_true_anomaly,
 )
 
 # **************************************************************************************
@@ -98,6 +99,79 @@ class TestEccentricAnomaly(unittest.TestCase):
         E = get_eccentric_anomaly(M, e)
         residual = E - e * sin(E) - M
         self.assertAlmostEqual(residual, 0, places=8)
+
+
+# **************************************************************************************
+
+
+class TestTrueAnomaly(unittest.TestCase):
+    def test_zero_eccentricity(self):
+        """
+        For zero eccentricity (e = 0), the true anomaly should equal the mean anomaly.
+        """
+        eccentricity = 0.0
+        for mean_anomaly in [
+            0.0,
+            pi / 6,
+            pi / 4,
+            pi / 2,
+            pi,
+            2 * pi,
+        ]:
+            with self.subTest(mean_anomaly=mean_anomaly):
+                ν = get_true_anomaly(mean_anomaly, eccentricity)
+                # Normalize mean_anomaly to [0, 2pi) for comparison.
+                expected = mean_anomaly % (2 * pi)
+                self.assertAlmostEqual(ν, degrees(expected), places=8)
+
+    def test_mean_anomaly_zero(self):
+        """
+        For any eccentricity, if the mean anomaly is zero, then the true anomaly should be zero.
+        """
+        mean_anomaly = 0.0
+        for eccentricity in [0.0, 0.1, 0.5, 0.9]:
+            with self.subTest(eccentricity=eccentricity):
+                ν = get_true_anomaly(mean_anomaly, eccentricity)
+                self.assertAlmostEqual(ν, 0.0, places=8)
+
+    def test_normalization(self):
+        """
+        Test that the output true anomaly is normalized to [0, 2π).
+        """
+        # For a given eccentricity and mean anomaly that leads to a negative true anomaly,
+        # check that the returned value is normalized.
+        eccentricity = 0.2
+        # Choose a mean anomaly that might yield a negative true anomaly before normalization.
+        mean_anomaly = -0.5
+        ν = get_true_anomaly(mean_anomaly, eccentricity)
+        self.assertTrue(0 <= ν < 360)
+
+    def test_invalid_eccentricity(self):
+        """
+        Check that a ValueError is raised for an eccentricity outside [0, 1).
+        """
+        with self.assertRaises(ValueError):
+            get_true_anomaly(1.0, 1.0)  # e = 1.0 is not allowed for elliptical orbits
+
+    def test_known_value(self):
+        """
+        Test a known value: Compute the expected true anomaly using the same formulas
+        and compare with the function's output.
+        """
+        eccentricity = 0.1
+        mean_anomaly = 0.75
+        # Compute the eccentric anomaly using the dependent function.
+        E = get_eccentric_anomaly(mean_anomaly, eccentricity)
+        expected = 2 * atan2(
+            sqrt(1 + eccentricity) * sin(E / 2),
+            sqrt(1 - eccentricity) * cos(E / 2),
+        )
+        # Normalize expected value.
+        if expected < 0:
+            expected += 2 * pi
+
+        ν = get_true_anomaly(mean_anomaly, eccentricity)
+        self.assertAlmostEqual(ν, degrees(expected), places=8)
 
 
 # **************************************************************************************

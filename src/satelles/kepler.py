@@ -5,7 +5,7 @@
 
 # **************************************************************************************
 
-from math import cos, pi, sin
+from math import atan2, cos, degrees, pi, sin, sqrt
 from typing import Optional
 
 from .constants import GRAVITATIONAL_CONSTANT
@@ -104,6 +104,51 @@ def get_eccentric_anomaly(
         )
 
     return E
+
+
+# **************************************************************************************
+
+
+def get_true_anomaly(
+    mean_anomaly: float, eccentricity: float, tolerance: float = 1e-8
+) -> float:
+    """
+    Calculate the true anomaly (ν) from the mean anomaly (M) and eccentricity (e).
+
+    Args:
+        mean_anomaly: The mean anomaly (M) in radians.
+        eccentricity: The orbital eccentricity (e).
+        tolerance: Convergence tolerance. Defaults to 1e-8.
+
+    Raises:
+        ValueError: If the eccentricity is not within the range [0, 1) for an elliptical orbit.
+
+    Returns:
+        The true anomaly (ν) (in degrees).
+    """
+    # Validate input eccentricity for an elliptical orbit.
+    if not (0 <= eccentricity < 1):
+        raise ValueError(
+            "Eccentricity must be in the range [0, 1) for elliptical orbits."
+        )
+
+    # Compute the eccentric anomaly (E):
+    E = get_eccentric_anomaly(mean_anomaly, eccentricity, tolerance)
+
+    # Compute the true anomaly (ν) using the formula from Kepler's laws:
+    ν = degrees(
+        2
+        * atan2(
+            sqrt(1 + eccentricity) * sin(E / 2),
+            sqrt(1 - eccentricity) * cos(E / 2),
+        )
+    )
+
+    # Normalize the true anomaly to the range [0, 360] degrees:
+    if ν < 0:
+        ν += 360
+
+    return ν % 360
 
 
 # **************************************************************************************

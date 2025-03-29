@@ -15,6 +15,7 @@ from .earth import (
 from .kepler import (
     get_eccentric_anomaly,
     get_semi_major_axis,
+    get_true_anomaly,
 )
 from .satellite import Satellite
 from .tle import TLE
@@ -37,6 +38,7 @@ __all__: list[str] = [
     "GRAVITATIONAL_CONSTANT",
     "get_eccentric_anomaly",
     "get_semi_major_axis",
+    "get_true_anomaly",
     "Satellite",
     "TLE",
 ]
