@@ -17,6 +17,8 @@ jobs:
 
     environment: pypi
     permissions:
+      contents: read
+      packages: write
       id-token: write
 
     steps:
