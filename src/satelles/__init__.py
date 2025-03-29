@@ -18,6 +18,7 @@ from .kepler import (
     get_semi_major_axis,
     get_true_anomaly,
 )
+from .orbit import get_orbital_radius
 from .satellite import Satellite
 from .tle import TLE
 
@@ -38,6 +39,7 @@ __all__: list[str] = [
     "EARTH_MEAN_RADIUS",
     "GRAVITATIONAL_CONSTANT",
     "get_eccentric_anomaly",
+    "get_orbital_radius",
     "get_semi_major_axis",
     "get_true_anomaly",
     "Satellite",
