@@ -5,6 +5,7 @@
 
 # **************************************************************************************
 
+from .common import CartesianCoordinate
 from .constants import GRAVITATIONAL_CONSTANT
 from .earth import (
     EARTH_EQUATORIAL_RADIUS,
@@ -40,6 +41,7 @@ __all__: list[str] = [
     "get_semi_major_axis",
     "get_true_anomaly",
     "Satellite",
+    "CartesianCoordinate",
     "TLE",
 ]
 
