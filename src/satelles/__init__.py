@@ -22,6 +22,7 @@ from .kepler import (
 from .orbit import get_orbital_radius
 from .satellite import Satellite
 from .tle import TLE
+from .vector import rotate
 
 # **************************************************************************************
 
@@ -44,6 +45,7 @@ __all__: list[str] = [
     "get_perifocal_coordinate",
     "get_semi_major_axis",
     "get_true_anomaly",
+    "rotate",
     "Satellite",
     "CartesianCoordinate",
     "TLE",
