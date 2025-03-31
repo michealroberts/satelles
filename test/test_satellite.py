@@ -133,8 +133,7 @@ class TestOrbitalElements(unittest.TestCase):
 
 class TestSatelliteOptionalFields(unittest.TestCase):
     def setUp(self) -> None:
-        # Combine valid data from ID and OrbitalElements
-        self.base_id: Dict[str, Any] = {
+        self.identifier: Dict[str, Any] = {
             "id": 25544,
             "name": "ISS (ZARYA)",
             "classification": "U",
@@ -145,7 +144,8 @@ class TestSatelliteOptionalFields(unittest.TestCase):
             "ephemeris": 0,
             "set": 999,
         }
-        self.base_oe: Dict[str, Any] = {
+
+        self.orbital_elements: Dict[str, Any] = {
             "drag": 0.00002182,
             "raan": 257.8333,
             "inclination": 51.6433,
@@ -157,17 +157,24 @@ class TestSatelliteOptionalFields(unittest.TestCase):
             "second_derivative_of_mean_motion": 0.0,
             "number_of_revolutions": 12345,
         }
+
         self.valid_satellite_data: Dict[str, Any] = {
-            **self.base_id,
-            **self.base_oe,
-            "reference_frame": "TEME",  # valid input; should map to human readable
-            "center": "EARTH",  # valid input; should map to "Earth"
+            **self.identifier,
+            **self.orbital_elements,
+            "reference_frame": "TEME",
+            "center": "EARTH",
+            "mass": 1200,
+            "solar_radiation_pressure_area": 20.0,
+            "solar_radiation_pressure_coefficient": 1.2,
+            "drag_area": 10.0,
+            "drag_coefficient": 2.2,
+            "gravitational_coefficient": 398600.4418,
         }
 
     def test_valid_optional_fields(self) -> None:
-        sat = Satellite(**self.valid_satellite_data)
-        self.assertEqual(sat.reference_frame, "True Equator, Mean Equinox")
-        self.assertEqual(sat.center, "Earth")
+        satellite = Satellite(**self.valid_satellite_data)
+        self.assertEqual(satellite.reference_frame, "True Equator, Mean Equinox")
+        self.assertEqual(satellite.center, "Earth")
 
     def test_invalid_reference_frame(self) -> None:
         data = self.valid_satellite_data.copy()
@@ -186,9 +193,9 @@ class TestSatelliteOptionalFields(unittest.TestCase):
         data = self.valid_satellite_data.copy()
         del data["reference_frame"]
         del data["center"]
-        sat = Satellite(**data)
-        self.assertIsNone(sat.reference_frame)
-        self.assertIsNone(sat.center)
+        satellite = Satellite(**data)
+        self.assertIsNone(satellite.reference_frame)
+        self.assertIsNone(satellite.center)
 
 
 # **************************************************************************************

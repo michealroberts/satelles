@@ -9,6 +9,8 @@ import re
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional, Tuple
 
+from .constants import GRAVITATIONAL_CONSTANT
+from .earth import EARTH_MASS
 from .kepler import get_semi_major_axis
 from .satellite import Satellite
 
@@ -461,6 +463,12 @@ def parse_tle(tle: str) -> Satellite:
         first_derivative_of_mean_motion=fdmm,
         second_derivative_of_mean_motion=sdmm,
         number_of_revolutions=number_of_revolutions,
+        mass=None,
+        drag_area=None,
+        drag_coefficient=None,
+        solar_radiation_pressure_area=None,
+        solar_radiation_pressure_coefficient=None,
+        gravitational_coefficient=EARTH_MASS * GRAVITATIONAL_CONSTANT,
     )
 
 
