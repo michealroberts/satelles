@@ -405,6 +405,9 @@ class TestTLE(unittest.TestCase):
         with self.assertRaises(ValueError):
             _ = tle.perifocal_coordinate
 
+        with self.assertRaises(ValueError):
+            _ = tle.eci_coordinate
+
         when = datetime(2021, 5, 15, 0, 0, 0, tzinfo=timezone.utc)
 
         tle.at(when=when)
@@ -414,6 +417,12 @@ class TestTLE(unittest.TestCase):
         self.assertAlmostEqualFloat(cartesian["x"], 6620059.856849059)
         self.assertAlmostEqualFloat(cartesian["y"], -1527527.3878711176)
         self.assertAlmostEqualFloat(cartesian["z"], 0.0)
+
+        eci = tle.eci_coordinate
+
+        self.assertAlmostEqualFloat(eci["x"], -2999918.0003107865)
+        self.assertAlmostEqualFloat(eci["y"], -3039494.659567604)
+        self.assertAlmostEqualFloat(eci["z"], 5283984.920004229)
 
     def test_parse_3le_classified(self):
         tle = TLE(iss3LEClassified)
@@ -438,6 +447,9 @@ class TestTLE(unittest.TestCase):
         with self.assertRaises(ValueError):
             _ = tle.perifocal_coordinate
 
+        with self.assertRaises(ValueError):
+            _ = tle.eci_coordinate
+
         when = datetime(2021, 5, 15, 0, 0, 0, tzinfo=timezone.utc)
 
         tle.at(when=when)
@@ -447,6 +459,12 @@ class TestTLE(unittest.TestCase):
         self.assertAlmostEqualFloat(cartesian["x"], 6620059.856849059)
         self.assertAlmostEqualFloat(cartesian["y"], -1527527.3878711176)
         self.assertAlmostEqualFloat(cartesian["z"], 0.0)
+
+        eci = tle.eci_coordinate
+
+        self.assertAlmostEqualFloat(eci["x"], -2999918.0003107865)
+        self.assertAlmostEqualFloat(eci["y"], -3039494.659567604)
+        self.assertAlmostEqualFloat(eci["z"], 5283984.920004229)
 
     def test_parse_3le_secret(self):
         tle = TLE(iss3LESecret)
@@ -471,6 +489,9 @@ class TestTLE(unittest.TestCase):
         with self.assertRaises(ValueError):
             _ = tle.perifocal_coordinate
 
+        with self.assertRaises(ValueError):
+            _ = tle.eci_coordinate
+
         when = datetime(2021, 5, 15, 0, 0, 0, tzinfo=timezone.utc)
 
         tle.at(when=when)
@@ -480,6 +501,12 @@ class TestTLE(unittest.TestCase):
         self.assertAlmostEqualFloat(cartesian["x"], 6620059.856849059)
         self.assertAlmostEqualFloat(cartesian["y"], -1527527.3878711176)
         self.assertAlmostEqualFloat(cartesian["z"], 0.0)
+
+        eci = tle.eci_coordinate
+
+        self.assertAlmostEqualFloat(eci["x"], -2999918.0003107865)
+        self.assertAlmostEqualFloat(eci["y"], -3039494.659567604)
+        self.assertAlmostEqualFloat(eci["z"], 5283984.920004229)
 
     def test_parse_3le_with_alpha5(self):
         tle = TLE(iss3LEWithAlpha5)

@@ -14,6 +14,7 @@ from celerity.temporal import get_julian_date
 from .common import CartesianCoordinate
 from .constants import GRAVITATIONAL_CONSTANT
 from .coordinates import (
+    convert_perifocal_to_eci,
     get_perifocal_coordinate,
 )
 from .earth import EARTH_MASS
@@ -629,6 +630,29 @@ class TLE:
             mean_anomaly=M,
             true_anomaly=ν,
             eccentricity=self.eccentricity,
+        )
+
+    @property
+    def eci_coordinate(self) -> CartesianCoordinate:
+        """
+        Convert the satellite's orbital elements to an Earth-Centered Inertial (ECI)
+        coordinate system.
+
+        Note:
+            The date and time to calculate the position for should be set using the
+            `at` method before calling this property.
+
+        Returns:
+            A CartesianCoordinate representing the satellite's position in the ECI
+            coordinate system.
+        """
+        # Convert the perifocal coordinate to the Earth Centered Inertial (ECI)
+        # reference frame:
+        return convert_perifocal_to_eci(
+            perifocal=self.perifocal_coordinate,
+            inclination=self.inclination,
+            raan=self.right_ascension_of_the_ascending_node,
+            argument_of_perigee=self.argument_of_perigee,
         )
 
     def at(self, when: datetime) -> None:
