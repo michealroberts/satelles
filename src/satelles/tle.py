@@ -442,6 +442,8 @@ def parse_tle(tle: str) -> Satellite:
     return Satellite(
         id=id,
         name=name,
+        reference_frame="TEME",
+        center="EARTH",
         classification=classification,
         designator=designator,
         year=year,

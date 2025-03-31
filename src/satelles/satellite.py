@@ -5,7 +5,7 @@
 
 # **************************************************************************************
 
-from typing import Annotated
+from typing import Annotated, Optional
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -171,7 +171,62 @@ class OrbitalElements(BaseModel):
 
 
 class Satellite(ID, OrbitalElements):
-    pass
+    reference_frame: Annotated[
+        Optional[str],
+        Field(
+            description="Reference frame used for orbit propagation",
+            default=None,
+        ),
+    ]
+
+    center: Annotated[
+        Optional[str],
+        Field(
+            description="The center name of the satellite, e.g., 'Earth', 'Moon', 'Mars', 'Sun', etc.",
+            default=None,
+        ),
+    ]
+
+    @field_validator("reference_frame")
+    def validate_reference_frame(cls, value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return None
+
+        mapping = {
+            "TEME": "True Equator, Mean Equinox",
+            "ICRF": "International Celestial Reference Frame",
+            "EME2000": "Epoch Mean Equinox 2000",
+        }
+
+        if value is not None and value.upper() not in mapping.keys():
+            raise ValueError(f"Reference frame must be one of {list(mapping.keys())}")
+
+        return mapping.get(value.upper()) if value else None
+
+    @field_validator("center")
+    def validate_center(cls, value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return None
+
+        mapping = {
+            "EARTH": "Earth",
+            "MOON": "Moon",
+            "SUN": "Sun",
+            "MERCURY": "Mercury",
+            "VENUS": "Venus",
+            "MARS": "Mars",
+            "JUPITER": "Jupiter",
+            "SATURN": "Saturn",
+            "URANUS": "Uranus",
+            "NEPTUNE": "Neptune",
+            "PLUTO": "Pluto",
+            "CERES": "Ceres",
+        }
+
+        if value is not None and value.upper() not in mapping.keys():
+            raise ValueError(f"Center must be one of {list(mapping.keys())}")
+
+        return mapping.get(value.upper()) if value else None
 
 
 # **************************************************************************************
