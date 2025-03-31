@@ -88,7 +88,7 @@ class TestOrbitalElements(unittest.TestCase):
             "raan": 257.8333,
             "inclination": 51.6433,
             "eccentricity": 0.0001675,
-            "argument_of_perigee": 296.7755,
+            "argument_of_pericenter": 296.7755,
             "mean_anomaly": 73.3782,
             "mean_motion": 15.542259,
             "first_derivative_of_mean_motion": -0.00002182,
@@ -102,7 +102,7 @@ class TestOrbitalElements(unittest.TestCase):
         self.assertAlmostEqual(model.raan, 257.8333)
         self.assertAlmostEqual(model.inclination, 51.6433)
         self.assertAlmostEqual(model.eccentricity, 0.0001675)
-        self.assertAlmostEqual(model.argument_of_perigee, 296.7755)
+        self.assertAlmostEqual(model.argument_of_pericenter, 296.7755)
         self.assertAlmostEqual(model.mean_anomaly, 73.3782)
         self.assertAlmostEqual(model.mean_motion, 15.542259)
         self.assertAlmostEqual(model.first_derivative_of_mean_motion, -0.00002182)
@@ -150,7 +150,7 @@ class TestSatelliteOptionalFields(unittest.TestCase):
             "raan": 257.8333,
             "inclination": 51.6433,
             "eccentricity": 0.0001675,
-            "argument_of_perigee": 296.7755,
+            "argument_of_pericenter": 296.7755,
             "mean_anomaly": 73.3782,
             "mean_motion": 15.542259,
             "first_derivative_of_mean_motion": -0.00002182,

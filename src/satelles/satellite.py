@@ -122,10 +122,10 @@ class OrbitalElements(BaseModel):
         ),
     ]
 
-    argument_of_perigee: Annotated[
+    argument_of_pericenter: Annotated[
         float,
         Field(
-            description="The argument of perigee of the satellite (in degrees)",
+            description="The argument of pericenter of the satellite (in degrees)",
         ),
     ]
 

@@ -455,7 +455,7 @@ def parse_tle(tle: str) -> Satellite:
         raan=raan,
         inclination=inclination,
         eccentricity=eccentricity,
-        argument_of_perigee=argument_of_perigee,
+        argument_of_pericenter=argument_of_perigee,
         mean_anomaly=mean_anomaly,
         mean_motion=mean_motion,
         first_derivative_of_mean_motion=fdmm,
@@ -536,7 +536,7 @@ class TLE:
 
     @property
     def argument_of_perigee(self) -> float:
-        return self._satellite.argument_of_perigee
+        return self._satellite.argument_of_pericenter
 
     @property
     def mean_anomaly(self) -> float:
