@@ -43,6 +43,15 @@ wheels = [
 ]
 
 [[package]]
+name = "celerity"
+version = "0.27.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/3c/23/03f8cbe894e2bd383c91930293fa128a128f73a57406c40b21038c5933e0/celerity-0.27.0.tar.gz", hash = "sha256:72a3341ddb6e7ba7610c6b2f52a9285cc399937d457737ae9dbf7469e2bafd1e", size = 21603 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/1c/02/0bbb0ce4a81258fb32b3b769f322cce09d424967ef60f628538c0b2fae8b/celerity-0.27.0-py3-none-any.whl", hash = "sha256:bcb117af53d68fabdc6be5060e46dbafafb1cf964fc36dfd8dc3bc0fc7417d7a", size = 29194 },
+]
+
+[[package]]
 name = "cfgv"
 version = "3.4.0"
 source = { registry = "https://pypi.org/simple" }
@@ -377,6 +386,7 @@ name = "satelles"
 version = "0.0.0"
 source = { editable = "." }
 dependencies = [
+    { name = "celerity" },
     { name = "pydantic" },
 ]
 
@@ -392,7 +402,10 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "pydantic", specifier = ">=2.10.6" }]
+requires-dist = [
+    { name = "celerity", specifier = ">=0.27.0" },
+    { name = "pydantic", specifier = ">=2.10.6" },
+]
 
 [package.metadata.requires-dev]
 dev = [

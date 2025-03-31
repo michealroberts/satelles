@@ -9,6 +9,7 @@ from math import cos, radians, sin
 
 from .common import CartesianCoordinate
 from .orbit import get_orbital_radius
+from .vector import rotate
 
 # **************************************************************************************
 
@@ -48,6 +49,40 @@ def get_perifocal_coordinate(
 
     # The z-coordinate is always zero in the perifocal frame:
     return CartesianCoordinate(x=x_perifocal, y=y_perifocal, z=0.0)
+
+
+# **************************************************************************************
+
+
+def convert_perifocal_to_eci(
+    perifocal: CartesianCoordinate,
+    argument_of_perigee: float,
+    inclination: float,
+    raan: float,
+) -> CartesianCoordinate:
+    """
+    Convert perifocal coordinates to Earth-Centered Inertial (ECI) coordinates.
+
+    Args:
+        perifocal (CartesianCoordinate): The perifocal coordinates (x, y, z).
+        argument_of_perigee (float): The argument of perigee (ω) (in degrees).
+        inclination (float): The inclination (i) (in degrees).
+        raan (float): The right ascension of ascending node (Ω) (in degrees).
+
+    Returns:
+        CartesianCoordinate: The ECI coordinates (x, y, z).
+    """
+    # Rotate by argument of perigee around the z-axis:
+    rotated_z = rotate(perifocal, argument_of_perigee, "z")
+
+    # Rotate by inclination around the x-axis:
+    rotated_x = rotate(rotated_z, inclination, "x")
+
+    # Rotate by Right Ascension of Ascending Node (RAAN) around the z-axis:
+    eci = rotate(rotated_x, raan, "z")
+
+    # The ECI coordinates are now in the rotated frame:
+    return eci
 
 
 # **************************************************************************************
