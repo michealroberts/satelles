@@ -7,6 +7,7 @@
 
 import re
 import unittest
+from datetime import datetime, timezone
 from math import isclose as is_close
 from typing import Dict, Optional, Tuple
 
@@ -368,6 +369,19 @@ class TestTLE(unittest.TestCase):
         # b_star_drag is parsed from "10270-3": 10270/1e5 * 10^-3 = 0.00010270
         self.assertAlmostEqualFloat(tle.b_star_drag, 0.00010270)
 
+        with self.assertRaises(ValueError):
+            _ = tle.perifocal_coordinate
+
+        when = datetime(2021, 5, 15, 0, 0, 0, tzinfo=timezone.utc)
+
+        tle.at(when=when)
+
+        cartesian = tle.perifocal_coordinate
+
+        self.assertAlmostEqualFloat(cartesian["x"], 6620059.856849059)
+        self.assertAlmostEqualFloat(cartesian["y"], -1527527.3878711176)
+        self.assertAlmostEqualFloat(cartesian["z"], 0.0)
+
     def test_parse_3le_unclassified(self):
         tle = TLE(iss3LE)
         self.assertEqual(tle.name, "ISS (ZARYA)")
@@ -387,6 +401,19 @@ class TestTLE(unittest.TestCase):
         self.assertEqual(tle.ephemeris, 0)
         self.assertEqual(tle.set, 9006)
         self.assertAlmostEqualFloat(tle.b_star_drag, 0.00010270)
+
+        with self.assertRaises(ValueError):
+            _ = tle.perifocal_coordinate
+
+        when = datetime(2021, 5, 15, 0, 0, 0, tzinfo=timezone.utc)
+
+        tle.at(when=when)
+
+        cartesian = tle.perifocal_coordinate
+
+        self.assertAlmostEqualFloat(cartesian["x"], 6620059.856849059)
+        self.assertAlmostEqualFloat(cartesian["y"], -1527527.3878711176)
+        self.assertAlmostEqualFloat(cartesian["z"], 0.0)
 
     def test_parse_3le_classified(self):
         tle = TLE(iss3LEClassified)
@@ -408,6 +435,19 @@ class TestTLE(unittest.TestCase):
         self.assertEqual(tle.set, 9006)
         self.assertAlmostEqualFloat(tle.b_star_drag, 0.00010270)
 
+        with self.assertRaises(ValueError):
+            _ = tle.perifocal_coordinate
+
+        when = datetime(2021, 5, 15, 0, 0, 0, tzinfo=timezone.utc)
+
+        tle.at(when=when)
+
+        cartesian = tle.perifocal_coordinate
+
+        self.assertAlmostEqualFloat(cartesian["x"], 6620059.856849059)
+        self.assertAlmostEqualFloat(cartesian["y"], -1527527.3878711176)
+        self.assertAlmostEqualFloat(cartesian["z"], 0.0)
+
     def test_parse_3le_secret(self):
         tle = TLE(iss3LESecret)
         self.assertEqual(tle.name, "ISS (ZARYA)")
@@ -427,6 +467,19 @@ class TestTLE(unittest.TestCase):
         self.assertEqual(tle.ephemeris, 0)
         self.assertEqual(tle.set, 9006)
         self.assertAlmostEqualFloat(tle.b_star_drag, 0.00010270)
+
+        with self.assertRaises(ValueError):
+            _ = tle.perifocal_coordinate
+
+        when = datetime(2021, 5, 15, 0, 0, 0, tzinfo=timezone.utc)
+
+        tle.at(when=when)
+
+        cartesian = tle.perifocal_coordinate
+
+        self.assertAlmostEqualFloat(cartesian["x"], 6620059.856849059)
+        self.assertAlmostEqualFloat(cartesian["y"], -1527527.3878711176)
+        self.assertAlmostEqualFloat(cartesian["z"], 0.0)
 
     def test_parse_3le_with_alpha5(self):
         tle = TLE(iss3LEWithAlpha5)

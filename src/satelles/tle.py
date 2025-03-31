@@ -9,9 +9,15 @@ import re
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional, Tuple
 
+from celerity.temporal import get_julian_date
+
+from .common import CartesianCoordinate
 from .constants import GRAVITATIONAL_CONSTANT
+from .coordinates import (
+    get_perifocal_coordinate,
+)
 from .earth import EARTH_MASS
-from .kepler import get_semi_major_axis
+from .kepler import get_semi_major_axis, get_true_anomaly
 from .satellite import Satellite
 
 # **************************************************************************************
@@ -478,6 +484,8 @@ def parse_tle(tle: str) -> Satellite:
 class TLE:
     _satellite: Satellite
 
+    _when: Optional[datetime] = None
+
     def __init__(self, tle_string: str) -> None:
         # Parse the TLE string and create a Satellite instance:
         try:
@@ -581,6 +589,48 @@ class TLE:
         """
         return get_semi_major_axis(self.mean_motion, mass=mass)
 
+    @property
+    def perifocal_coordinate(self) -> CartesianCoordinate:
+        """
+        Convert the satellite's orbital elements to a perifocal coordinate system.
+
+        Note:
+            The date and time to calculate the position for should be set using the
+            `at` method before calling this property.
+
+        Returns:
+            A CartesianCoordinate representing the satellite's position in the
+            perifocal coordinate system.
+        """
+        if self._when is None:
+            raise ValueError(
+                "Please specify a date and time to calculate the position for by calling the at() method."
+            )
+
+        # Get the Julian date at the epoch:
+        JD = get_julian_date(date=self._when)
+
+        # Get the semi-major axis (in meters) for the TLE:
+        a = self.get_semi_major_axis()
+
+        # Get the mean anomaly (in degrees) for the TLE given the mean anomaly at
+        # the epoch:
+        M = self.mean_anomaly + self.mean_motion * 360 * (JD - self.julian_date)
+
+        # Get the true anomaly (in degrees) for the TLE given the mean anomaly at
+        # the epoch:
+        ν = get_true_anomaly(
+            mean_anomaly=M,
+            eccentricity=self.eccentricity,
+        )
+
+        return get_perifocal_coordinate(
+            semi_major_axis=a,
+            mean_anomaly=M,
+            true_anomaly=ν,
+            eccentricity=self.eccentricity,
+        )
+
     def at(self, when: datetime) -> None:
         """
         Set the TLE to a specific date and time (in UTC).
@@ -588,7 +638,7 @@ class TLE:
         Args:
             when: The date and time to set the TLE to.
         """
-        self.when = when.astimezone(timezone.utc)
+        self._when = when.astimezone(timezone.utc)
 
 
 # **************************************************************************************
