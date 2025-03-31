@@ -10,7 +10,7 @@ from typing import Any, Dict
 
 from pydantic import ValidationError
 
-from satelles.satellite import ID, OrbitalElements
+from satelles.satellite import ID, OrbitalElements, Satellite
 
 # **************************************************************************************
 
@@ -126,6 +126,69 @@ class TestOrbitalElements(unittest.TestCase):
         del data["drag"]
         with self.assertRaises(ValidationError):
             OrbitalElements(**data)
+
+
+# **************************************************************************************
+
+
+class TestSatelliteOptionalFields(unittest.TestCase):
+    def setUp(self) -> None:
+        # Combine valid data from ID and OrbitalElements
+        self.base_id: Dict[str, Any] = {
+            "id": 25544,
+            "name": "ISS (ZARYA)",
+            "classification": "U",
+            "designator": "1998-067A",
+            "year": 2021,
+            "day": 123.456789,
+            "jd": 2459365.456789,
+            "ephemeris": 0,
+            "set": 999,
+        }
+        self.base_oe: Dict[str, Any] = {
+            "drag": 0.00002182,
+            "raan": 257.8333,
+            "inclination": 51.6433,
+            "eccentricity": 0.0001675,
+            "argument_of_perigee": 296.7755,
+            "mean_anomaly": 73.3782,
+            "mean_motion": 15.542259,
+            "first_derivative_of_mean_motion": -0.00002182,
+            "second_derivative_of_mean_motion": 0.0,
+            "number_of_revolutions": 12345,
+        }
+        self.valid_satellite_data: Dict[str, Any] = {
+            **self.base_id,
+            **self.base_oe,
+            "reference_frame": "TEME",  # valid input; should map to human readable
+            "center": "EARTH",  # valid input; should map to "Earth"
+        }
+
+    def test_valid_optional_fields(self) -> None:
+        sat = Satellite(**self.valid_satellite_data)
+        self.assertEqual(sat.reference_frame, "True Equator, Mean Equinox")
+        self.assertEqual(sat.center, "Earth")
+
+    def test_invalid_reference_frame(self) -> None:
+        data = self.valid_satellite_data.copy()
+        data["reference_frame"] = "XYZ"
+        with self.assertRaises(ValidationError):
+            Satellite(**data)
+
+    def test_invalid_center(self) -> None:
+        data = self.valid_satellite_data.copy()
+        data["center"] = "PLUTOY"  # assuming "PLUTOY" is not allowed
+        with self.assertRaises(ValidationError):
+            Satellite(**data)
+
+    def test_optional_fields_missing(self) -> None:
+        # Test that missing optional fields are allowed.
+        data = self.valid_satellite_data.copy()
+        del data["reference_frame"]
+        del data["center"]
+        sat = Satellite(**data)
+        self.assertIsNone(sat.reference_frame)
+        self.assertIsNone(sat.center)
 
 
 # **************************************************************************************
