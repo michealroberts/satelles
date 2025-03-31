@@ -5,7 +5,9 @@
 
 # **************************************************************************************
 
-from math import cos, radians, sin
+from math import asin, atan2, cos, degrees, radians, sin, sqrt
+
+from celerity.coordinates import EquatorialCoordinate
 
 from .common import CartesianCoordinate
 from .orbit import get_orbital_radius
@@ -83,6 +85,41 @@ def convert_perifocal_to_eci(
 
     # The ECI coordinates are now in the rotated frame:
     return eci
+
+
+# **************************************************************************************
+
+
+def convert_eci_to_equatorial(
+    eci: CartesianCoordinate,
+) -> EquatorialCoordinate:
+    """
+    Convert ECI coordinates to equatorial coordinates.
+
+    Args:
+        eci (CartesianCoordinate): The ECI coordinates (x, y, z).
+
+    Raises:
+        ValueError: If the ECI coordinates are a zero vector.
+
+    Returns:
+        EquatorialCoordinate: The equatorial coordinates (RA, Dec).
+    """
+    x, y, z = eci["x"], eci["y"], eci["z"]
+
+    r = sqrt(x**2 + y**2 + z**2)
+
+    if r == 0:
+        raise ValueError("Cannot convert zero vector to equatorial coordinates.")
+
+    ra = degrees(atan2(y, x))
+
+    dec = degrees(asin(z / r))
+
+    if ra < 0:
+        ra += 360
+
+    return EquatorialCoordinate(ra=ra % 360, dec=dec)
 
 
 # **************************************************************************************
