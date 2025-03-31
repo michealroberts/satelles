@@ -1,14 +1,11 @@
 [project]
 name = "satelles"
-version = "0.0.0"
+version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 authors = [{ name = "michealroberts", email = "michael@observerly.com" }]
 requires-python = ">=3.13"
-dependencies = [
-    "celerity>=0.27.0",
-    "pydantic>=2.10.6",
-]
+dependencies = ["celerity>=0.27.0", "pydantic>=2.10.6"]
 
 [build-system]
 requires = ["hatchling"]
