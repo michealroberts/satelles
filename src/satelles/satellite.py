@@ -187,6 +187,36 @@ class Satellite(ID, OrbitalElements):
         ),
     ]
 
+    mass: Annotated[
+        Optional[float],
+        Field(default=None, description="Satellite mass in kilograms"),
+    ]
+
+    solar_radiation_pressure_area: Annotated[
+        Optional[float],
+        Field(default=None, description="Solar radiation pressure area (AR) in m²"),
+    ]
+
+    solar_radiation_pressure_coefficient: Annotated[
+        Optional[float],
+        Field(default=None, description="Solar radiation pressure coefficient (CR)"),
+    ]
+
+    drag_area: Annotated[
+        Optional[float],
+        Field(default=None, description="Drag area (AD) in m²"),
+    ]
+
+    drag_coefficient: Annotated[
+        Optional[float],
+        Field(default=None, description="Drag coefficient (CD)"),
+    ]
+
+    gravitational_coefficient: Annotated[
+        Optional[float],
+        Field(default=None, description="Gravitational coefficient (GM) in SI units"),
+    ]
+
     @field_validator("reference_frame")
     def validate_reference_frame(cls, value: Optional[str]) -> Optional[str]:
         if value is None:
