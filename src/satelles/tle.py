@@ -9,11 +9,13 @@ import re
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional, Tuple
 
+from celerity.coordinates import EquatorialCoordinate
 from celerity.temporal import get_julian_date
 
 from .common import CartesianCoordinate
 from .constants import GRAVITATIONAL_CONSTANT
 from .coordinates import (
+    convert_eci_to_equatorial,
     convert_perifocal_to_eci,
     get_perifocal_coordinate,
 )
@@ -653,6 +655,24 @@ class TLE:
             inclination=self.inclination,
             raan=self.right_ascension_of_the_ascending_node,
             argument_of_perigee=self.argument_of_perigee,
+        )
+
+    @property
+    def equatorial_coordinate(self) -> EquatorialCoordinate:
+        """
+        Convert the satellite's orbital elements to an Equatorial coordinate system.
+
+        Note:
+            The date and time to calculate the position for should be set using the
+            `at` method before calling this property.
+
+        Returns:
+            An EquatorialCoordinate representing the satellite's position in the
+            equatorial coordinate system.
+        """
+        # Convert the ECI coordinate to the Equatorial coordinate system:
+        return convert_eci_to_equatorial(
+            eci=self.eci_coordinate,
         )
 
     def at(self, when: datetime) -> None:
