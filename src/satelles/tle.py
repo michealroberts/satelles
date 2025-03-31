@@ -571,5 +571,14 @@ class TLE:
         """
         return get_semi_major_axis(self.mean_motion, mass=mass)
 
+    def at(self, when: datetime) -> None:
+        """
+        Set the TLE to a specific date and time (in UTC).
+
+        Args:
+            when: The date and time to set the TLE to.
+        """
+        self.when = when.astimezone(timezone.utc)
+
 
 # **************************************************************************************
