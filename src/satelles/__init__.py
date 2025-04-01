@@ -5,7 +5,7 @@
 
 # **************************************************************************************
 
-from .common import CartesianCoordinate
+from .common import Acceleration, CartesianCoordinate, Velocity
 from .constants import GRAVITATIONAL_CONSTANT
 from .coordinates import (
     convert_eci_to_equatorial,
@@ -54,9 +54,11 @@ __all__: list[str] = [
     "get_true_anomaly",
     "get_gravitational_acceleration",
     "rotate",
+    "Acceleration",
     "Satellite",
     "CartesianCoordinate",
     "TLE",
+    "Velocity",
 ]
 
 # **************************************************************************************
