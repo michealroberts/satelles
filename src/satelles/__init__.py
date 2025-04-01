@@ -18,6 +18,7 @@ from .earth import (
     EARTH_MEAN_RADIUS,
     EARTH_POLAR_RADIUS,
 )
+from .gravity import get_gravitational_acceleration
 from .kepler import (
     get_eccentric_anomaly,
     get_semi_major_axis,
@@ -51,6 +52,7 @@ __all__: list[str] = [
     "get_perifocal_coordinate",
     "get_semi_major_axis",
     "get_true_anomaly",
+    "get_gravitational_acceleration",
     "rotate",
     "Satellite",
     "CartesianCoordinate",
