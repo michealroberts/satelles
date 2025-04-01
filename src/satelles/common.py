@@ -21,3 +21,16 @@ class CartesianCoordinate(TypedDict):
 
 
 # **************************************************************************************
+
+
+class Acceleration(TypedDict):
+    """
+    Typed dictionary for a gravitational acceleration vector.
+    """
+
+    ax: float
+    ay: float
+    az: float
+
+
+# **************************************************************************************
