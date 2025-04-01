@@ -592,6 +592,21 @@ class TLE:
         """
         return get_semi_major_axis(self.mean_motion, mass=mass)
 
+    def get_semi_latus_rectum(self, mass: float = 0.0) -> float:
+        """
+        Calculate the semi-latus rectum of the satellite's orbit in meters.
+
+        The semi-latus rectum is calculated using the semi-major axis and the
+        eccentricity of the orbit.
+
+        Args:
+            mass: The mass of the satellite in kilograms. Default is 0.0 (for a point mass).
+
+        Returns:
+            The semi-latus rectum (in SI meters).
+        """
+        return self.get_semi_major_axis(mass=mass) * (1 - self.eccentricity**2)
+
     @property
     def perifocal_coordinate(self) -> CartesianCoordinate:
         """
