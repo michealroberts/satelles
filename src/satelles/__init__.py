@@ -29,6 +29,7 @@ from .orbit import get_orbital_radius
 from .satellite import Satellite
 from .tle import TLE
 from .vector import rotate
+from .velocity import get_perifocal_velocity
 
 # **************************************************************************************
 
@@ -51,6 +52,7 @@ __all__: list[str] = [
     "get_eccentric_anomaly",
     "get_orbital_radius",
     "get_perifocal_coordinate",
+    "get_perifocal_velocity",
     "get_semi_latus_rectum",
     "get_semi_major_axis",
     "get_true_anomaly",
