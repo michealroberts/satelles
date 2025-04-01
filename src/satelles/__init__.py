@@ -21,6 +21,7 @@ from .earth import (
 from .gravity import get_gravitational_acceleration
 from .kepler import (
     get_eccentric_anomaly,
+    get_semi_latus_rectum,
     get_semi_major_axis,
     get_true_anomaly,
 )
@@ -50,6 +51,7 @@ __all__: list[str] = [
     "get_eccentric_anomaly",
     "get_orbital_radius",
     "get_perifocal_coordinate",
+    "get_semi_latus_rectum",
     "get_semi_major_axis",
     "get_true_anomaly",
     "get_gravitational_acceleration",
