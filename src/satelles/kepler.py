@@ -45,6 +45,27 @@ def get_semi_major_axis(mean_motion: float, mass: Optional[float] = 0.0) -> floa
 # **************************************************************************************
 
 
+def get_semi_latus_rectum(semi_major_axis: float, eccentricity: float) -> float:
+    """
+    Calculate the semi-latus rectum of the satellite's orbit in meters.
+
+    The semi-latus rectum is calculated using the semi-major axis and eccentricity.
+
+    Args:
+        semi_major_axis: The semi-major axis (a) (in meters).
+        eccentricity: The orbital eccentricity (e), (unitless).
+
+    Returns:
+        The semi-latus rectum (in SI meters).
+    """
+    # Calculate the semi-latus rectum using the formula (in meters):
+    # p = a * (1 - e^2)
+    return semi_major_axis * (1 - eccentricity**2)
+
+
+# **************************************************************************************
+
+
 def get_eccentric_anomaly(
     mean_anomaly: float, eccentricity: float, tolerance: float = 1e-8
 ) -> float:

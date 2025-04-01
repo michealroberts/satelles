@@ -12,6 +12,7 @@ from satelles import (
     EARTH_MASS,
     GRAVITATIONAL_CONSTANT,
     get_eccentric_anomaly,
+    get_semi_latus_rectum,
     get_semi_major_axis,
     get_true_anomaly,
 )
@@ -61,6 +62,69 @@ class TestSemiMajorAxis(unittest.TestCase):
         expected = (μ / n**2) ** (1 / 3)
 
         self.assertAlmostEqual(result, expected, places=5)
+
+
+# **************************************************************************************
+
+
+class TestSemiLatusRectum(unittest.TestCase):
+    def test_zero_eccentricity(self):
+        """
+        With zero eccentricity, the orbit is circular so the semi-latus rectum equals
+        the semi-major axis.
+        """
+        a = 10000.0  # meters
+        e = 0.0
+        expected = 10000.0
+        result = get_semi_latus_rectum(a, e)
+        self.assertAlmostEqual(
+            result,
+            expected,
+            msg="Semi-latus rectum should equal semi-major axis for a circular orbit.",
+        )
+
+    def test_half_eccentricity(self):
+        """
+        With an eccentricity of 0.5, p = a * (1 - 0.5^2) = a * 0.75.
+        """
+        a = 10000.0  # meters
+        e = 0.5
+        expected = 10000.0 * 0.75  # 7500.0 meters
+        result = get_semi_latus_rectum(a, e)
+        self.assertAlmostEqual(
+            result,
+            expected,
+            msg="Semi-latus rectum calculation is incorrect for e=0.5.",
+        )
+
+    def test_small_eccentricity(self):
+        """
+        With a small eccentricity, e.g. 0.1, p = a * (1 - 0.1^2) = a * 0.99.
+        """
+        a = 20000.0  # meters
+        e = 0.1
+        expected = 20000.0 * 0.99  # 19800.0 meters
+        result = get_semi_latus_rectum(a, e)
+        self.assertAlmostEqual(
+            result,
+            expected,
+            msg="Semi-latus rectum calculation is incorrect for e=0.1.",
+        )
+
+    def test_high_eccentricity(self):
+        """
+        For a high eccentricity, verify the computed value is correct.
+        """
+        a = 1.0  # meter
+        e = 0.99
+        expected = a * (1 - 0.99**2)
+        result = get_semi_latus_rectum(a, e)
+        self.assertAlmostEqual(
+            result,
+            expected,
+            places=5,
+            msg="Semi-latus rectum calculation is incorrect for high eccentricity.",
+        )
 
 
 # **************************************************************************************
