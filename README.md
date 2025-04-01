@@ -1,2 +1,81 @@
-# satelles
-A hypermodern python package starter template with astral uv ruff and mypy
+![pypi](https://img.shields.io/pypi/v/satelles.svg)
+![versions](https://img.shields.io/pypi/pyversions/satelles.svg)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![satelles/test](https://github.com/michealroberts/satelles/actions/workflows/test.yml/badge.svg)](https://github.com/michealroberts/satelles/actions/workflows/test.yml)
+
+# Satelles
+
+Modern, type-safe, zero-dependency python library for TLE, OMM et al. handling and orbit propagation to accurately locate your satellites in the sky.
+
+## Installation
+
+```bash
+uv add satelles
+```
+
+or
+
+using your preferred environment / package manager of choice, e.g., `poetry`, `conda` or `pip`:
+
+```bash
+pip install satelles
+```
+
+```bash
+poetry add satelles
+```
+
+```bash
+conda install satelles
+```
+
+## Usage
+
+```python
+from datetime import datetime, timezone
+
+from satelles import TLE
+
+iss2LE: str = """        
+  1 25544U 98067A   20062.59097222  .00016717  00000-0  10270-3 0  9006
+  2 25544  51.6442 147.1064 0004607  95.6506 329.8285 15.49249062  2423
+"""
+
+tle = TLE(iss2LE)
+
+when = datetime(2021, 5, 15, 0, 0, 0, tzinfo=timezone.utc)
+
+tle.at(when=when)
+
+# Get the Earth Centric Inertial (ECI) coordinate of the satellite at the given time:
+eci = tle.eci_coordinate
+
+# Get the Equatorial Coordinate of the satellite at the given time:
+equatorial = tle.equatorial_coordinate
+...
+```
+
+As the API is fully typed, you can use your IDE's autocompletion to see all the available methods and properties.
+
+We have also provided further usage examples in the [examples](./examples) directory.
+
+## Milestones
+
+- [X] Type-safe modern 3.6+ Python
+- [X] Fully unit tested
+- [X] Simpler API using Pydantic base models for validation
+- [X] Zero-external dependencies (pure Python 3.6+ with no external C/C++ dependencies)
+- [ ] Example API usage
+- [X] Fully supported Two-Line Element (TLE) parsing and operations
+- [ ] Fully supported Orbital Mean Elements Message (OMM) parsing and operations
+- [ ] Fully supported TLE to OMM conversion
+- [ ] Fully supported Earth Centric Inertial (ECI) to Equatorial Coordinate System (ECS) conversion
+- [ ] Fully supported Earth Centric Inertial (ECI) to Topocentric Coordinate System (TCS) conversion
+- [ ] Fully supported SPG4-XP propagation from TLE
+- [ ] Fully supported Runge-Kutta 4th order propagation from TLE
+
+---
+
+### License
+
+This project is licensed under the terms of the MIT license.
