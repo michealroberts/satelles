@@ -1,9 +1,25 @@
 [project]
 name = "satelles"
 version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
+description = "Modern, type-safe python library for TLE, OMM et al. handling and orbit propagation to accurately locate your satellites in the sky."
 authors = [{ name = "michealroberts", email = "michael@observerly.com" }]
+keywords = [
+    "satellite",
+    "tle",
+    "omm",
+    "orbit",
+    "propagation",
+    "astrodynamics",
+    "astronomy",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.13",
+]
+readme = "README.md"
+license = { file = "LICENSE" }
 requires-python = ">=3.13"
 dependencies = ["celerity>=0.27.0", "pydantic>=2.10.6"]
 
