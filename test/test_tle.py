@@ -385,6 +385,12 @@ class TestTLE(unittest.TestCase):
         self.assertAlmostEqualFloat(cartesian["y"], -1527527.3878711176)
         self.assertAlmostEqualFloat(cartesian["z"], 0.0)
 
+        perifocal_velocity = tle.perifocal_velocity
+
+        self.assertAlmostEqualFloat(perifocal_velocity["vx"], 1721.755285)
+        self.assertAlmostEqualFloat(perifocal_velocity["vy"], 7465.340542)
+        self.assertAlmostEqualFloat(perifocal_velocity["vz"], 0.0)
+
         eci = tle.eci_coordinate
 
         self.assertAlmostEqualFloat(eci["x"], -2999918.0003107865)
@@ -434,6 +440,12 @@ class TestTLE(unittest.TestCase):
         self.assertAlmostEqualFloat(cartesian["x"], 6620059.856849059)
         self.assertAlmostEqualFloat(cartesian["y"], -1527527.3878711176)
         self.assertAlmostEqualFloat(cartesian["z"], 0.0)
+
+        perifocal_velocity = tle.perifocal_velocity
+
+        self.assertAlmostEqualFloat(perifocal_velocity["vx"], 1721.755285)
+        self.assertAlmostEqualFloat(perifocal_velocity["vy"], 7465.340542)
+        self.assertAlmostEqualFloat(perifocal_velocity["vz"], 0.0)
 
         eci = tle.eci_coordinate
 
@@ -485,6 +497,12 @@ class TestTLE(unittest.TestCase):
         self.assertAlmostEqualFloat(cartesian["y"], -1527527.3878711176)
         self.assertAlmostEqualFloat(cartesian["z"], 0.0)
 
+        perifocal_velocity = tle.perifocal_velocity
+
+        self.assertAlmostEqualFloat(perifocal_velocity["vx"], 1721.755285)
+        self.assertAlmostEqualFloat(perifocal_velocity["vy"], 7465.340542)
+        self.assertAlmostEqualFloat(perifocal_velocity["vz"], 0.0)
+
         eci = tle.eci_coordinate
 
         self.assertAlmostEqualFloat(eci["x"], -2999918.0003107865)
@@ -534,6 +552,12 @@ class TestTLE(unittest.TestCase):
         self.assertAlmostEqualFloat(cartesian["x"], 6620059.856849059)
         self.assertAlmostEqualFloat(cartesian["y"], -1527527.3878711176)
         self.assertAlmostEqualFloat(cartesian["z"], 0.0)
+
+        perifocal_velocity = tle.perifocal_velocity
+
+        self.assertAlmostEqualFloat(perifocal_velocity["vx"], 1721.755285)
+        self.assertAlmostEqualFloat(perifocal_velocity["vy"], 7465.340542)
+        self.assertAlmostEqualFloat(perifocal_velocity["vz"], 0.0)
 
         eci = tle.eci_coordinate
 
