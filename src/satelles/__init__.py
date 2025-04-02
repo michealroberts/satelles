@@ -27,6 +27,10 @@ from .kepler import (
 )
 from .orbit import get_orbital_radius
 from .satellite import Satellite
+from .symplectic import (
+    VerletPropagationParameters,
+    propagate_verlet,
+)
 from .tle import TLE
 from .vector import rotate
 from .velocity import get_perifocal_velocity
@@ -57,12 +61,14 @@ __all__: list[str] = [
     "get_semi_major_axis",
     "get_true_anomaly",
     "get_gravitational_acceleration",
+    "propagate_verlet",
     "rotate",
     "Acceleration",
     "Satellite",
     "CartesianCoordinate",
     "TLE",
     "Velocity",
+    "VerletPropagationParameters",
 ]
 
 # **************************************************************************************
