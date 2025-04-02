@@ -12,7 +12,7 @@ from typing import Any, Optional, Tuple
 from celerity.coordinates import EquatorialCoordinate
 from celerity.temporal import get_julian_date
 
-from .common import CartesianCoordinate
+from .common import CartesianCoordinate, Velocity
 from .constants import GRAVITATIONAL_CONSTANT
 from .coordinates import (
     convert_eci_to_equatorial,
@@ -22,6 +22,7 @@ from .coordinates import (
 from .earth import EARTH_MASS
 from .kepler import get_semi_major_axis, get_true_anomaly
 from .satellite import Satellite
+from .velocity import get_perifocal_velocity
 
 # **************************************************************************************
 
@@ -647,6 +648,49 @@ class TLE:
             mean_anomaly=M,
             true_anomaly=ν,
             eccentricity=self.eccentricity,
+        )
+
+    @property
+    def perifocal_velocity(self) -> Velocity:
+        """
+        Calculate the velocity in the perifocal coordinate system.
+
+        Note:
+            The date and time to calculate the position for should be set using the
+            `at` method before calling this property.
+
+        Returns:
+            A Velocity representing the satellite's velocity in the perifocal
+            coordinate system.
+        """
+        if self._when is None:
+            raise ValueError(
+                "Please specify a date and time to calculate the position for by calling the at() method."
+            )
+
+        # Get the Julian date at the epoch:
+        JD = get_julian_date(date=self._when)
+
+        # Get the semi-major axis (in meters) for the TLE:
+        a = self.get_semi_major_axis()
+
+        # Get the mean anomaly (in degrees) for the TLE given the mean anomaly at
+        # the epoch:
+        M = self.mean_anomaly + self.mean_motion * 360 * (JD - self.julian_date)
+
+        # Get the true anomaly (in degrees) for the TLE given the mean anomaly at
+        # the epoch:
+        ν = get_true_anomaly(
+            mean_anomaly=M,
+            eccentricity=self.eccentricity,
+        )
+
+        # Calculate the velocity in the perifocal coordinate system:
+        return get_perifocal_velocity(
+            semi_major_axis=a,
+            true_anomaly=ν,
+            eccentricity=self.eccentricity,
+            μ=EARTH_MASS * GRAVITATIONAL_CONSTANT,
         )
 
     @property
