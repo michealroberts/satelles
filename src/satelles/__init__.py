@@ -12,6 +12,7 @@ from .coordinates import (
     convert_perifocal_to_eci,
     get_perifocal_coordinate,
 )
+from .covariance import Covariance
 from .earth import (
     EARTH_EQUATORIAL_RADIUS,
     EARTH_MASS,
@@ -64,6 +65,7 @@ __all__: list[str] = [
     "propagate_verlet",
     "rotate",
     "Acceleration",
+    "Covariance",
     "Satellite",
     "CartesianCoordinate",
     "TLE",
