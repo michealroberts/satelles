@@ -27,6 +27,10 @@ from .kepler import (
     get_true_anomaly,
 )
 from .orbit import get_orbital_radius
+from .runge_kutta import (
+    RungeKuttaPropagationParameters,
+    propagate_rk4,
+)
 from .satellite import Satellite
 from .symplectic import (
     VerletPropagationParameters,
@@ -62,12 +66,14 @@ __all__: list[str] = [
     "get_semi_major_axis",
     "get_true_anomaly",
     "get_gravitational_acceleration",
+    "propagate_rk4",
     "propagate_verlet",
     "rotate",
     "Acceleration",
-    "Covariance",
-    "Satellite",
     "CartesianCoordinate",
+    "Covariance",
+    "RungeKuttaPropagationParameters",
+    "Satellite",
     "TLE",
     "Velocity",
     "VerletPropagationParameters",
