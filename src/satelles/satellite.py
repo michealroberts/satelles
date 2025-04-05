@@ -9,6 +9,8 @@ from typing import Annotated, Optional
 
 from pydantic import BaseModel, Field, field_validator
 
+from .covariance import Covariance
+
 # **************************************************************************************
 
 
@@ -216,6 +218,8 @@ class Satellite(ID, OrbitalElements):
         Optional[float],
         Field(default=None, description="Gravitational coefficient (GM) in SI units"),
     ]
+
+    covariance: Optional[Covariance] = None
 
     @field_validator("reference_frame")
     def validate_reference_frame(cls, value: Optional[str]) -> Optional[str]:
