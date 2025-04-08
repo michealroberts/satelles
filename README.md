@@ -36,22 +36,20 @@ from datetime import datetime, timezone
 
 from satelles import TLE
 
-iss2LE: str = """        
+issTLE: str = """        
   1 25544U 98067A   20062.59097222  .00016717  00000-0  10270-3 0  9006
   2 25544  51.6442 147.1064 0004607  95.6506 329.8285 15.49249062  2423
 """
 
-tle = TLE(iss2LE)
+satellite = TLE(tle_string=issTLE).as_satellite()
 
-when = datetime(2021, 5, 15, 0, 0, 0, tzinfo=timezone.utc)
-
-tle.at(when=when)
+satellite.at(when=datetime(2021, 5, 15, 0, 0, 0, tzinfo=timezone.utc))
 
 # Get the Earth Centric Inertial (ECI) coordinate of the satellite at the given time:
-eci = tle.eci_coordinate
+eci = satellite.eci_coordinate
 
 # Get the Equatorial Coordinate of the satellite at the given time:
-equatorial = tle.equatorial_coordinate
+equatorial = satellite.equatorial_coordinate
 ...
 ```
 
@@ -69,10 +67,11 @@ We have also provided further usage examples in the [examples](./examples) direc
 - [X] Fully supported Two-Line Element (TLE) parsing and operations
 - [ ] Fully supported Orbital Mean Elements Message (OMM) parsing and operations
 - [ ] Fully supported TLE to OMM conversion
-- [ ] Fully supported Earth Centric Inertial (ECI) to Equatorial Coordinate System (ECS) conversion
-- [ ] Fully supported Earth Centric Inertial (ECI) to Topocentric Coordinate System (TCS) conversion
-- [ ] Fully supported SPG4-XP propagation from TLE
-- [ ] Fully supported Runge-Kutta 4th order propagation from TLE
+- [X] Fully supported Earth Centric Inertial (ECI) to Equatorial Coordinate System (ECS) conversion
+- [X] Fully supported Earth Centric Inertial (ECI) to Topocentric Coordinate System (TCS) conversion
+- [ ] Fully supported SPG4-XP propagation from TLE or OMM
+- [X] Fully supported symplectic Verlet numerical propagation
+- [X] Fully supported Runge-Kutta 4th order numerical propagation
 
 ---
 
