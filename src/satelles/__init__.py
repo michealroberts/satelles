@@ -5,6 +5,7 @@
 
 # **************************************************************************************
 
+from .checksum import perform_checksum_compute
 from .common import Acceleration, CartesianCoordinate, Velocity
 from .constants import GRAVITATIONAL_CONSTANT
 from .coordinates import (
@@ -70,6 +71,7 @@ __all__: list[str] = [
     "get_semi_major_axis",
     "get_true_anomaly",
     "get_gravitational_acceleration",
+    "perform_checksum_compute",
     "propagate_rk4",
     "propagate_verlet",
     "rotate",
