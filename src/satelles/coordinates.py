@@ -5,9 +5,11 @@
 
 # **************************************************************************************
 
+from datetime import datetime
 from math import asin, atan2, cos, degrees, radians, sin, sqrt
 
 from celerity.coordinates import EquatorialCoordinate
+from celerity.temporal import get_greenwich_sidereal_time
 
 from .common import CartesianCoordinate
 from .orbit import get_orbital_radius
@@ -85,6 +87,35 @@ def convert_perifocal_to_eci(
 
     # The ECI coordinates are now in the rotated frame:
     return eci
+
+
+# **************************************************************************************
+
+
+def convert_eci_to_ecef(
+    eci: CartesianCoordinate,
+    when: datetime,
+) -> CartesianCoordinate:
+    """
+    Convert Earth-Centered Inertial (ECI) coordinates to Earth-Centered Earth Fixed (ECEF)
+    coordinates.
+
+    Args:
+        eci (CartesianCoordinate): The ECI coordinates (x, y, z).
+        when (datetime): The date and time for the conversion.
+
+    Returns:
+        CartesianCoordinate: The ECEF coordinates (x, y, z).
+    """
+    # Get the Greenwich Mean Sidereal Time (GMST) for the given date:
+    GMST = get_greenwich_sidereal_time(date=when)
+
+    # Rotate around Z-axis (from ECI to ECEF) using the GMST:
+    return CartesianCoordinate(
+        x=(eci["x"] * cos(radians(GMST))) + (eci["y"] * sin(radians(GMST))),
+        y=(eci["x"] * -sin(radians(GMST))) + (eci["y"] * cos(radians(GMST))),
+        z=eci["z"],
+    )
 
 
 # **************************************************************************************

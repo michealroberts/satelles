@@ -8,6 +8,7 @@
 from .common import Acceleration, CartesianCoordinate, Velocity
 from .constants import GRAVITATIONAL_CONSTANT
 from .coordinates import (
+    convert_eci_to_ecef,
     convert_eci_to_equatorial,
     convert_perifocal_to_eci,
     get_perifocal_coordinate,
@@ -58,6 +59,7 @@ __all__: list[str] = [
     "EARTH_POLAR_RADIUS",
     "EARTH_MEAN_RADIUS",
     "GRAVITATIONAL_CONSTANT",
+    "convert_eci_to_ecef",
     "convert_eci_to_equatorial",
     "convert_perifocal_to_eci",
     "get_eccentric_anomaly",
