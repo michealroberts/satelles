@@ -569,6 +569,15 @@ class TLE:
     def number_of_revolutions(self) -> int:
         return self._satellite.number_of_revolutions
 
+    def as_satellite(self) -> Satellite:
+        """
+        Convert the TLE to a Satellite instance.
+
+        Returns:
+            A Satellite instance.
+        """
+        return self._satellite
+
     def serialize_to_parts(self) -> Tuple[str, str, str]:
         """
         Serialize our parsed TLE back to its original parts.
