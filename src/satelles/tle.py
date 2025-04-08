@@ -9,20 +9,9 @@ import re
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional, Tuple
 
-from celerity.coordinates import EquatorialCoordinate
-from celerity.temporal import get_julian_date
-
-from .common import CartesianCoordinate, Velocity
 from .constants import GRAVITATIONAL_CONSTANT
-from .coordinates import (
-    convert_eci_to_equatorial,
-    convert_perifocal_to_eci,
-    get_perifocal_coordinate,
-)
 from .earth import EARTH_MASS
-from .kepler import get_semi_major_axis, get_true_anomaly
 from .satellite import Satellite
-from .velocity import get_perifocal_velocity
 
 # **************************************************************************************
 
@@ -490,8 +479,6 @@ class TLE:
 
     _satellite: Satellite
 
-    _when: Optional[datetime] = None
-
     def __init__(self, tle_string: str) -> None:
         self._tle = tle_string.strip()
 
@@ -581,171 +568,6 @@ class TLE:
     @property
     def number_of_revolutions(self) -> int:
         return self._satellite.number_of_revolutions
-
-    def get_semi_major_axis(self, mass: float = 0.0) -> float:
-        """
-        Calculate the semi-major axis of the satellite's orbit in meters.
-
-        The semi-major axis is calculated using the mean motion and the gravitational
-        constant of the Earth.
-
-        Args:
-            mass: The mass of the satellite in kilograms. Default is 0.0 (for a point mass).
-
-        Returns:
-            The semi-major axis (in SI meters).
-        """
-        return get_semi_major_axis(self.mean_motion, mass=mass)
-
-    def get_semi_latus_rectum(self, mass: float = 0.0) -> float:
-        """
-        Calculate the semi-latus rectum of the satellite's orbit in meters.
-
-        The semi-latus rectum is calculated using the semi-major axis and the
-        eccentricity of the orbit.
-
-        Args:
-            mass: The mass of the satellite in kilograms. Default is 0.0 (for a point mass).
-
-        Returns:
-            The semi-latus rectum (in SI meters).
-        """
-        return self.get_semi_major_axis(mass=mass) * (1 - self.eccentricity**2)
-
-    @property
-    def perifocal_coordinate(self) -> CartesianCoordinate:
-        """
-        Convert the satellite's orbital elements to a perifocal coordinate system.
-
-        Note:
-            The date and time to calculate the position for should be set using the
-            `at` method before calling this property.
-
-        Returns:
-            A CartesianCoordinate representing the satellite's position in the
-            perifocal coordinate system.
-        """
-        if self._when is None:
-            raise ValueError(
-                "Please specify a date and time to calculate the position for by calling the at() method."
-            )
-
-        # Get the Julian date at the epoch:
-        JD = get_julian_date(date=self._when)
-
-        # Get the semi-major axis (in meters) for the TLE:
-        a = self.get_semi_major_axis()
-
-        # Get the mean anomaly (in degrees) for the TLE given the mean anomaly at
-        # the epoch:
-        M = self.mean_anomaly + self.mean_motion * 360 * (JD - self.julian_date)
-
-        # Get the true anomaly (in degrees) for the TLE given the mean anomaly at
-        # the epoch:
-        ν = get_true_anomaly(
-            mean_anomaly=M,
-            eccentricity=self.eccentricity,
-        )
-
-        return get_perifocal_coordinate(
-            semi_major_axis=a,
-            mean_anomaly=M,
-            true_anomaly=ν,
-            eccentricity=self.eccentricity,
-        )
-
-    @property
-    def perifocal_velocity(self) -> Velocity:
-        """
-        Calculate the velocity in the perifocal coordinate system.
-
-        Note:
-            The date and time to calculate the position for should be set using the
-            `at` method before calling this property.
-
-        Returns:
-            A Velocity representing the satellite's velocity in the perifocal
-            coordinate system.
-        """
-        if self._when is None:
-            raise ValueError(
-                "Please specify a date and time to calculate the position for by calling the at() method."
-            )
-
-        # Get the Julian date at the epoch:
-        JD = get_julian_date(date=self._when)
-
-        # Get the semi-major axis (in meters) for the TLE:
-        a = self.get_semi_major_axis()
-
-        # Get the mean anomaly (in degrees) for the TLE given the mean anomaly at
-        # the epoch:
-        M = self.mean_anomaly + self.mean_motion * 360 * (JD - self.julian_date)
-
-        # Get the true anomaly (in degrees) for the TLE given the mean anomaly at
-        # the epoch:
-        ν = get_true_anomaly(
-            mean_anomaly=M,
-            eccentricity=self.eccentricity,
-        )
-
-        # Calculate the velocity in the perifocal coordinate system:
-        return get_perifocal_velocity(
-            semi_major_axis=a,
-            true_anomaly=ν,
-            eccentricity=self.eccentricity,
-            μ=EARTH_MASS * GRAVITATIONAL_CONSTANT,
-        )
-
-    @property
-    def eci_coordinate(self) -> CartesianCoordinate:
-        """
-        Convert the satellite's orbital elements to an Earth-Centered Inertial (ECI)
-        coordinate system.
-
-        Note:
-            The date and time to calculate the position for should be set using the
-            `at` method before calling this property.
-
-        Returns:
-            A CartesianCoordinate representing the satellite's position in the ECI
-            coordinate system.
-        """
-        # Convert the perifocal coordinate to the Earth Centered Inertial (ECI)
-        # reference frame:
-        return convert_perifocal_to_eci(
-            perifocal=self.perifocal_coordinate,
-            inclination=self.inclination,
-            raan=self.right_ascension_of_the_ascending_node,
-            argument_of_perigee=self.argument_of_perigee,
-        )
-
-    @property
-    def equatorial_coordinate(self) -> EquatorialCoordinate:
-        """
-        Convert the satellite's orbital elements to an Equatorial coordinate system.
-
-        Note:
-            The date and time to calculate the position for should be set using the
-            `at` method before calling this property.
-
-        Returns:
-            An EquatorialCoordinate representing the satellite's position in the
-            equatorial coordinate system.
-        """
-        # Convert the ECI coordinate to the Equatorial coordinate system:
-        return convert_eci_to_equatorial(
-            eci=self.eci_coordinate,
-        )
-
-    def at(self, when: datetime) -> None:
-        """
-        Set the TLE to a specific date and time (in UTC).
-
-        Args:
-            when: The date and time to set the TLE to.
-        """
-        self._when = when.astimezone(timezone.utc)
 
     def serialize_to_parts(self) -> Tuple[str, str, str]:
         """

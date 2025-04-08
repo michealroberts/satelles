@@ -401,34 +401,34 @@ class TestTLE(unittest.TestCase):
         self.assertAlmostEqualFloat(tle.b_star_drag, 0.00010270)
 
         with self.assertRaises(ValueError):
-            _ = tle.perifocal_coordinate
+            _ = tle._satellite.perifocal_coordinate
 
         with self.assertRaises(ValueError):
-            _ = tle.equatorial_coordinate
+            _ = tle._satellite.equatorial_coordinate
 
         when = datetime(2021, 5, 15, 0, 0, 0, tzinfo=timezone.utc)
 
-        tle.at(when=when)
+        tle._satellite.at(when=when)
 
-        cartesian = tle.perifocal_coordinate
+        cartesian = tle._satellite.perifocal_coordinate
 
         self.assertAlmostEqualFloat(cartesian["x"], 6620059.856849059)
         self.assertAlmostEqualFloat(cartesian["y"], -1527527.3878711176)
         self.assertAlmostEqualFloat(cartesian["z"], 0.0)
 
-        perifocal_velocity = tle.perifocal_velocity
+        perifocal_velocity = tle._satellite.perifocal_velocity
 
         self.assertAlmostEqualFloat(perifocal_velocity["vx"], 1721.755285)
         self.assertAlmostEqualFloat(perifocal_velocity["vy"], 7465.340542)
         self.assertAlmostEqualFloat(perifocal_velocity["vz"], 0.0)
 
-        eci = tle.eci_coordinate
+        eci = tle._satellite.eci_coordinate
 
         self.assertAlmostEqualFloat(eci["x"], -2999918.0003107865)
         self.assertAlmostEqualFloat(eci["y"], -3039494.659567604)
         self.assertAlmostEqualFloat(eci["z"], 5283984.920004229)
 
-        equatorial = tle.equatorial_coordinate
+        equatorial = tle._satellite.equatorial_coordinate
 
         self.assertAlmostEqualFloat(equatorial["ra"], 225.37545, tol=1e-5)
         self.assertAlmostEqualFloat(equatorial["dec"], 51.054300, tol=1e-5)
@@ -454,37 +454,37 @@ class TestTLE(unittest.TestCase):
         self.assertAlmostEqualFloat(tle.b_star_drag, 0.00010270)
 
         with self.assertRaises(ValueError):
-            _ = tle.perifocal_coordinate
+            _ = tle._satellite.perifocal_coordinate
 
         with self.assertRaises(ValueError):
-            _ = tle.eci_coordinate
+            _ = tle._satellite.eci_coordinate
 
         with self.assertRaises(ValueError):
-            _ = tle.equatorial_coordinate
+            _ = tle._satellite.equatorial_coordinate
 
         when = datetime(2021, 5, 15, 0, 0, 0, tzinfo=timezone.utc)
 
-        tle.at(when=when)
+        tle._satellite.at(when=when)
 
-        cartesian = tle.perifocal_coordinate
+        cartesian = tle._satellite.perifocal_coordinate
 
         self.assertAlmostEqualFloat(cartesian["x"], 6620059.856849059)
         self.assertAlmostEqualFloat(cartesian["y"], -1527527.3878711176)
         self.assertAlmostEqualFloat(cartesian["z"], 0.0)
 
-        perifocal_velocity = tle.perifocal_velocity
+        perifocal_velocity = tle._satellite.perifocal_velocity
 
         self.assertAlmostEqualFloat(perifocal_velocity["vx"], 1721.755285)
         self.assertAlmostEqualFloat(perifocal_velocity["vy"], 7465.340542)
         self.assertAlmostEqualFloat(perifocal_velocity["vz"], 0.0)
 
-        eci = tle.eci_coordinate
+        eci = tle._satellite.eci_coordinate
 
         self.assertAlmostEqualFloat(eci["x"], -2999918.0003107865)
         self.assertAlmostEqualFloat(eci["y"], -3039494.659567604)
         self.assertAlmostEqualFloat(eci["z"], 5283984.920004229)
 
-        equatorial = tle.equatorial_coordinate
+        equatorial = tle._satellite.equatorial_coordinate
 
         self.assertAlmostEqualFloat(equatorial["ra"], 225.37545, tol=1e-5)
         self.assertAlmostEqualFloat(equatorial["dec"], 51.054300, tol=1e-5)
@@ -510,37 +510,37 @@ class TestTLE(unittest.TestCase):
         self.assertAlmostEqualFloat(tle.b_star_drag, 0.00010270)
 
         with self.assertRaises(ValueError):
-            _ = tle.perifocal_coordinate
+            _ = tle._satellite.perifocal_coordinate
 
         with self.assertRaises(ValueError):
-            _ = tle.eci_coordinate
+            _ = tle._satellite.eci_coordinate
 
         with self.assertRaises(ValueError):
-            _ = tle.equatorial_coordinate
+            _ = tle._satellite.equatorial_coordinate
 
         when = datetime(2021, 5, 15, 0, 0, 0, tzinfo=timezone.utc)
 
-        tle.at(when=when)
+        tle._satellite.at(when=when)
 
-        cartesian = tle.perifocal_coordinate
+        cartesian = tle._satellite.perifocal_coordinate
 
         self.assertAlmostEqualFloat(cartesian["x"], 6620059.856849059)
         self.assertAlmostEqualFloat(cartesian["y"], -1527527.3878711176)
         self.assertAlmostEqualFloat(cartesian["z"], 0.0)
 
-        perifocal_velocity = tle.perifocal_velocity
+        perifocal_velocity = tle._satellite.perifocal_velocity
 
         self.assertAlmostEqualFloat(perifocal_velocity["vx"], 1721.755285)
         self.assertAlmostEqualFloat(perifocal_velocity["vy"], 7465.340542)
         self.assertAlmostEqualFloat(perifocal_velocity["vz"], 0.0)
 
-        eci = tle.eci_coordinate
+        eci = tle._satellite.eci_coordinate
 
         self.assertAlmostEqualFloat(eci["x"], -2999918.0003107865)
         self.assertAlmostEqualFloat(eci["y"], -3039494.659567604)
         self.assertAlmostEqualFloat(eci["z"], 5283984.920004229)
 
-        equatorial = tle.equatorial_coordinate
+        equatorial = tle._satellite.equatorial_coordinate
 
         self.assertAlmostEqualFloat(equatorial["ra"], 225.37545, tol=1e-5)
         self.assertAlmostEqualFloat(equatorial["dec"], 51.054300, tol=1e-5)
@@ -566,48 +566,48 @@ class TestTLE(unittest.TestCase):
         self.assertAlmostEqualFloat(tle.b_star_drag, 0.00010270)
 
         with self.assertRaises(ValueError):
-            _ = tle.perifocal_coordinate
+            _ = tle._satellite.perifocal_coordinate
 
         with self.assertRaises(ValueError):
-            _ = tle.eci_coordinate
+            _ = tle._satellite.eci_coordinate
 
         with self.assertRaises(ValueError):
-            _ = tle.equatorial_coordinate
+            _ = tle._satellite.equatorial_coordinate
 
         when = datetime(2021, 5, 15, 0, 0, 0, tzinfo=timezone.utc)
 
-        tle.at(when=when)
+        tle._satellite.at(when=when)
 
-        cartesian = tle.perifocal_coordinate
+        cartesian = tle._satellite.perifocal_coordinate
 
         self.assertAlmostEqualFloat(cartesian["x"], 6620059.856849059)
         self.assertAlmostEqualFloat(cartesian["y"], -1527527.3878711176)
         self.assertAlmostEqualFloat(cartesian["z"], 0.0)
 
-        perifocal_velocity = tle.perifocal_velocity
+        perifocal_velocity = tle._satellite.perifocal_velocity
 
         self.assertAlmostEqualFloat(perifocal_velocity["vx"], 1721.755285)
         self.assertAlmostEqualFloat(perifocal_velocity["vy"], 7465.340542)
         self.assertAlmostEqualFloat(perifocal_velocity["vz"], 0.0)
 
-        eci = tle.eci_coordinate
+        eci = tle._satellite.eci_coordinate
 
         self.assertAlmostEqualFloat(eci["x"], -2999918.0003107865)
         self.assertAlmostEqualFloat(eci["y"], -3039494.659567604)
         self.assertAlmostEqualFloat(eci["z"], 5283984.920004229)
 
-        equatorial = tle.equatorial_coordinate
+        equatorial = tle._satellite.equatorial_coordinate
 
         self.assertAlmostEqualFloat(equatorial["ra"], 225.37545, tol=1e-5)
         self.assertAlmostEqualFloat(equatorial["dec"], 51.054300, tol=1e-5)
 
     def test_parse_3le_with_alpha5(self):
         tle = TLE(iss3LEWithAlpha5)
-        self.assertEqual(tle.name, "ISS (ZARYA)")
-        self.assertEqual(tle.classification, "Unclassified")
+        self.assertEqual(tle._satellite.name, "ISS (ZARYA)")
+        self.assertEqual(tle._satellite.classification, "Unclassified")
         # The id field is parsed using base-36 when the first character is a letter.
         # Expected value for "E5544" in base-36 is 23754532.
-        self.assertEqual(tle.id, 23754532)
+        self.assertEqual(tle._satellite.id, 23754532)
 
     def test_invalid_tle(self):
         with self.assertRaises(ValueError):
