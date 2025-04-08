@@ -240,6 +240,37 @@ class TestTLERegex(unittest.TestCase):
         self.check_line1(line1, expected_line1)
         self.check_line2(line2, expected_line2)
 
+    def test_serialize_to_parts_iss2LE(self) -> None:
+        tle = TLE(tle_string=iss2LE)
+
+        parts = tle.serialize_to_parts()
+
+        self.assertEqual(parts[0], "")
+        self.assertEqual(
+            parts[1],
+            "1 25544U 98067A   20062.59097222  .00016717  00000-0  10270-3 0  9006",
+        )
+        self.assertEqual(
+            parts[2],
+            "2 25544  51.6442 147.1064 0004607  95.6506 329.8285 15.49249062  2423",
+        )
+
+    def test_serialize_to_parts_iss3LEWithAlpha5(self) -> None:
+        tle = TLE(tle_string=iss3LEWithAlpha5)
+
+        parts = tle.serialize_to_parts()
+
+        self.assertEqual(len(parts), 3)
+        self.assertEqual(parts[0], "ISS (ZARYA)")
+        self.assertEqual(
+            parts[1],
+            "1 E5544U 98067A   20062.59097222  .00016717  00000-0  10270-3 0  9006",
+        )
+        self.assertEqual(
+            parts[2],
+            "2 E5544  51.6442 147.1064 0004607  95.6506 329.8285 15.49249062  2423",
+        )
+
 
 # **************************************************************************************
 

@@ -486,14 +486,18 @@ def parse_tle(tle: str) -> Satellite:
 
 
 class TLE:
+    _tle: str
+
     _satellite: Satellite
 
     _when: Optional[datetime] = None
 
     def __init__(self, tle_string: str) -> None:
+        self._tle = tle_string.strip()
+
         # Parse the TLE string and create a Satellite instance:
         try:
-            satellite = parse_tle(tle_string)
+            satellite = parse_tle(self._tle)
         except ValueError as e:
             raise ValueError(f"Invalid TLE string: {e}")
 
@@ -742,6 +746,33 @@ class TLE:
             when: The date and time to set the TLE to.
         """
         self._when = when.astimezone(timezone.utc)
+
+    def serialize_to_parts(self) -> Tuple[str, str, str]:
+        """
+        Serialize our parsed TLE back to its original parts.
+
+        Returns:
+            A tuple containing the name, line1, and line2 of the TLE.
+        """
+        lines = [line.strip() for line in self._tle.splitlines() if line.strip()]
+
+        # TLE lines start with "1" or "2"
+        tle_lines = [
+            line
+            for line in lines
+            if line.startswith("1") or line.startswith("2") or line is not None
+        ]
+
+        if len(tle_lines) < 2:
+            raise ValueError("Not enough TLE lines found")
+
+        if len(tle_lines) == 3:
+            return tle_lines[0], tle_lines[1], tle_lines[2]
+
+        if len(tle_lines) == 2:
+            return "", tle_lines[0], tle_lines[1]
+
+        raise ValueError("Invalid TLE format")
 
 
 # **************************************************************************************
