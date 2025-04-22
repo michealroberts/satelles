@@ -50,6 +50,18 @@ iss3LEWithAlpha5: str = """
   2 E5544  51.6442 147.1064 0004607  95.6506 329.8285 15.49249062  2423
 """
 
+iss3LEWithAlpha5Zeroth: str = """
+  0 ISS (ZARYA)             
+  1 E5544U 98067A   20062.59097222  .00016717  00000-0  10270-3 0  9006
+  2 E5544  51.6442 147.1064 0004607  95.6506 329.8285 15.49249062  2423
+"""
+
+starlink5833: str = """
+  0 STARLINK-5833
+  1 55773U 23028AJ  25098.97241231  .00000576  00000-0  56023-4 0  9993
+  2 55773  70.0000 348.4786 0001618 274.5576  85.5398 14.98332157  6399                                               
+"""
+
 
 # **************************************************************************************
 
@@ -215,6 +227,33 @@ class TestTLERegex(unittest.TestCase):
 
     def test_iss3LEWithAlpha5(self) -> None:
         line1, line2 = self.extract_lines(iss3LEWithAlpha5)
+        expected_line1 = {
+            "id": "E5544",
+            "classification": "U",
+            "designator": "98067A",
+            "year": "20",
+            "day": "062.59097222",
+            "first_derivative_of_mean_motion": ".00016717",
+            "second_derivative_of_mean_motion": "00000-0",
+            "drag": "10270-3",
+            "ephemeris": "0",
+            "set": "9006",
+        }
+        expected_line2 = {
+            "id": "E5544",
+            "inclination": "51.6442",
+            "raan": "147.1064",
+            "eccentricity": "0004607",
+            "argument_of_perigee": "95.6506",
+            "mean_anomaly": "329.8285",
+            "mean_motion": "15.49249062",
+            "number_of_revolutions": "2423",
+        }
+        self.check_line1(line1, expected_line1)
+        self.check_line2(line2, expected_line2)
+
+    def test_iss3LEWithAlpha5Zeroth(self) -> None:
+        line1, line2 = self.extract_lines(iss3LEWithAlpha5Zeroth)
         expected_line1 = {
             "id": "E5544",
             "classification": "U",
@@ -608,6 +647,27 @@ class TestTLE(unittest.TestCase):
         # The id field is parsed using base-36 when the first character is a letter.
         # Expected value for "E5544" in base-36 is 23754532.
         self.assertEqual(tle._satellite.id, 23754532)
+
+    def test_parse_starlink_5833(self):
+        tle = TLE(starlink5833)
+        self.assertEqual(tle.name, "STARLINK-5833")
+        self.assertEqual(tle.classification, "Unclassified")
+        self.assertEqual(tle.designator, "23028AJ")
+        self.assertEqual(tle.year, 2025)
+        self.assertAlmostEqualFloat(tle.day, 98.97241231)
+        self.assertAlmostEqualFloat(tle.right_ascension_of_the_ascending_node, 348.4786)
+        self.assertAlmostEqualFloat(tle.inclination, 70.0)
+        self.assertAlmostEqualFloat(tle.eccentricity, 0.0001618)
+        self.assertAlmostEqualFloat(tle.argument_of_perigee, 274.5576)
+        self.assertAlmostEqualFloat(tle.mean_anomaly, 85.5398)
+        self.assertAlmostEqualFloat(tle.mean_motion, 14.98332157116399)
+        self.assertAlmostEqualFloat(tle.first_derivative_of_mean_motion, 0.00000576)
+        self.assertAlmostEqualFloat(tle.second_derivative_of_mean_motion, 0.0)
+        self.assertEqual(tle.number_of_revolutions, 6399)
+        self.assertEqual(tle.ephemeris, 0)
+        self.assertEqual(tle.set, 9993)
+        self.assertAlmostEqualFloat(tle.b_star_drag, 0.000056023)
+        # b_star_drag is parsed from "56023-4": 56023/1e5 * 10^-4 = 0.000056023
 
     def test_invalid_tle(self):
         with self.assertRaises(ValueError):

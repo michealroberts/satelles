@@ -336,7 +336,7 @@ def parse_tle(tle: str) -> Satellite:
         name = ""
         line1, line2 = lines
     elif len(lines) >= 3:
-        name = lines[0]
+        name = lines[0].removeprefix("0 ")
         line1, line2 = lines[1], lines[2]
     else:
         raise ValueError("Invalid TLE format")
