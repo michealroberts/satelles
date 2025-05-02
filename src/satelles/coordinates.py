@@ -6,12 +6,13 @@
 # **************************************************************************************
 
 from datetime import datetime
-from math import asin, atan2, cos, degrees, radians, sin, sqrt
+from math import asin, atan2, cos, degrees, pi, pow, radians, sin, sqrt
 
-from celerity.coordinates import EquatorialCoordinate
+from celerity.coordinates import EquatorialCoordinate, GeographicCoordinate
 from celerity.temporal import get_greenwich_sidereal_time
 
 from .common import CartesianCoordinate
+from .earth import EARTH_EQUATORIAL_RADIUS, EARTH_FLATTENING_FACTOR
 from .orbit import get_orbital_radius
 from .vector import rotate
 
@@ -151,6 +152,84 @@ def convert_eci_to_equatorial(
         ra += 360
 
     return EquatorialCoordinate(ra=ra % 360, dec=dec)
+
+
+# **************************************************************************************
+
+
+def convert_lla_to_ecef(
+    lla: GeographicCoordinate,
+) -> CartesianCoordinate:
+    """
+    Convert geographic coordinates (latitude, longitude, height) to ECEF coordinates.
+
+    Args:
+        lla (GeographicCoordinate): The geographic coordinates (lat, lon, el).
+
+    Returns:
+        CartesianCoordinate: The ECEF coordinates (x, y, z).
+
+    Raises:
+        ValueError: If the flattening factor is not between 0 and 1.
+        ValueError: If the latitude is not between -90 and 90 degrees.
+        ValueError: If the longitude is not between -180 and 180 degrees.
+    """
+    earth_radius = EARTH_EQUATORIAL_RADIUS
+
+    # Convert the latitude to radians:
+    φ = radians(lla["lat"])
+
+    # Convert the longitude to radians:
+    θ = radians(lla["lon"])
+
+    # The height (el) is the height above the ellipsoid (e.g., the elevation):
+    h = lla["el"]
+
+    # The flattening factor (f) is the ratio of the difference between the equatorial
+    # and polar radii to the equatorial radius, in the WGS-84 ellipsoid model:
+    f = EARTH_FLATTENING_FACTOR
+
+    # Ensure that the latitude (φ) is between -π/2 and π/2 radians:
+    if abs(φ) > (pi / 2):
+        raise ValueError("Latitude must be between -90 and 90 degrees.")
+
+    # Ensure that the longitude (θ) is between -π and π radians:
+    if abs(θ) > pi:
+        raise ValueError("Longitude must be between -180 and 180 degrees.")
+
+    # Ensure that f is between 0 and 1:
+    if f < 0 or f > 1:
+        raise ValueError("Earth flattening factor must be between 0 and 1.")
+
+    # The square of the flattening factor (FF) is used to calculate the radius of
+    # curvature in the prime vertical (N):
+    FF = f * (2 - f)
+
+    # The radius of curvature in the prime vertical (N) is the Earth’s east–west
+    # curvature radius at the given latitude, accounting for ellipsoidal flattening:
+    C = 1 / sqrt(1 - (FF * pow(sin(φ), 2)))
+
+    # The radius of curvature in the meridian (S) is the Earth’s north–south curvature
+    # radius at the given latitude, scaled by the polar flattening factor:
+    S = C * FF
+
+    # The radius of curvature in the prime vertical (N):
+    N = earth_radius * C
+
+    # Compute the x coordinate in the ECEF frame:
+    x = (N + h) * cos(φ) * cos(θ)
+
+    # Compute the y coordinate in the ECEF frame:
+    y = (N + h) * cos(φ) * sin(θ)
+
+    # Compute the z coordinate in the ECEF frame:
+    z = (earth_radius * S + h) * sin(φ)
+
+    return CartesianCoordinate(
+        x=x,
+        y=y,
+        z=z,
+    )
 
 
 # **************************************************************************************
