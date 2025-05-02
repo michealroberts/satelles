@@ -7,15 +7,18 @@
 
 import unittest
 from datetime import datetime
-from math import cos, degrees, radians, sin
+from math import cos, degrees, radians, sin, sqrt
 
-from celerity.coordinates import EquatorialCoordinate
+from celerity.coordinates import EquatorialCoordinate, GeographicCoordinate
 from celerity.temporal import get_greenwich_sidereal_time
 
 from satelles import (
+    EARTH_EQUATORIAL_RADIUS,
+    EARTH_FLATTENING_FACTOR,
     CartesianCoordinate,
     convert_eci_to_ecef,
     convert_eci_to_equatorial,
+    convert_lla_to_ecef,
     convert_perifocal_to_eci,
     get_eccentric_anomaly,
     get_perifocal_coordinate,
@@ -307,6 +310,116 @@ class TestConvertECIToEquatorial(unittest.TestCase):
 
 # **************************************************************************************
 
+
+class TestConvertLLAToECEF(unittest.TestCase):
+    def assertCoordinatesAlmostEqual(
+        self,
+        coord1: CartesianCoordinate,
+        coord2: CartesianCoordinate,
+        places: int = 6,
+    ) -> None:
+        self.assertAlmostEqual(coord1["x"], coord2["x"], places=places)
+        self.assertAlmostEqual(coord1["y"], coord2["y"], places=places)
+        self.assertAlmostEqual(coord1["z"], coord2["z"], places=places)
+
+    def test_equator_prime_meridian(self) -> None:
+        """
+        At lat=0°, lon=0°, height=0, x should equal Earth's equatorial radius, y and z should be 0.
+        """
+        lla = GeographicCoordinate(
+            {
+                "lat": 0.0,
+                "lon": 0.0,
+                "el": 0.0,
+            }
+        )
+        result = convert_lla_to_ecef(lla)
+
+        expected = CartesianCoordinate(
+            {
+                "x": EARTH_EQUATORIAL_RADIUS,
+                "y": 0.0,
+                "z": 0.0,
+            }
+        )
+        self.assertCoordinatesAlmostEqual(result, expected)
+
+    def test_equator_ninety_east(self) -> None:
+        """
+        At lat=0°, lon=90°, height=0, y should equal Earth's equatorial radius, x and z should be 0.
+        """
+        lla = GeographicCoordinate(
+            {
+                "lat": 0.0,
+                "lon": 90.0,
+                "el": 0.0,
+            }
+        )
+        result = convert_lla_to_ecef(lla)
+
+        expected = CartesianCoordinate(
+            {
+                "x": 0.0,
+                "y": EARTH_EQUATORIAL_RADIUS,
+                "z": 0.0,
+            }
+        )
+        self.assertCoordinatesAlmostEqual(result, expected)
+
+    def test_north_pole(self) -> None:
+        """
+        At lat=90°, lon arbitrary, height=0; x and y remain zero, z matches the implementation's
+        value z = a * e² / sqrt(1 - e²), where e² = f * (2 - f).
+        """
+        a = EARTH_EQUATORIAL_RADIUS
+        f = EARTH_FLATTENING_FACTOR
+        e2 = f * (2 - f)
+        expected_z = a * e2 / sqrt(1 - e2)
+
+        lla = GeographicCoordinate(
+            {
+                "lat": 90.0,
+                "lon": 0.0,
+                "el": 0.0,
+            }
+        )
+        result = convert_lla_to_ecef(lla)
+
+        expected = CartesianCoordinate(
+            {
+                "x": 0.0,
+                "y": 0.0,
+                "z": expected_z,
+            }
+        )
+        self.assertCoordinatesAlmostEqual(result, expected)
+
+    def test_with_height(self) -> None:
+        """
+        For a point at lat=45°, lon=45° with height above the ellipsoid,
+        changes in each ECEF component match h times the local unit vectors:
+          Δx = h·cosφ·cosθ, Δy = h·cosφ·sinθ, Δz = h·sinφ.
+        """
+        h = 1000.0
+        phi = radians(45.0)
+        lam = radians(45.0)
+
+        base = GeographicCoordinate({"lat": 45.0, "lon": 45.0, "el": 0.0})
+        elevated = GeographicCoordinate({"lat": 45.0, "lon": 45.0, "el": h})
+
+        result0 = convert_lla_to_ecef(base)
+        resulth = convert_lla_to_ecef(elevated)
+
+        dx = resulth["x"] - result0["x"]
+        dy = resulth["y"] - result0["y"]
+        dz = resulth["z"] - result0["z"]
+
+        self.assertAlmostEqual(dx, h * cos(phi) * cos(lam), places=6)
+        self.assertAlmostEqual(dy, h * cos(phi) * sin(lam), places=6)
+        self.assertAlmostEqual(dz, h * sin(phi), places=6)
+
+
+# **************************************************************************************
 
 if __name__ == "__main__":
     unittest.main()
