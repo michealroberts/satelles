@@ -17,6 +17,7 @@ from .coordinates import (
 from .covariance import Covariance
 from .earth import (
     EARTH_EQUATORIAL_RADIUS,
+    EARTH_FLATTENING_FACTOR,
     EARTH_MASS,
     EARTH_MEAN_RADIUS,
     EARTH_POLAR_RADIUS,
@@ -57,6 +58,7 @@ __all__: list[str] = [
     "__version__",
     "__license__",
     "EARTH_EQUATORIAL_RADIUS",
+    "EARTH_FLATTENING_FACTOR",
     "EARTH_MASS",
     "EARTH_POLAR_RADIUS",
     "EARTH_MEAN_RADIUS",
