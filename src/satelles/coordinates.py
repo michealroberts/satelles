@@ -157,6 +157,59 @@ def convert_eci_to_equatorial(
 # **************************************************************************************
 
 
+def convert_ecef_to_enu(
+    ecef: CartesianCoordinate,
+    observer: GeographicCoordinate,
+) -> CartesianCoordinate:
+    """
+    Convert  ECEF (Earth-Centered, Earth-Fixed) coordinates into East-North-Up (ENU)
+    coordinates using the observer's latitude (φ) and longitude (θ).
+
+    Args:
+        ecef (CartesianCoordinate): The ECEF coordinates (x, y, z).
+        observer (GeographicCoordinate): The geographic coordinates (lat, lon, el) of the observer.
+
+    Notes:
+        The latitude (φ) and longitude (θ) are in degrees, and the height (el) is in meters above mean sea level.
+        The ECEF coordinates (x, y, z) are in meters.
+        The ENU coordinates (east, north, up) are in meters.
+
+    Returns:
+        CartesianCoordinate: The ENU coordinates (east, north, up).
+    """
+
+    site = convert_lla_to_ecef(lla=observer)
+
+    # The ECEF relative coordinates are the coordinates of the observer in the ECEF frame:
+    dx = ecef["x"] - site["x"]
+    dy = ecef["y"] - site["y"]
+    dz = ecef["z"] - site["z"]
+
+    # Convert the latitude and longitude to radians:
+    φ = radians(observer["lat"])
+    θ = radians(observer["lon"])
+
+    # The east coordinate is the projection of the ECEF coordinates onto the local
+    # east-west plane. The negative sine is used here because the eastward direction
+    # involves a rotation in the negative sense around the z-axis in the ENU
+    # coordinate system:
+    east = -sin(θ) * dx + cos(θ) * dy
+
+    # The north coordinate is the projection of the ECEF coordinates onto the local
+    # meridian:
+    north = -sin(φ) * cos(θ) * dx - sin(φ) * sin(θ) * dy + cos(φ) * dz
+
+    # The up coordinate is the projection of the ECEF coordinates onto the local
+    # vertical:
+    up = cos(φ) * cos(θ) * dx + cos(φ) * sin(θ) * dy + sin(φ) * dz
+
+    # The East North-Up coordinates are now in the rotated frame:
+    return CartesianCoordinate(x=east, y=north, z=up)
+
+
+# **************************************************************************************
+
+
 def convert_lla_to_ecef(
     lla: GeographicCoordinate,
 ) -> CartesianCoordinate:
