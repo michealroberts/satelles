@@ -9,6 +9,7 @@ from .checksum import perform_checksum_compute
 from .common import Acceleration, CartesianCoordinate, Velocity
 from .constants import GRAVITATIONAL_CONSTANT
 from .coordinates import (
+    convert_ecef_to_enu,
     convert_eci_to_ecef,
     convert_eci_to_equatorial,
     convert_lla_to_ecef,
@@ -64,6 +65,7 @@ __all__: list[str] = [
     "EARTH_POLAR_RADIUS",
     "EARTH_MEAN_RADIUS",
     "GRAVITATIONAL_CONSTANT",
+    "convert_ecef_to_enu",
     "convert_eci_to_ecef",
     "convert_eci_to_equatorial",
     "convert_lla_to_ecef",

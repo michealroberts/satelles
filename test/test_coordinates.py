@@ -16,6 +16,7 @@ from satelles import (
     EARTH_EQUATORIAL_RADIUS,
     EARTH_FLATTENING_FACTOR,
     CartesianCoordinate,
+    convert_ecef_to_enu,
     convert_eci_to_ecef,
     convert_eci_to_equatorial,
     convert_lla_to_ecef,
@@ -306,6 +307,87 @@ class TestConvertECIToEquatorial(unittest.TestCase):
         result = convert_eci_to_equatorial(eci)
         expected: EquatorialCoordinate = {"ra": 45.0, "dec": 35.26439}
         self.assertEquatorialAlmostEqual(result, expected)
+
+
+# **************************************************************************************
+
+
+class TestConvertECEFToEastNorthUp(unittest.TestCase):
+    def assertCoordinatesAlmostEqual(
+        self, coord1: CartesianCoordinate, coord2: CartesianCoordinate, places: int = 6
+    ) -> None:
+        self.assertAlmostEqual(coord1["x"], coord2["x"], places=places)
+        self.assertAlmostEqual(coord1["y"], coord2["y"], places=places)
+        self.assertAlmostEqual(coord1["z"], coord2["z"], places=places)
+
+    def test_zero_offset(self):
+        """
+        If the satellite ECEF equals the observer's ECEF, ENU should be (0, 0, 0).
+        """
+        observer = GeographicCoordinate({"lat": 10.0, "lon": 20.0, "el": 100.0})
+        site_ecef = convert_lla_to_ecef(lla=observer)
+
+        result = convert_ecef_to_enu(ecef=site_ecef, observer=observer)
+        expected = CartesianCoordinate({"x": 0.0, "y": 0.0, "z": 0.0})
+
+        self.assertCoordinatesAlmostEqual(result, expected)
+
+    def test_pure_east(self):
+        """
+        At lat=0°, lon=0°, an offset of +1 m in ECEF y should map to +1 m East.
+        """
+        observer = GeographicCoordinate({"lat": 0.0, "lon": 0.0, "el": 0.0})
+        site_ecef = convert_lla_to_ecef(lla=observer)
+        sat_ecef = CartesianCoordinate(
+            {
+                "x": site_ecef["x"],
+                "y": site_ecef["y"] + 1.0,
+                "z": site_ecef["z"],
+            }
+        )
+
+        result = convert_ecef_to_enu(ecef=sat_ecef, observer=observer)
+        expected = CartesianCoordinate({"x": 1.0, "y": 0.0, "z": 0.0})
+
+        self.assertCoordinatesAlmostEqual(result, expected)
+
+    def test_pure_north(self):
+        """
+        At lat=0°, lon=0°, an offset of +1 m in ECEF z should map to +1 m North.
+        """
+        observer = GeographicCoordinate({"lat": 0.0, "lon": 0.0, "el": 0.0})
+        site_ecef = convert_lla_to_ecef(lla=observer)
+        sat_ecef = CartesianCoordinate(
+            {
+                "x": site_ecef["x"],
+                "y": site_ecef["y"],
+                "z": site_ecef["z"] + 1.0,
+            }
+        )
+
+        result = convert_ecef_to_enu(ecef=sat_ecef, observer=observer)
+        expected = CartesianCoordinate({"x": 0.0, "y": 1.0, "z": 0.0})
+
+        self.assertCoordinatesAlmostEqual(result, expected)
+
+    def test_pure_up(self):
+        """
+        At lat=0°, lon=0°, an offset of +1 m in ECEF x should map to +1 m Up.
+        """
+        observer = GeographicCoordinate({"lat": 0.0, "lon": 0.0, "el": 0.0})
+        site_ecef = convert_lla_to_ecef(lla=observer)
+        sat_ecef = CartesianCoordinate(
+            {
+                "x": site_ecef["x"] + 1.0,
+                "y": site_ecef["y"],
+                "z": site_ecef["z"],
+            }
+        )
+
+        result = convert_ecef_to_enu(ecef=sat_ecef, observer=observer)
+        expected = CartesianCoordinate({"x": 0.0, "y": 0.0, "z": 1.0})
+
+        self.assertCoordinatesAlmostEqual(result, expected)
 
 
 # **************************************************************************************
