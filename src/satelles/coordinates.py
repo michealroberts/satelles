@@ -291,10 +291,6 @@ def convert_lla_to_ecef(
     # curvature radius at the given latitude, accounting for ellipsoidal flattening:
     C = 1 / sqrt(1 - (FF * pow(sin(φ), 2)))
 
-    # The radius of curvature in the meridian (S) is the Earth’s north–south curvature
-    # radius at the given latitude, scaled by the polar flattening factor:
-    S = C * FF
-
     # The radius of curvature in the prime vertical (N):
     N = earth_radius * C
 
@@ -305,7 +301,7 @@ def convert_lla_to_ecef(
     y = (N + h) * cos(φ) * sin(θ)
 
     # Compute the z coordinate in the ECEF frame:
-    z = (earth_radius * S + h) * sin(φ)
+    z = ((N * (1 - FF)) + h) * sin(φ)
 
     return CartesianCoordinate(
         x=x,

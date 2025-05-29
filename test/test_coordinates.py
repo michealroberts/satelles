@@ -561,13 +561,12 @@ class TestConvertLLAToECEF(unittest.TestCase):
 
     def test_north_pole(self) -> None:
         """
-        At lat=90°, lon arbitrary, height=0; x and y remain zero, z matches the implementation's
-        value z = a * e² / sqrt(1 - e²), where e² = f * (2 - f).
+        At lat=90°, lon arbitrary, height=0; x and y remain zero, z = a * √(1−e²) for the pole.
         """
         a = EARTH_EQUATORIAL_RADIUS
         f = EARTH_FLATTENING_FACTOR
         e2 = f * (2 - f)
-        expected_z = a * e2 / sqrt(1 - e2)
+        expected_z = a * sqrt(1 - e2)
 
         lla = GeographicCoordinate(
             {
