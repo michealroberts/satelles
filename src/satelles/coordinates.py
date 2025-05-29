@@ -8,7 +8,11 @@
 from datetime import datetime
 from math import asin, atan2, cos, degrees, pi, pow, radians, sin, sqrt
 
-from celerity.coordinates import EquatorialCoordinate, GeographicCoordinate
+from celerity.coordinates import (
+    EquatorialCoordinate,
+    GeographicCoordinate,
+    HorizontalCoordinate,
+)
 from celerity.temporal import get_greenwich_sidereal_time
 
 from .common import CartesianCoordinate
@@ -234,6 +238,35 @@ def convert_ecef_to_enu(
 
     # The East North-Up coordinates are now in the rotated frame:
     return CartesianCoordinate(x=east, y=north, z=up)
+
+
+# **************************************************************************************
+
+
+def convert_enu_to_horizontal(
+    enu: CartesianCoordinate,
+) -> HorizontalCoordinate:
+    """
+    Convert local East-North-Up coordinates to horizontal azimuth and altitude.
+
+    Args:
+        enu (CartesianCoordinate): Coordinates in the ENU frame (east, north, up) in meters.
+
+    Returns:
+        HorizontalCoordinate: The horizontal coordinates (altitude, azimuth) in degrees.
+    """
+    # Compute the azimuth along the bearing clockwise from north:
+    az = degrees(atan2(enu["x"], enu["y"]))
+
+    if az < 0:
+        az += 360.0
+
+    return HorizontalCoordinate(
+        {
+            "alt": degrees(atan2(enu["z"], sqrt(enu["x"] ** 2 + enu["y"] ** 2))),
+            "az": az,
+        }
+    )
 
 
 # **************************************************************************************
