@@ -7,9 +7,13 @@
 
 import unittest
 from datetime import datetime
-from math import cos, degrees, radians, sin, sqrt
+from math import atan2, cos, degrees, radians, sin, sqrt
 
-from celerity.coordinates import EquatorialCoordinate, GeographicCoordinate
+from celerity.coordinates import (
+    EquatorialCoordinate,
+    GeographicCoordinate,
+    HorizontalCoordinate,
+)
 from celerity.temporal import get_greenwich_sidereal_time
 
 from satelles import (
@@ -20,6 +24,7 @@ from satelles import (
     convert_ecef_to_enu,
     convert_eci_to_ecef,
     convert_eci_to_equatorial,
+    convert_enu_to_horizontal,
     convert_lla_to_ecef,
     convert_perifocal_to_eci,
     get_eccentric_anomaly,
@@ -499,6 +504,99 @@ class TestConvertECEFToEastNorthUp(unittest.TestCase):
         expected = CartesianCoordinate({"x": 0.0, "y": 0.0, "z": 1.0})
 
         self.assertCoordinatesAlmostEqual(result, expected)
+
+
+# **************************************************************************************
+
+
+class TestConvertEnuToHorizontal(unittest.TestCase):
+    def assertHorizontalCoordinatesAlmostEqual(
+        self,
+        result: HorizontalCoordinate,
+        expected: HorizontalCoordinate,
+        places: int = 6,
+    ) -> None:
+        """
+        Assert that two HorizontalCoordinate objects have alt and az equal within tolerance.
+        """
+        self.assertAlmostEqual(result["alt"], expected["alt"], places=places)
+        self.assertAlmostEqual(result["az"], expected["az"], places=places)
+
+    def test_pure_north_vector_has_zero_azimuth_and_zero_elevation(self) -> None:
+        """
+        An ENU vector pointing straight north (east=0, north>0, up=0) should have
+        azimuth 0° and elevation 0°.
+        """
+        enu = CartesianCoordinate({"x": 0.0, "y": 10.0, "z": 0.0})
+        expected = HorizontalCoordinate({"az": 0.0, "alt": 0.0})
+        result = convert_enu_to_horizontal(enu)
+        self.assertHorizontalCoordinatesAlmostEqual(result, expected)
+
+    def test_pure_east_vector_has_ninety_degree_azimuth_and_zero_elevation(
+        self,
+    ) -> None:
+        """
+        An ENU vector pointing straight east (east>0, north=0, up=0) should have
+        azimuth 90° and elevation 0°.
+        """
+        enu = CartesianCoordinate({"x": 10.0, "y": 0.0, "z": 0.0})
+        expected = HorizontalCoordinate({"az": 90.0, "alt": 0.0})
+        result = convert_enu_to_horizontal(enu)
+        self.assertHorizontalCoordinatesAlmostEqual(result, expected)
+
+    def test_pure_south_vector_has_180_degree_azimuth_and_zero_elevation(self) -> None:
+        """
+        An ENU vector pointing straight south (east=0, north<0, up=0) should have
+        azimuth 180° and elevation 0°.
+        """
+        enu = CartesianCoordinate({"x": 0.0, "y": -5.0, "z": 0.0})
+        expected = HorizontalCoordinate({"az": 180.0, "alt": 0.0})
+        result = convert_enu_to_horizontal(enu)
+        self.assertHorizontalCoordinatesAlmostEqual(result, expected)
+
+    def test_pure_west_vector_has_270_degree_azimuth_and_zero_elevation(self) -> None:
+        """
+        An ENU vector pointing straight west (east<0, north=0, up=0) should have
+        azimuth 270° and elevation 0°.
+        """
+        enu = CartesianCoordinate({"x": -8.0, "y": 0.0, "z": 0.0})
+        expected = HorizontalCoordinate({"az": 270.0, "alt": 0.0})
+        result = convert_enu_to_horizontal(enu)
+        self.assertHorizontalCoordinatesAlmostEqual(result, expected)
+
+    def test_diagonal_vector_with_upward_component(self) -> None:
+        """
+        An ENU vector with equal east and north and positive up should have
+        azimuth 45° and elevation tan⁻¹(up/horizontal_distance).
+        """
+        east = 1.0
+        north = 1.0
+        up = 1.0
+        enu = CartesianCoordinate(
+            {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0,
+            }
+        )
+        expected = HorizontalCoordinate(
+            {
+                "az": 45.0,
+                "alt": degrees(atan2(up, sqrt(east**2 + north**2))),
+            }
+        )
+        result = convert_enu_to_horizontal(enu)
+        self.assertHorizontalCoordinatesAlmostEqual(result, expected)
+
+    def test_northwest_quadrant_vector_wraps_azimuth_to_315(self) -> None:
+        """
+        An ENU vector in the northwest quadrant (east<0, north>0) should wrap
+        azimuth to 360-45=315°.
+        """
+        enu = CartesianCoordinate({"x": -1.0, "y": 1.0, "z": 0.0})
+        expected = HorizontalCoordinate({"az": 315.0, "alt": 0.0})
+        result = convert_enu_to_horizontal(enu)
+        self.assertHorizontalCoordinatesAlmostEqual(result, expected)
 
 
 # **************************************************************************************
