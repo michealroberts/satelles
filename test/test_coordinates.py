@@ -180,43 +180,64 @@ class TestConvertECIToECEF(unittest.TestCase):
         when = datetime(2025, 1, 1, 0, 0, 0)
 
         result = convert_eci_to_ecef(eci, when)
-        expected: CartesianCoordinate = {
-            "x": 1.227381227842824,
-            "y": 1.8691001368409992,
-            "z": 3.0,
-        }
+        expected: CartesianCoordinate = CartesianCoordinate(
+            {
+                "x": 1.7748323217117372,
+                "y": -1.3601361070890385,
+                "z": 3.0,
+            }
+        )
         self.assertCoordinatesAlmostEqual(result, expected)
 
     def test_rotation_90_degrees(self) -> None:
         """
         With GMST = 90°, ECI (1,0,0) should become ECEF (0,-1,0).
         """
-        eci: CartesianCoordinate = {"x": 1.0, "y": 0.0, "z": 0.0}
-        when = datetime(2025, 1, 1, 6, 0, 0)  # A time roughly giving 90° GMST
+        eci: CartesianCoordinate = CartesianCoordinate(
+            {
+                "x": 1.0,
+                "y": 0.0,
+                "z": 0.0,
+            }
+        )
+        when = datetime(
+            2025, 1, 1, 23, 12, 35, 600000
+        )  # A time roughly giving 90° GMST
 
         result = convert_eci_to_ecef(eci, when)
-        expected: CartesianCoordinate = {
-            "x": 0.9753690259432949,
-            "y": -0.2205793807916511,
-            "z": 0.0,
-        }
-        self.assertCoordinatesAlmostEqual(result, expected)
+        expected: CartesianCoordinate = CartesianCoordinate(
+            {
+                "x": 0,
+                "y": -1,
+                "z": 0.0,
+            }
+        )
+        self.assertCoordinatesAlmostEqual(result, expected, 4)
 
     def test_nontrivial_rotation(self) -> None:
         """
         With a realistic GMST, ECI coordinates rotate correctly to ECEF.
         """
-        eci: CartesianCoordinate = {"x": 1.0, "y": 1.0, "z": 0.0}
+        eci: CartesianCoordinate = CartesianCoordinate(
+            {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 0.0,
+            }
+        )
         when = datetime(2025, 1, 1, 3, 0, 0)  # Arbitrary realistic datetime
 
         GMST = get_greenwich_sidereal_time(date=when)
-        gmst_rad = radians(GMST)
 
-        expected: CartesianCoordinate = {
-            "x": cos(gmst_rad) * eci["x"] + sin(gmst_rad) * eci["y"],
-            "y": -sin(gmst_rad) * eci["x"] + cos(gmst_rad) * eci["y"],
-            "z": eci["z"],
-        }
+        expected: CartesianCoordinate = CartesianCoordinate(
+            {
+                "x": cos(radians(GMST * 15.0)) * eci["x"]
+                + sin(radians(GMST * 15.0)) * eci["y"],
+                "y": -sin(radians(GMST * 15.0)) * eci["x"]
+                + cos(radians(GMST * 15.0)) * eci["y"],
+                "z": eci["z"],
+            }
+        )
 
         result = convert_eci_to_ecef(eci, when)
         self.assertCoordinatesAlmostEqual(result, expected)

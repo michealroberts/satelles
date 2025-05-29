@@ -113,8 +113,8 @@ def convert_eci_to_ecef(
 
     # Rotate around Z-axis (from ECI to ECEF) using the GMST:
     return CartesianCoordinate(
-        x=(eci["x"] * cos(radians(GMST))) + (eci["y"] * sin(radians(GMST))),
-        y=(eci["x"] * -sin(radians(GMST))) + (eci["y"] * cos(radians(GMST))),
+        x=(eci["x"] * cos(radians(GMST * 15))) + (eci["y"] * sin(radians(GMST * 15))),
+        y=-(eci["x"] * sin(radians(GMST * 15))) + (eci["y"] * cos(radians(GMST * 15))),
         z=eci["z"],
     )
 
