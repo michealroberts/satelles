@@ -93,6 +93,35 @@ def convert_perifocal_to_eci(
 # **************************************************************************************
 
 
+def convert_ecef_to_eci(
+    ecef: CartesianCoordinate,
+    when: datetime,
+) -> CartesianCoordinate:
+    """
+    Convert Earth-Centered Earth-Fixed (ECEF) coordinates back to
+    Earth-Centered Inertial (ECI) coordinates.
+
+    Args:
+        ecef (CartesianCoordinate): The ECEF coordinates (x, y, z).
+        when (datetime): The date and time for the conversion.
+
+    Returns:
+        CartesianCoordinate: The ECI coordinates (x, y, z).
+    """
+    # Get the Greenwich Mean Sidereal Time (GMST) for the given date:
+    GMST = get_greenwich_sidereal_time(date=when)
+
+    # Rotate around Z-axis (from ECEF to ECI) using the GMST:
+    return CartesianCoordinate(
+        x=ecef["x"] * cos(radians(GMST * 15)) - ecef["y"] * sin(radians(GMST * 15)),
+        y=ecef["x"] * sin(radians(GMST * 15)) + ecef["y"] * cos(radians(GMST * 15)),
+        z=ecef["z"],
+    )
+
+
+# **************************************************************************************
+
+
 def convert_eci_to_ecef(
     eci: CartesianCoordinate,
     when: datetime,
