@@ -16,6 +16,7 @@ from satelles import (
     EARTH_EQUATORIAL_RADIUS,
     EARTH_FLATTENING_FACTOR,
     CartesianCoordinate,
+    convert_ecef_to_eci,
     convert_ecef_to_enu,
     convert_eci_to_ecef,
     convert_eci_to_equatorial,
@@ -157,6 +158,95 @@ class TestConvertPerifocalToECI(unittest.TestCase):
         perifocal: CartesianCoordinate = {"x": 1.0, "y": 1.0, "z": 0.0}
         result = convert_perifocal_to_eci(perifocal, 45, 45, 45)
         expected: CartesianCoordinate = {"x": -0.70710678, "y": 0.70710678, "z": 1.0}
+        self.assertCoordinatesAlmostEqual(result, expected)
+
+
+# **************************************************************************************
+
+
+class TestConvertECEFToECI(unittest.TestCase):
+    def assertCoordinatesAlmostEqual(
+        self, coord1: CartesianCoordinate, coord2: CartesianCoordinate, places: int = 6
+    ) -> None:
+        self.assertAlmostEqual(coord1["x"], coord2["x"], places=places)
+        self.assertAlmostEqual(coord1["y"], coord2["y"], places=places)
+        self.assertAlmostEqual(coord1["z"], coord2["z"], places=places)
+
+    def test_identity(self) -> None:
+        """
+        Verifies the conversion from ECEF to ECI coordinates for a specific
+        date and time.
+        """
+        ecef: CartesianCoordinate = CartesianCoordinate(
+            {
+                "x": 1.7748323217117372,
+                "y": -1.3601361070890385,
+                "z": 3.0,
+            }
+        )
+        when = datetime(2025, 1, 1, 0, 0, 0)
+
+        result = convert_ecef_to_eci(ecef, when)
+        expected: CartesianCoordinate = {"x": 1.0, "y": 2.0, "z": 3.0}
+
+        self.assertCoordinatesAlmostEqual(result, expected)
+
+    def test_rotation_90_degrees(self) -> None:
+        """
+        With GMST = 90°, ECEF (0,-1,0) should become ECI (1,0,0).
+        """
+        ecef: CartesianCoordinate = CartesianCoordinate(
+            {
+                "x": 0,
+                "y": -1,
+                "z": 0.0,
+            }
+        )
+
+        when = datetime(
+            2025, 1, 1, 23, 12, 35, 600000
+        )  # A time roughly giving 90° GMST
+
+        result = convert_ecef_to_eci(ecef, when)
+        expected: CartesianCoordinate = {"x": 1.0, "y": 0.0, "z": 0.0}
+
+        self.assertCoordinatesAlmostEqual(result, expected, 4)
+
+    def test_nontrivial_rotation(self) -> None:
+        """
+        With a realistic GMST, ECEF coordinates rotate correctly to ECI.
+        """
+        eci: CartesianCoordinate = CartesianCoordinate(
+            {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 0.0,
+            }
+        )
+
+        when = datetime(2025, 1, 1, 3, 0, 0)
+
+        GMST = get_greenwich_sidereal_time(date=when)
+
+        ecef: CartesianCoordinate = CartesianCoordinate(
+            {
+                "x": (eci["x"] * cos(radians(GMST * 15)))
+                + (eci["y"] * sin(radians(GMST * 15))),
+                "y": -(eci["x"] * sin(radians(GMST * 15)))
+                + (eci["y"] * cos(radians(GMST * 15))),
+                "z": eci["z"],
+            }
+        )
+
+        expected = CartesianCoordinate(
+            {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 0.0,
+            }
+        )
+
+        result = convert_ecef_to_eci(ecef, when)
         self.assertCoordinatesAlmostEqual(result, expected)
 
 
