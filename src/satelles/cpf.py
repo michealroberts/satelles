@@ -90,3 +90,25 @@ h2_regex = re.compile(
 )
 
 # **************************************************************************************
+
+e10_regex = re.compile(
+    # Record type: "10" ephemeris data record for position:
+    r"^10\s+"
+    # Direction flag (0 = geocentric, 1 = fire, 2 = return):
+    r"(?P<direction>[0-2])\s+"
+    # Modified Julian Date (integer, 1–5 digits):
+    r"(?P<mjd>\d{1,5})\s+"
+    # Seconds of day (floating point with exactly 6 decimals):
+    r"(?P<seconds>\d+\.\d{1,6})\s+"
+    # Leap second flag (0 = no leap second, or the value of the leap second):
+    r"(?P<leap_second>\d{1,2})\s+"
+    # X coordinate (meters; optional sign, digits before decimal, dot, 3 decimals):
+    r"(?P<x>[+-]?\d+\.\d{3})\s+"
+    # Y coordinate (meters; optional sign, digits before decimal, dot, 3 decimals):
+    r"(?P<y>[+-]?\d+\.\d{3})\s+"
+    # Z coordinate (meters; optional sign, digits before decimal, dot, 3 decimals):
+    r"(?P<z>[+-]?\d+\.\d{3})"
+    r"$"
+)
+
+# **************************************************************************************
