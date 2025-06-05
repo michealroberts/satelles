@@ -75,15 +75,15 @@ h2_regex = re.compile(
     # 5-digit time‐between‐entries in seconds (00000–99999):
     r"(?P<interval>\d{1,5})\s+"
     # 1-digit compatibility with TIVs (0 or 1):
-    r"(?P<tiv_compat>\d)\s+"
+    r"(?P<tiv_compatibility>\d)\s+"
     # 1-digit target class (1–5):
     r"(?P<target_class>\d)\s+"
     # 2-digit reference frame (00–02):
     r"(?P<reference_frame>\d{1,2})\s+"
     # 1-digit rotational angle type (0–2):
-    r"(?P<rot_angle_type>\d)\s+"
+    r"(?P<rotational_angle_type>\d)\s+"
     # 1-digit center-of-mass correction flag (0 or 1):
-    r"(?P<com_correction>\d)\s+"
+    r"(?P<center_of_mass_correction>\d)\s+"
     # 2-digit target location/dynamics code (01–10):
     r"(?P<location_dynamics>\d{1,2})"
     r"$"
