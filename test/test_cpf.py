@@ -202,11 +202,11 @@ class TestCPFH2Regex(unittest.TestCase):
         self.assertEqual(m.group("end_minute"), "45")
         self.assertEqual(m.group("end_second"), "0")
         self.assertEqual(m.group("interval"), "900")
-        self.assertEqual(m.group("tiv_compat"), "0")
+        self.assertEqual(m.group("tiv_compatibility"), "0")
         self.assertEqual(m.group("target_class"), "1")
         self.assertEqual(m.group("reference_frame"), "0")
-        self.assertEqual(m.group("rot_angle_type"), "0")
-        self.assertEqual(m.group("com_correction"), "0")
+        self.assertEqual(m.group("rotational_angle_type"), "0")
+        self.assertEqual(m.group("center_of_mass_correction"), "0")
         self.assertEqual(m.group("location_dynamics"), "3")
 
     def test_valid_galileo_101_h2(self):
@@ -228,11 +228,11 @@ class TestCPFH2Regex(unittest.TestCase):
         self.assertEqual(m.group("end_minute"), "59")
         self.assertEqual(m.group("end_second"), "42")
         self.assertEqual(m.group("interval"), "900")
-        self.assertEqual(m.group("tiv_compat"), "1")
+        self.assertEqual(m.group("tiv_compatibility"), "1")
         self.assertEqual(m.group("target_class"), "1")
         self.assertEqual(m.group("reference_frame"), "0")
-        self.assertEqual(m.group("rot_angle_type"), "0")
-        self.assertEqual(m.group("com_correction"), "0")
+        self.assertEqual(m.group("rotational_angle_type"), "0")
+        self.assertEqual(m.group("center_of_mass_correction"), "0")
         self.assertEqual(m.group("location_dynamics"), "1")
 
     def test_valid_glonass_105_h2(self):
@@ -254,11 +254,11 @@ class TestCPFH2Regex(unittest.TestCase):
         self.assertEqual(m.group("end_minute"), "45")
         self.assertEqual(m.group("end_second"), "0")
         self.assertEqual(m.group("interval"), "900")
-        self.assertEqual(m.group("tiv_compat"), "1")
+        self.assertEqual(m.group("tiv_compatibility"), "1")
         self.assertEqual(m.group("target_class"), "1")
         self.assertEqual(m.group("reference_frame"), "0")
-        self.assertEqual(m.group("rot_angle_type"), "0")
-        self.assertEqual(m.group("com_correction"), "0")
+        self.assertEqual(m.group("rotational_angle_type"), "0")
+        self.assertEqual(m.group("center_of_mass_correction"), "0")
         self.assertEqual(m.group("location_dynamics"), "1")
 
     def test_valid_lageos_h2(self):
@@ -280,11 +280,11 @@ class TestCPFH2Regex(unittest.TestCase):
         self.assertEqual(m.group("end_minute"), "00")
         self.assertEqual(m.group("end_second"), "00")
         self.assertEqual(m.group("interval"), "60")
-        self.assertEqual(m.group("tiv_compat"), "1")
+        self.assertEqual(m.group("tiv_compatibility"), "1")
         self.assertEqual(m.group("target_class"), "1")
         self.assertEqual(m.group("reference_frame"), "0")
-        self.assertEqual(m.group("rot_angle_type"), "0")
-        self.assertEqual(m.group("com_correction"), "0")
+        self.assertEqual(m.group("rotational_angle_type"), "0")
+        self.assertEqual(m.group("center_of_mass_correction"), "0")
         self.assertEqual(m.group("location_dynamics"), "1")
 
     def test_valid_lares_h2(self):
@@ -306,11 +306,11 @@ class TestCPFH2Regex(unittest.TestCase):
         self.assertEqual(m.group("end_minute"), "00")
         self.assertEqual(m.group("end_second"), "00")
         self.assertEqual(m.group("interval"), "30")
-        self.assertEqual(m.group("tiv_compat"), "1")
+        self.assertEqual(m.group("tiv_compatibility"), "1")
         self.assertEqual(m.group("target_class"), "1")
         self.assertEqual(m.group("reference_frame"), "0")
-        self.assertEqual(m.group("rot_angle_type"), "0")
-        self.assertEqual(m.group("com_correction"), "0")
+        self.assertEqual(m.group("rotational_angle_type"), "0")
+        self.assertEqual(m.group("center_of_mass_correction"), "0")
         self.assertEqual(m.group("location_dynamics"), "1")
 
     def test_invalid_not_h2(self):
