@@ -127,3 +127,24 @@ e20_regex = re.compile(
 )
 
 # **************************************************************************************
+
+e30_regex = re.compile(
+    # Record type: "30" ephemeris data record for stellar aberration and relativistic
+    # range corrections:
+    r"^30\s+"
+    # Direction flag (0 = common epoch, 1 = transmit, 2 = receive):
+    r"(?P<direction>[0-2])\s+"
+    # X stellar aberration correction (meters; optional sign, digits before decimal,
+    # dot, zero or more decimals):
+    r"(?P<x_aberration>[+-]?\d+\.\d*)\s+"
+    # Y stellar aberration correction (meters; optional sign, digits before decimal,
+    # dot, zero or more decimals):
+    r"(?P<y_aberration>[+-]?\d+\.\d*)\s+"
+    # Z stellar aberration correction (meters; optional sign, digits before decimal,
+    # dot, zero or more decimals):
+    r"(?P<z_aberration>[+-]?\d+\.\d*)\s+"
+    # Relativistic range correction (nsec; digits before decimal, dot, 1 decimal):
+    r"(?P<relativistic_range_correction_in_nanoseconds>\d+\.\d{1})$"
+)
+
+# **************************************************************************************

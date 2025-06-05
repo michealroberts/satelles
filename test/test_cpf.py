@@ -7,7 +7,7 @@
 
 import unittest
 
-from satelles.cpf import e10_regex, e20_regex, h1_regex, h2_regex
+from satelles.cpf import e10_regex, e20_regex, e30_regex, h1_regex, h2_regex
 
 # **************************************************************************************
 
@@ -21,6 +21,8 @@ apollo_15_10 = (
 
 apollo_15_20 = "20 1 2190.123456 -1850.654321 2100.987654"
 
+apollo_15_30 = "30 1        3430.     -39000.       2982.    26.0"
+
 # **************************************************************************************
 
 galileo_101_h1 = "H1 CPF  2 ESA 2025  6  5 10 156 01 galileo101"
@@ -33,6 +35,8 @@ galileo_101_10 = (
 
 galileo_101_20 = "20 0 -350.123456 720.654321 1800.987654"
 
+galileo_101_30 = "30 0 -500.123456 250.654321 -100.000000 1.5"
+
 # **************************************************************************************
 
 glonass_105_h1 = "H1 CPF  2  NER 2025  6  5 12  156 01 glonass105"
@@ -42,6 +46,8 @@ glonass_105_h2 = "H2  0705202 9105    32276 2025  6  5  0  0  0 2025  6  8 23 45
 glonass_105_10 = "10 0 60834  85500.00000  0  -3027287.597  18473674.047  17310722.799"
 
 glonass_105_20 = "20 0 -1800.123456 3600.654321 5400.987654"
+
+glonass_105_30 = "30 0 -2000.123456 1500.654321 -300.000000 2.0"
 
 # **************************************************************************************
 
@@ -55,6 +61,8 @@ lageos_10 = (
 
 lageos_20 = "20 0 750.123456 -620.654321 -1300.987654"
 
+lageos_30 = "30 0 800.123456 -700.654321 -200.000000 2.5"
+
 # **************************************************************************************
 
 lares_h1 = "H1 CPF  2  DGF 2025 06 05 11 156 01 lares      NONE"
@@ -66,6 +74,8 @@ lares_10 = (
 )
 
 lares_20 = "20 0 400.123456 300.654321 -500.987654"
+
+lares_30 = "30 0 500.123456 400.654321 -100.000000 3.0"
 
 # **************************************************************************************
 
@@ -455,6 +465,76 @@ class TestCPF20Regex(unittest.TestCase):
     def test_invalid_non_numeric_velocity(self):
         bad_line = "20 0 abc.def456 720.654321 1800.987654"
         self.assertIsNone(e20_regex.match(bad_line), "Non-numeric VX field should fail")
+
+
+# **************************************************************************************
+
+
+class TestCPF30Regex(unittest.TestCase):
+    def test_valid_apollo_15_30(self):
+        m = e30_regex.match(apollo_15_30)
+        self.assertIsNotNone(m, "Apollo 15 record 30 should match")
+        self.assertEqual(m.group("direction"), "1")
+        self.assertEqual(m.group("x_aberration"), "3430.")
+        self.assertEqual(m.group("y_aberration"), "-39000.")
+        self.assertEqual(m.group("z_aberration"), "2982.")
+        self.assertEqual(
+            m.group("relativistic_range_correction_in_nanoseconds"), "26.0"
+        )
+
+    def test_valid_galileo_101_30(self):
+        m = e30_regex.match(galileo_101_30)
+        self.assertIsNotNone(m, "Galileo 101 record 30 should match")
+        self.assertEqual(m.group("direction"), "0")
+        self.assertEqual(m.group("x_aberration"), "-500.123456")
+        self.assertEqual(m.group("y_aberration"), "250.654321")
+        self.assertEqual(m.group("z_aberration"), "-100.000000")
+        self.assertEqual(m.group("relativistic_range_correction_in_nanoseconds"), "1.5")
+
+    def test_valid_glonass_105_30(self):
+        m = e30_regex.match(glonass_105_30)
+        self.assertIsNotNone(m, "Glonass 105 record 30 should match")
+        self.assertEqual(m.group("direction"), "0")
+        self.assertEqual(m.group("x_aberration"), "-2000.123456")
+        self.assertEqual(m.group("y_aberration"), "1500.654321")
+        self.assertEqual(m.group("z_aberration"), "-300.000000")
+        self.assertEqual(m.group("relativistic_range_correction_in_nanoseconds"), "2.0")
+
+    def test_valid_lageos_30(self):
+        m = e30_regex.match(lageos_30)
+        self.assertIsNotNone(m, "Lageos record 30 should match")
+        self.assertEqual(m.group("direction"), "0")
+        self.assertEqual(m.group("x_aberration"), "800.123456")
+        self.assertEqual(m.group("y_aberration"), "-700.654321")
+        self.assertEqual(m.group("z_aberration"), "-200.000000")
+        self.assertEqual(m.group("relativistic_range_correction_in_nanoseconds"), "2.5")
+
+    def test_valid_lares_30(self):
+        m = e30_regex.match(lares_30)
+        self.assertIsNotNone(m, "Lares record 30 should match")
+        self.assertEqual(m.group("direction"), "0")
+        self.assertEqual(m.group("x_aberration"), "500.123456")
+        self.assertEqual(m.group("y_aberration"), "400.654321")
+        self.assertEqual(m.group("z_aberration"), "-100.000000")
+        self.assertEqual(m.group("relativistic_range_correction_in_nanoseconds"), "3.0")
+
+    def test_invalid_not_30(self):
+        bad_line = "10 1 3430. -39000. 2982. 26.0"
+        self.assertIsNone(
+            e30_regex.match(bad_line), "Record type other than 30 should fail"
+        )
+
+    def test_invalid_missing_fields(self):
+        bad_line = "30 1 -500.123456 250.654321"
+        self.assertIsNone(
+            e30_regex.match(bad_line), "Too few aberration fields should fail"
+        )
+
+    def test_invalid_non_numeric_aberration(self):
+        bad_line = "30 1 abc.def456 250.654321 -100.000000 1.5"
+        self.assertIsNone(
+            e30_regex.match(bad_line), "Non-numeric X aberration field should fail"
+        )
 
 
 # **************************************************************************************
