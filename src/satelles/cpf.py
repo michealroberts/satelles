@@ -38,3 +38,55 @@ h1_regex = re.compile(
 )
 
 # **************************************************************************************
+
+h2_regex = re.compile(
+    # Record type: "H2"
+    r"^H2\s+"
+    # 8-digit COSPAR ID (compressed; e.g., "7603901" → "07603901"):
+    r"(?P<cospar_id>\d{1,8})\s+"
+    # 4-digit SIC (Satellite ID Code; e.g., "1234"):
+    r"(?P<sic>\d{1,4})\s+"
+    # 8-digit NORAD ID (e.g., "0000510" → "00000510"):
+    r"(?P<norad_id>\d{1,8})\s+"
+    # 4-digit start year (e.g., "2025"):
+    r"(?P<start_year>\d{4})\s+"
+    # 2-digit start month (01–12):
+    r"(?P<start_month>\d{1,2})\s+"
+    # 2-digit start day (01–31):
+    r"(?P<start_day>\d{1,2})\s+"
+    # 2-digit start hour (00–23):
+    r"(?P<start_hour>\d{1,2})\s+"
+    # 2-digit start minute (00–59):
+    r"(?P<start_minute>\d{1,2})\s+"
+    # 2-digit start second (00–59):
+    r"(?P<start_second>\d{1,2})\s+"
+    # 4-digit end year (e.g., "2025"):
+    r"(?P<end_year>\d{4})\s+"
+    # 2-digit end month (01–12):
+    r"(?P<end_month>\d{1,2})\s+"
+    # 2-digit end day (01–31):
+    r"(?P<end_day>\d{1,2})\s+"
+    # 2-digit end hour (00–23):
+    r"(?P<end_hour>\d{1,2})\s+"
+    # 2-digit end minute (00–59):
+    r"(?P<end_minute>\d{1,2})\s+"
+    # 2-digit end second (00–59):
+    r"(?P<end_second>\d{1,2})\s+"
+    # 5-digit time‐between‐entries in seconds (00000–99999):
+    r"(?P<interval>\d{1,5})\s+"
+    # 1-digit compatibility with TIVs (0 or 1):
+    r"(?P<tiv_compatability>\d)\s+"
+    # 1-digit target class (1–5):
+    r"(?P<target_class>[1-5])\s+"
+    # 2-digit reference frame (00–02):
+    r"(?P<reference_frame>[0-2])\s+"
+    # 1-digit rotational angle type (0–2):
+    r"(?P<rotational_angle_type>[0-2])\s+"
+    # 1-digit center-of-mass correction flag (0 or 1):
+    r"(?P<center_of_mass_correction>[0-1])\s+"
+    # 2-digit target location/dynamics code (01–10):
+    r"(?P<location_dynamics>\d{1,2})"
+    r"$"
+)
+
+# **************************************************************************************
