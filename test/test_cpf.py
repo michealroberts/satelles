@@ -7,7 +7,7 @@
 
 import unittest
 
-from satelles.cpf import h1_regex, h2_regex
+from satelles.cpf import e10_regex, h1_regex, h2_regex
 
 # **************************************************************************************
 
@@ -15,17 +15,27 @@ apollo_15_h1 = "H1 CPF 2 OPA 2025 06 04 18 155 1 apollo15 OPA_ELP96"
 
 apollo_15_h2 = "H2 103 103 0 2025 6 5 0 0 0 2025 6 9 23 45 0 900 0 1 0 0 0 3"
 
+apollo_15_10 = (
+    "10 1 60835   85500.0 0       352072320.278       -83567364.603      -173273869.404"
+)
+
 # **************************************************************************************
 
 galileo_101_h1 = "H1 CPF  2 ESA 2025  6  5 10 156 01 galileo101"
 
 galileo_101_h2 = "H2  1106001 7101    37846 2025  6  4 23 59 42 2025  6  9 23 59 42   900 1 1  0 0 0  1"
 
+galileo_101_10 = (
+    "10 0 60835  86382.000000  0      -9151185.629      25534182.361      11819411.299"
+)
+
 # **************************************************************************************
 
-glonass105_h1 = "H1 CPF  2  NER 2025  6  5 12  156 01 glonass105"
+glonass_105_h1 = "H1 CPF  2  NER 2025  6  5 12  156 01 glonass105"
 
-glonass105_h2 = "H2  0705202 9105    32276 2025  6  5  0  0  0 2025  6  8 23 45  0   900 1 1  0 0 0 1"
+glonass_105_h2 = "H2  0705202 9105    32276 2025  6  5  0  0  0 2025  6  8 23 45  0   900 1 1  0 0 0 1"
+
+glonass_105_10 = "10 0 60834  85500.00000  0  -3027287.597  18473674.047  17310722.799"
 
 # **************************************************************************************
 
@@ -33,11 +43,19 @@ lageos_h1 = "H1 CPF  2  DGF 2025 06 05 10 156 01 lageos1    NONE"
 
 lageos_h2 = "H2  7603901 1155     8820 2025 06 05 00 00 00 2025 06 12 00 00 00    60 1 1  0 0 0 1"
 
+lageos_10 = (
+    "10 0 60837  86340.000000  0       3105278.540      -5872619.369     -10373183.293"
+)
+
 # **************************************************************************************
 
 lares_h1 = "H1 CPF  2  DGF 2025 06 05 11 156 01 lares      NONE"
 
 lares_h2 = "H2  1200601 5987    38077 2025 06 05 00 00 00 2025 06 12 00 00 00    30 1 1  0 0 0 1"
+
+lares_10 = (
+    "10 0 60837  86370.000000  0       4909758.210      -5452680.749       2690387.910"
+)
 
 # **************************************************************************************
 
@@ -73,8 +91,8 @@ class TestCPFH1Regex(unittest.TestCase):
         # Since no notes are provided, group("notes") must be None:
         self.assertIsNone(m.group("notes"))
 
-    def test_valid_glonass105(self):
-        m = h1_regex.match(glonass105_h1)
+    def test_valid_glonass_105(self):
+        m = h1_regex.match(glonass_105_h1)
         self.assertIsNotNone(m, "Glonass 105 H1 should match")
         self.assertEqual(m.group("version"), "2")
         self.assertEqual(m.group("ephemeris_source"), "NER")
@@ -197,8 +215,8 @@ class TestCPFH2Regex(unittest.TestCase):
         self.assertEqual(m.group("com_correction"), "0")
         self.assertEqual(m.group("location_dynamics"), "1")
 
-    def test_valid_glonass105_h2(self):
-        m = h2_regex.match(glonass105_h2)
+    def test_valid_glonass_105_h2(self):
+        m = h2_regex.match(glonass_105_h2)
         self.assertIsNotNone(m, "Glonass 105 H2 should match")
         self.assertEqual(m.group("cospar_id"), "0705202")
         self.assertEqual(m.group("sic"), "9105")
@@ -288,6 +306,84 @@ class TestCPFH2Regex(unittest.TestCase):
     def test_invalid_non_numeric(self):
         bad_line = "H2 ABCDEFGH 103 0 2025 6 5 0 0 0 2025 6 9 23 45 0 900 0 1 0 0 0 3"
         self.assertIsNone(h2_regex.match(bad_line), "Non‐numeric COSPAR ID should fail")
+
+
+# **************************************************************************************
+
+
+class TestCPF10Regex(unittest.TestCase):
+    def test_valid_apollo_15_10(self):
+        m = e10_regex.match(apollo_15_10)
+        self.assertIsNotNone(m, "Apollo 15 record 10 should match")
+        self.assertEqual(m.group("direction"), "1")
+        self.assertEqual(m.group("mjd"), "60835")
+        self.assertEqual(m.group("seconds"), "85500.0")
+        self.assertEqual(m.group("leap_second"), "0")
+        self.assertEqual(m.group("x"), "352072320.278")
+        self.assertEqual(m.group("y"), "-83567364.603")
+        self.assertEqual(m.group("z"), "-173273869.404")
+
+    def test_valid_galileo_101_10(self):
+        m = e10_regex.match(galileo_101_10)
+        self.assertIsNotNone(m, "Galileo 101 record 10 should match")
+        self.assertEqual(m.group("direction"), "0")
+        self.assertEqual(m.group("mjd"), "60835")
+        self.assertEqual(m.group("seconds"), "86382.000000")
+        self.assertEqual(m.group("leap_second"), "0")
+        self.assertEqual(m.group("x"), "-9151185.629")
+        self.assertEqual(m.group("y"), "25534182.361")
+        self.assertEqual(m.group("z"), "11819411.299")
+
+    def test_valid_glonass_105_10(self):
+        m = e10_regex.match(glonass_105_10)
+        self.assertIsNotNone(m, "Glonass 105 record 10 should match")
+        self.assertEqual(m.group("direction"), "0")
+        self.assertEqual(m.group("mjd"), "60834")
+        self.assertEqual(m.group("seconds"), "85500.00000")
+        self.assertEqual(m.group("leap_second"), "0")
+        self.assertEqual(m.group("x"), "-3027287.597")
+        self.assertEqual(m.group("y"), "18473674.047")
+        self.assertEqual(m.group("z"), "17310722.799")
+
+    def test_valid_lageos_10(self):
+        m = e10_regex.match(lageos_10)
+        self.assertIsNotNone(m, "Lageos record 10 should match")
+        self.assertEqual(m.group("direction"), "0")
+        self.assertEqual(m.group("mjd"), "60837")
+        self.assertEqual(m.group("seconds"), "86340.000000")
+        self.assertEqual(m.group("leap_second"), "0")
+        self.assertEqual(m.group("x"), "3105278.540")
+        self.assertEqual(m.group("y"), "-5872619.369")
+        self.assertEqual(m.group("z"), "-10373183.293")
+
+    def test_valid_lares_10(self):
+        m = e10_regex.match(lares_10)
+        self.assertIsNotNone(m, "Lares record 10 should match")
+        self.assertEqual(m.group("direction"), "0")
+        self.assertEqual(m.group("mjd"), "60837")
+        self.assertEqual(m.group("seconds"), "86370.000000")
+        self.assertEqual(m.group("leap_second"), "0")
+        self.assertEqual(m.group("x"), "4909758.210")
+        self.assertEqual(m.group("y"), "-5452680.749")
+        self.assertEqual(m.group("z"), "2690387.910")
+
+    def test_invalid_not_10(self):
+        bad_line = "11 0 60835 85500.000000 0 0 0"
+        self.assertIsNone(
+            e10_regex.match(bad_line), "Record type other than 10 should fail"
+        )
+
+    def test_invalid_missing_fields(self):
+        bad_line = "10 0 60835 85500.000000 0 0"
+        self.assertIsNone(
+            e10_regex.match(bad_line), "Too few coordinate fields should fail"
+        )
+
+    def test_invalid_non_numeric_direction(self):
+        bad_line = "10 X 60835 85500.000000 0 0 0"
+        self.assertIsNone(
+            e10_regex.match(bad_line), "Non‐numeric direction flag should fail"
+        )
 
 
 # **************************************************************************************
