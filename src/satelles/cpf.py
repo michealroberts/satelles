@@ -112,3 +112,18 @@ e10_regex = re.compile(
 )
 
 # **************************************************************************************
+
+e20_regex = re.compile(
+    # Record type: "20" ephemeris data record for velocity:
+    r"^20\s+"
+    # Direction flag (0 = geocentric, 1 = transmit, 2 = receive):
+    r"(?P<direction>[0-2])\s+"
+    # Geocentric X velocity (m/s; optional sign, digits before decimal, dot, 6 decimals):
+    r"(?P<vx>[+-]?\d+\.\d{6})\s+"
+    # Geocentric Y velocity (m/s; optional sign, digits before decimal, dot, 6 decimals):
+    r"(?P<vy>[+-]?\d+\.\d{6})\s+"
+    # Geocentric Z velocity (m/s; optional sign, digits before decimal, dot, 6 decimals):
+    r"(?P<vz>[+-]?\d+\.\d{6})$"
+)
+
+# **************************************************************************************
