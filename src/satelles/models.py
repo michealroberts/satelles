@@ -36,3 +36,29 @@ class Position(BaseModel):
 
 
 # **************************************************************************************
+
+
+class Velocity(BaseModel):
+    vx: Annotated[
+        float,
+        Field(
+            description="Geocentric X velocity in meters/second; required for orbit interpolation"
+        ),
+    ]
+
+    vy: Annotated[
+        float,
+        Field(
+            description="Geocentric Y velocity in meters/second; required for orbit interpolation"
+        ),
+    ]
+
+    vz: Annotated[
+        float,
+        Field(
+            description="Geocentric Z velocity in meters/second; required for orbit interpolation"
+        ),
+    ]
+
+
+# **************************************************************************************
