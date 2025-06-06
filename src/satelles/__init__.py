@@ -33,6 +33,7 @@ from .kepler import (
     get_semi_major_axis,
     get_true_anomaly,
 )
+from .mjd import convert_mjd_to_datetime
 from .orbit import get_orbital_radius
 from .runge_kutta import (
     RungeKuttaPropagationParameters,
@@ -73,6 +74,7 @@ __all__: list[str] = [
     "convert_eci_to_equatorial",
     "convert_enu_to_horizontal",
     "convert_lla_to_ecef",
+    "convert_mjd_to_datetime",
     "convert_perifocal_to_eci",
     "get_eccentric_anomaly",
     "get_orbital_radius",
