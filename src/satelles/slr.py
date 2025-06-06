@@ -404,7 +404,7 @@ class CPFEphemeris(BaseModel):
     relativistic_range_correction: Annotated[
         Optional[float],
         Field(
-            description="One-way relativistic range correction in nanoseconds; corrects for gravitational time dilation",
+            description="One-way relativistic range correction in seconds; corrects for gravitational time dilation",
         ),
     ]
 
