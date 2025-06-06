@@ -288,10 +288,6 @@ class TestCPFEphemerisModel(unittest.TestCase):
         }
 
     def test_valid_cpf_fields(self) -> None:
-        """
-        A CPF constructed via model_validate with fully valid data
-        should succeed, and integer-coded fields map correctly.
-        """
         cpf = CPFEphemeris.model_validate(self.valid_cpf_data)
         self.assertEqual(
             cpf.at, datetime(2023, 2, 25, 12, 0, 0, 500000, tzinfo=timezone.utc)
@@ -308,9 +304,6 @@ class TestCPFEphemerisModel(unittest.TestCase):
         self.assertEqual(cpf.relativistic_range_correction, 0.123)
 
     def test_negative_mjd_raises(self) -> None:
-        """
-        mjd has ge=0; negative mjd should cause ValidationError.
-        """
         data = self.valid_cpf_data.copy()
         data["mjd"] = -1
         with self.assertRaises(ValidationError) as cm:
@@ -318,9 +311,6 @@ class TestCPFEphemerisModel(unittest.TestCase):
         self.assertIn("Input should be greater than or equal to 0", str(cm.exception))
 
     def test_negative_seconds_of_day_raises(self) -> None:
-        """
-        seconds_of_day has ge=0; passing a negative value should fail.
-        """
         data = self.valid_cpf_data.copy()
         data["seconds_of_day"] = -0.1
         with self.assertRaises(ValidationError) as cm:
@@ -328,9 +318,6 @@ class TestCPFEphemerisModel(unittest.TestCase):
         self.assertIn("Input should be greater than or equal to 0", str(cm.exception))
 
     def test_negative_leap_second_raises(self) -> None:
-        """
-        leap_second has ge=0; passing a negative leap_second should fail.
-        """
         data = self.valid_cpf_data.copy()
         data["leap_second"] = -5
         with self.assertRaises(ValidationError) as cm:
@@ -338,7 +325,7 @@ class TestCPFEphemerisModel(unittest.TestCase):
         self.assertIn("Input should be greater than or equal to 0", str(cm.exception))
 
     def test_invalid_direction_position_flag_raises(self) -> None:
-        for invalid_value in (-2, 4, 2.1, None):
+        for invalid_value in (-2, 4, 2.1):
             data = self.valid_cpf_data.copy()
             data["direction_position"] = invalid_value
             with self.assertRaises(ValidationError) as cm:
@@ -350,7 +337,7 @@ class TestCPFEphemerisModel(unittest.TestCase):
             )
 
     def test_invalid_direction_velocity_flag_raises(self) -> None:
-        for invalid_value in (-2, 4, 2.1, None):
+        for invalid_value in (-2, 4, 2.1):
             data = self.valid_cpf_data.copy()
             data["direction_velocity"] = invalid_value
 
@@ -363,10 +350,7 @@ class TestCPFEphemerisModel(unittest.TestCase):
             )
 
     def test_invalid_direction_stellar_aberration_flag_raises(self) -> None:
-        """
-        direction_stellar_aberration must be 0,1,2; else fail.
-        """
-        for invalid_flag in (5, "0", -10, None):
+        for invalid_flag in (5, "0", -10):
             data = self.valid_cpf_data.copy()
             data["direction_stellar_aberration"] = invalid_flag
             with self.assertRaises(ValidationError) as cm:
@@ -378,25 +362,18 @@ class TestCPFEphemerisModel(unittest.TestCase):
             )
 
     def test_missing_required_fields_raises(self) -> None:
-        """
-        Omitting any required field should raise ValidationError.
-        We'll omit 'position', 'velocity', and 'stellar_aberration' one by one.
-        """
-        # Missing position
         data1 = self.valid_cpf_data.copy()
         data1.pop("position")
         with self.assertRaises(ValidationError) as cm1:
             CPFEphemeris.model_validate(data1)
         self.assertIn("position", str(cm1.exception))
 
-        # Missing velocity
         data2 = self.valid_cpf_data.copy()
         data2.pop("velocity")
         with self.assertRaises(ValidationError) as cm2:
             CPFEphemeris.model_validate(data2)
         self.assertIn("velocity", str(cm2.exception))
 
-        # Missing stellar_aberration
         data3 = self.valid_cpf_data.copy()
         data3.pop("stellar_aberration")
         with self.assertRaises(ValidationError) as cm3:
@@ -404,9 +381,6 @@ class TestCPFEphemerisModel(unittest.TestCase):
         self.assertIn("stellar_aberration", str(cm3.exception))
 
     def test_invalid_position_type_raises(self) -> None:
-        """
-        Passing a non-Position type for 'position' should cause a ValidationError.
-        """
         data = self.valid_cpf_data.copy()
         data["position"] = "not a position"
         with self.assertRaises(ValidationError) as cm:
@@ -415,9 +389,6 @@ class TestCPFEphemerisModel(unittest.TestCase):
         self.assertIn("instance of Position", str(cm.exception))
 
     def test_invalid_velocity_type_raises(self) -> None:
-        """
-        Passing a non-Velocity type for 'velocity' should cause a ValidationError.
-        """
         data = self.valid_cpf_data.copy()
         data["velocity"] = {"x": 1, "y": 2, "z": 3}  # wrong schema
         with self.assertRaises(ValidationError) as cm:
@@ -425,9 +396,6 @@ class TestCPFEphemerisModel(unittest.TestCase):
         self.assertIn("velocity", str(cm.exception))
 
     def test_invalid_stellar_aberration_type_raises(self) -> None:
-        """
-        Passing a non-Position type for 'stellar_aberration' should fail.
-        """
         data = self.valid_cpf_data.copy()
         data["stellar_aberration"] = 12345  # wrong type
         with self.assertRaises(ValidationError) as cm:
@@ -435,12 +403,6 @@ class TestCPFEphemerisModel(unittest.TestCase):
         self.assertIn("stellar_aberration", str(cm.exception))
 
     def test_at_calculation_various_mjd_and_seconds(self) -> None:
-        """
-        Try several MJD and seconds_of_day combinations to verify 'at':
-        - MJD=1, seconds_of_day=0
-        - MJD=0, seconds_of_day=86399.999 (1-second before next day)
-        - MJD=40000, seconds_of_day=0.123
-        """
         for mjd, seconds_of_day, expected in [
             (
                 1,
@@ -467,25 +429,18 @@ class TestCPFEphemerisModel(unittest.TestCase):
             self.assertAlmostEqual(cpf.at.timestamp(), expected.timestamp(), places=6)
 
     def test_direction_flags_as_strings_still_accepted(self) -> None:
-        """
-        If user passes direction_* fields as the literal strings instead of ints,
-        the model should accept them directly (since they already match the Literal).
-        """
         data = self.valid_cpf_data.copy()
         data["direction_position"] = "Transmit"
         data["direction_velocity"] = "Receive"
         data["direction_stellar_aberration"] = "Common Epoch"
         cpf = CPFEphemeris.model_validate(data)
-        # No conversion needed; should remain exactly those strings
+
         self.assertEqual(cpf.direction_position, "Transmit")
         self.assertEqual(cpf.direction_velocity, "Receive")
         self.assertEqual(cpf.direction_stellar_aberration, "Common Epoch")
 
     def test_relativistic_range_correction_non_float_raises(self) -> None:
-        """
-        Passing a non-float (e.g. string or None) to relativistic_range_correction should fail.
-        """
-        for invalid_value in (None, [1, 2, 3]):
+        for invalid_value in ("a", "b", "b", [1, 2, 3]):
             data = self.valid_cpf_data.copy()
             data["relativistic_range_correction"] = invalid_value
             with self.assertRaises(ValidationError) as cm:
@@ -493,20 +448,12 @@ class TestCPFEphemerisModel(unittest.TestCase):
             self.assertIn("relativistic_range_correction", str(cm.exception))
 
     def test_leap_second_allows_large_int(self) -> None:
-        """
-        Although leap_second has ge=0, arbitrarily large ints are allowed.
-        """
         data = self.valid_cpf_data.copy()
         data["leap_second"] = 27  # e.g. a realistic future leap-second value
         cpf = CPFEphemeris.model_validate(data)
         self.assertEqual(cpf.leap_second, 27)
 
     def test_seconds_of_day_boundary_raises_if_too_large(self) -> None:
-        """
-        While the model only enforces ge=0, extremely large seconds_of_day
-        will compute a valid 'at'—to catch errors, we check that the computed
-        datetime is still reasonable (e.g. not before 1858). This is more of an integration check.
-        """
         data = self.valid_cpf_data.copy()
         data["seconds_of_day"] = 10_000_000.0  # ~116 days
         cpf = CPFEphemeris.model_validate(data)

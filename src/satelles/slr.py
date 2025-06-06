@@ -374,35 +374,35 @@ class CPFEphemeris(BaseModel):
     ]
 
     direction_velocity: Annotated[
-        Direction,
+        Optional[Direction],
         Field(
             description="Direction flag for velocity record; translates raw 0/1/2 into common epoch, transmit, or receive, respectively"
         ),
     ]
 
     velocity: Annotated[
-        Velocity,
+        Optional[Velocity],
         Field(
             description="Geocentric X, Y, Z velocity in m/s; needed for polynomial interpolation of orbit"
         ),
     ]
 
     direction_stellar_aberration: Annotated[
-        Direction,
+        Optional[Direction],
         Field(
             description="Direction flag for stellar aberration record; translates raw 0/1/2 into common epoch, transmit, or receive, respectively"
         ),
     ]
 
     stellar_aberration: Annotated[
-        Position,
+        Optional[Position],
         Field(
             description="X, Y, Z stellar aberration corrections in meters; used to remove light-time effects from pointing"
         ),
     ]
 
     relativistic_range_correction: Annotated[
-        float,
+        Optional[float],
         Field(
             description="One-way relativistic range correction in nanoseconds; corrects for gravitational time dilation",
         ),
@@ -411,6 +411,7 @@ class CPFEphemeris(BaseModel):
     @computed_field(  # type: ignore[misc]
         description="Computed UTC datetime for the position epoch; derived from MJD and seconds of day",
     )
+    @property
     def at(self) -> datetime:
         # The Modified Julian Date epoch starts at 1858-11-17 00:00:00 UTC. We then
         # apply to the MJD offset and the seconds of day to compute the full UTC
@@ -425,7 +426,11 @@ class CPFEphemeris(BaseModel):
         "direction_stellar_aberration",
         mode="before",
     )
-    def convert_direction_flag(cls, v: int | str) -> Direction:
+    def convert_direction_flag(cls, v: int | str | None) -> Direction | None:
+        # If an optional field is missing, just leave it as None:
+        if v is None:
+            return None
+
         directions: Dict[int, Direction] = {
             0: "Common Epoch",
             1: "Transmit",
