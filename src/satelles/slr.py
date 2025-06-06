@@ -5,10 +5,20 @@
 
 # **************************************************************************************
 
-from datetime import datetime
-from typing import Annotated, Any, Dict, Literal, Optional
+from datetime import datetime, timedelta, timezone
+from typing import Annotated, Any, Dict, Literal, Optional, cast
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    computed_field,
+    field_validator,
+    model_validator,
+)
+
+from .mjd import convert_mjd_to_datetime
+from .models import Position, Velocity
 
 # **************************************************************************************
 
@@ -43,6 +53,10 @@ TargetLocation = Literal[
     "Asteroid Surface",
     "Solar Orbit",
 ]
+
+# **************************************************************************************
+
+Direction = Literal["Common Epoch", "Transmit", "Receive"]
 
 # **************************************************************************************
 
@@ -315,6 +329,118 @@ class CPFHeader(BaseModel):
             )
 
         return data
+
+
+# **************************************************************************************
+
+
+class CPFEphemeris(BaseModel):
+    mjd: Annotated[
+        int,
+        Field(
+            ge=0,
+            description="Modified Julian Date for the position epoch; basis for time-tagged interpolation",
+        ),
+    ]
+
+    seconds_of_day: Annotated[
+        float,
+        Field(
+            ge=0,
+            description="UTC seconds of day for the position epoch; high-precision time marker",
+        ),
+    ]
+
+    leap_second: Annotated[
+        int,
+        Field(
+            ge=0,
+            description="Leap second flag (0 if none or the new leap second value); adjusts timing for UTC irregularities",
+        ),
+    ]
+
+    direction_position: Annotated[
+        Direction,
+        Field(
+            description="Direction flag for position record; translates raw 0/1/2 into common epoch, transmit, or receive, respectively"
+        ),
+    ]
+
+    position: Annotated[
+        Position,
+        Field(
+            description="Geocentric X, Y, Z position in meters; foundational data for pointing and ranging"
+        ),
+    ]
+
+    direction_velocity: Annotated[
+        Direction,
+        Field(
+            description="Direction flag for velocity record; translates raw 0/1/2 into common epoch, transmit, or receive, respectively"
+        ),
+    ]
+
+    velocity: Annotated[
+        Velocity,
+        Field(
+            description="Geocentric X, Y, Z velocity in m/s; needed for polynomial interpolation of orbit"
+        ),
+    ]
+
+    direction_stellar_aberration: Annotated[
+        Direction,
+        Field(
+            description="Direction flag for stellar aberration record; translates raw 0/1/2 into common epoch, transmit, or receive, respectively"
+        ),
+    ]
+
+    stellar_aberration: Annotated[
+        Position,
+        Field(
+            description="X, Y, Z stellar aberration corrections in meters; used to remove light-time effects from pointing"
+        ),
+    ]
+
+    relativistic_range_correction: Annotated[
+        float,
+        Field(
+            description="One-way relativistic range correction in nanoseconds; corrects for gravitational time dilation",
+        ),
+    ]
+
+    @computed_field(  # type: ignore[misc]
+        description="Computed UTC datetime for the position epoch; derived from MJD and seconds of day",
+    )
+    def at(self) -> datetime:
+        # The Modified Julian Date epoch starts at 1858-11-17 00:00:00 UTC. We then
+        # apply to the MJD offset and the seconds of day to compute the full UTC
+        # datetime:
+        return (
+            convert_mjd_to_datetime(self.mjd) + timedelta(seconds=self.seconds_of_day)
+        ).replace(tzinfo=timezone.utc)
+
+    @field_validator(
+        "direction_position",
+        "direction_velocity",
+        "direction_stellar_aberration",
+        mode="before",
+    )
+    def convert_direction_flag(cls, v: int | str) -> Direction:
+        directions: Dict[int, Direction] = {
+            0: "Common Epoch",
+            1: "Transmit",
+            2: "Receive",
+        }
+
+        if isinstance(v, str) and v in directions.values():
+            return cast(Direction, v)
+
+        if isinstance(v, int) and v in directions.keys():
+            return directions[v]
+
+        raise ValueError(
+            "Direction flag must be one of 0 (Common Epoch), 1 (Transmit), or 2 (Receive)"
+        )
 
 
 # **************************************************************************************
