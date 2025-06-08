@@ -94,7 +94,7 @@ h2_regex = re.compile(
 e10_regex = re.compile(
     # Record type: "10" ephemeris data record for position:
     r"^10\s+"
-    # Direction flag (0 = geocentric, 1 = fire, 2 = return):
+    # Direction flag (0 = geocentric, 1 = transmit, 2 = receive):
     r"(?P<direction>[0-2])\s+"
     # Modified Julian Date (integer, 1–5 digits):
     r"(?P<mjd>\d{1,5})\s+"
