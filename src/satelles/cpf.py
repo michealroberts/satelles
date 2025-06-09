@@ -91,6 +91,33 @@ h2_regex = re.compile(
 
 # **************************************************************************************
 
+
+h3_regex = re.compile(
+    # Record type: "H3"
+    r"^H3\s+"
+    # Along-track run-off after 0 hours (m):
+    r"(?P<along_track_runoff_at_0_hours>[+-]?\d{1,7}\.\d{5})\s+"
+    # Cross-track run-off after 0 hours (m):
+    r"(?P<cross_track_runoff_at_0_hours>[+-]?\d{1,7}\.\d{5})\s+"
+    # Radial run-off after 0 hours (m):
+    r"(?P<radial_runoff_at_0_hours>[+-]?\d{1,7}\.\d{5})\s+"
+    # Along-track run-off after 6 hours (m):
+    r"(?P<along_track_runoff_at_6_hours>[+-]?\d{1,7}\.\d{5})\s+"
+    # Cross-track run-off after 6 hours (m):
+    r"(?P<cross_track_runoff_at_6_hours>[+-]?\d{1,7}\.\d{5})\s+"
+    # Radial run-off after 6 hours (m):
+    r"(?P<radial_runoff_at_6_hours>[+-]?\d{1,7}\.\d{5})\s+"
+    # Along-track run-off after 24 hours (m):
+    r"(?P<along_track_runoff_at_24_hours>[+-]?\d{1,7}\.\d{5})\s+"
+    # Cross-track run-off after 24 hours (m):
+    r"(?P<cross_track_runoff_at_24_hours>[+-]?\d{1,7}\.\d{5})\s+"
+    # Radial run-off after 24 hours (m):
+    r"(?P<radial_runoff_at_24_hours>[+-]?\d{1,7}\.\d{5})"
+    r"$"
+)
+
+# **************************************************************************************
+
 e10_regex = re.compile(
     # Record type: "10" ephemeris data record for position:
     r"^10\s+"
@@ -134,13 +161,13 @@ e30_regex = re.compile(
     r"^30\s+"
     # Direction flag (0 = common epoch, 1 = transmit, 2 = receive):
     r"(?P<direction>[0-2])\s+"
-    # X stellar aberration correction (meters; optional sign, digits before decimal,
+    # X stellar aberration correction (m; optional sign, digits before decimal,
     # dot, zero or more decimals):
     r"(?P<x_aberration>[+-]?\d+\.\d*)\s+"
-    # Y stellar aberration correction (meters; optional sign, digits before decimal,
+    # Y stellar aberration correction (m; optional sign, digits before decimal,
     # dot, zero or more decimals):
     r"(?P<y_aberration>[+-]?\d+\.\d*)\s+"
-    # Z stellar aberration correction (meters; optional sign, digits before decimal,
+    # Z stellar aberration correction (m; optional sign, digits before decimal,
     # dot, zero or more decimals):
     r"(?P<z_aberration>[+-]?\d+\.\d*)\s+"
     # Relativistic range correction (nsec; digits before decimal, dot, 1 decimal):

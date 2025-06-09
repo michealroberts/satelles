@@ -7,7 +7,14 @@
 
 import unittest
 
-from satelles.cpf import e10_regex, e20_regex, e30_regex, h1_regex, h2_regex
+from satelles.cpf import (
+    e10_regex,
+    e20_regex,
+    e30_regex,
+    h1_regex,
+    h2_regex,
+    h3_regex,
+)
 
 # **************************************************************************************
 
@@ -54,6 +61,8 @@ glonass_105_30 = "30 0 -2000.123456 1500.654321 -300.000000 2.0"
 lageos_h1 = "H1 CPF  2  DGF 2025 06 05 10 156 01 lageos1    NONE"
 
 lageos_h2 = "H2  7603901 1155     8820 2025 06 05 00 00 00 2025 06 12 00 00 00    60 1 1  0 0 0 1"
+
+lageos_h3 = "H3  0.00000  0.00000  0.00000  0.00500  0.00300  0.00200  0.02000  0.01500  0.01000"
 
 lageos_10 = (
     "10 0 60837  86340.000000  0       3105278.540      -5872619.369     -10373183.293"
@@ -326,6 +335,42 @@ class TestCPFH2Regex(unittest.TestCase):
     def test_invalid_non_numeric(self):
         bad_line = "H2 ABCDEFGH 103 0 2025 6 5 0 0 0 2025 6 9 23 45 0 900 0 1 0 0 0 3"
         self.assertIsNone(h2_regex.match(bad_line), "Non-numeric COSPAR ID should fail")
+
+
+# **************************************************************************************
+
+
+class TestCPFH30Regex(unittest.TestCase):
+    def test_valid_lageos_h3(self):
+        m = h3_regex.match(lageos_h3)
+        self.assertIsNotNone(m, "Lageos H3 should match")
+        self.assertEqual(m.group("along_track_runoff_at_0_hours"), "0.00000")
+        self.assertEqual(m.group("cross_track_runoff_at_0_hours"), "0.00000")
+        self.assertEqual(m.group("radial_runoff_at_0_hours"), "0.00000")
+        self.assertEqual(m.group("along_track_runoff_at_6_hours"), "0.00500")
+        self.assertEqual(m.group("cross_track_runoff_at_6_hours"), "0.00300")
+        self.assertEqual(m.group("radial_runoff_at_6_hours"), "0.00200")
+        self.assertEqual(m.group("along_track_runoff_at_24_hours"), "0.02000")
+        self.assertEqual(m.group("cross_track_runoff_at_24_hours"), "0.01500")
+        self.assertEqual(m.group("radial_runoff_at_24_hours"), "0.01000")
+
+    def test_invalid_not_h3(self):
+        bad_line = (
+            "H2 0.00000 0.00000 0.00000 0.00500 0.00300 0.00200 0.02000 0.01500 0.01000"
+        )
+        self.assertIsNone(
+            h3_regex.match(bad_line), "Record type other than H3 should fail"
+        )
+
+    def test_invalid_missing_fields(self):
+        bad_line = "H3 0.00000 0.00000 0.00000 0.00500 0.00300"
+        self.assertIsNone(h3_regex.match(bad_line), "Too few fields should fail")
+
+    def test_invalid_non_numeric(self):
+        bad_line = (
+            "H3 abc.defgh 0.00000 0.00500 0.00300 0.00200 0.02000 0.01500 0.01000"
+        )
+        self.assertIsNone(h3_regex.match(bad_line), "Non-numeric X bias should fail")
 
 
 # **************************************************************************************
