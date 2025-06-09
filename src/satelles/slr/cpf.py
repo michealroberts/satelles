@@ -17,8 +17,8 @@ from pydantic import (
     model_validator,
 )
 
-from .mjd import convert_mjd_to_datetime
-from .models import Position, Velocity
+from ..mjd import convert_mjd_to_datetime
+from ..models import Position, Velocity
 
 # **************************************************************************************
 
