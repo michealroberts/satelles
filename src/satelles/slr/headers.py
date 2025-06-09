@@ -117,3 +117,13 @@ h3_regex = re.compile(
 )
 
 # **************************************************************************************
+
+h5_regex = re.compile(
+    # Record type: "H5"
+    r"^H5\s+"
+    # Approximate center-of-mass to reflector offset (m) (always positive)
+    r"(?P<center_of_mass_to_reflector_offset>\d{1,3}\.\d{4})"
+    r"$"
+)
+
+# **************************************************************************************

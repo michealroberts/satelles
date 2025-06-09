@@ -18,6 +18,7 @@ from .headers import (
     h1_regex,
     h2_regex,
     h3_regex,
+    h5_regex,
 )
 
 # **************************************************************************************
@@ -29,6 +30,7 @@ __all__: list[str] = [
     "h1_regex",
     "h2_regex",
     "h3_regex",
+    "h5_regex",
     "CPFEphemeris",
     "CPFHeader",
 ]
