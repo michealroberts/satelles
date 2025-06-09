@@ -11,6 +11,7 @@ from satelles.slr import (
     h1_regex,
     h2_regex,
     h3_regex,
+    h5_regex,
 )
 
 # **************************************************************************************
@@ -38,6 +39,8 @@ lageos_h1 = "H1 CPF  2  DGF 2025 06 05 10 156 01 lageos1    NONE"
 lageos_h2 = "H2  7603901 1155     8820 2025 06 05 00 00 00 2025 06 12 00 00 00    60 1 1  0 0 0 1"
 
 lageos_h3 = "H3  0.00000  0.00000  0.00000  0.00500  0.00300  0.00200  0.02000  0.01500  0.01000"
+
+lageos_h5 = "H5  0.2450"
 
 # **************************************************************************************
 
@@ -333,6 +336,31 @@ class TestCPFH30Regex(unittest.TestCase):
 
 
 # **************************************************************************************
+
+
+class TestCPFH5Regex(unittest.TestCase):
+    def test_valid_lageos_h5(self):
+        lageos_h5 = "H5 0.2450"
+        m = h5_regex.match(lageos_h5)
+        self.assertIsNotNone(m, "Lageos H5 should match")
+        self.assertEqual(m.group("center_of_mass_to_reflector_offset"), "0.2450")
+
+    def test_invalid_not_h5(self):
+        bad_line = "H2 0.2450"
+        self.assertIsNone(
+            h5_regex.match(bad_line), "Record type other than H5 should fail"
+        )
+
+    def test_invalid_missing_fields(self):
+        bad_line = "H5 0.2450 0.1234"
+        self.assertIsNone(h5_regex.match(bad_line), "Too many fields should fail")
+
+    def test_invalid_non_numeric(self):
+        bad_line = "H5 abc.defgh"
+        self.assertIsNone(
+            h5_regex.match(bad_line), "Non-numeric center of mass offset should fail"
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
