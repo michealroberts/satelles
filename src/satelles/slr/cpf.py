@@ -218,6 +218,14 @@ class CPFHeader(BaseModel):
         ),
     ]
 
+    center_of_mass_to_reflector_offset: Annotated[
+        Optional[float],
+        Field(
+            ge=0,
+            description="Center of mass to reflector offset in meters; applies only if center_of_mass_correction is true",
+        ),
+    ] = None
+
     tiv_compatibility: Annotated[
         bool,
         Field(
