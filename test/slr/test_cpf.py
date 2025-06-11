@@ -56,6 +56,7 @@ class TestCPFHeaderModel(unittest.TestCase):
             "reference_frame": 2,  # → "Geocentric Space Fixed Mean Of Date (J2000)"
             "rotational_angle_type": 2,
             "center_of_mass_correction": 1,  # → True
+            "center_of_mass_to_reflector_offset": 0.01,
             "location_dynamics": 5,  # → "Mars Surface"
             "mjd": 60000,
             "seconds_of_day": 43200.5,
@@ -82,6 +83,7 @@ class TestCPFHeaderModel(unittest.TestCase):
             "Geocentric Space Fixed Mean Of Date (J2000)",
         )
         self.assertTrue(cpf.center_of_mass_correction)
+        self.assertEqual(cpf.center_of_mass_to_reflector_offset, 0.01)
         self.assertEqual(cpf.location_dynamics, "Mars Surface")
         self.assertEqual(cpf.norad_id, "12345")
         self.assertEqual(cpf.cospar_id, "2025-001A")
