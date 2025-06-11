@@ -6,9 +6,13 @@
 # **************************************************************************************
 
 import unittest
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 
-from satelles.mjd import MJD_EPOCH_AS_DATETIME, convert_mjd_to_datetime
+from satelles.mjd import (
+    MJD_EPOCH_AS_DATETIME,
+    convert_mjd_to_datetime,
+    get_modified_julian_date_as_parts,
+)
 
 # **************************************************************************************
 
@@ -70,6 +74,102 @@ class TestConvertMJDToDatetime(unittest.TestCase):
         self.assertEqual(result.second, 0)
         self.assertEqual(result.microsecond, 0)
         self.assertEqual(result.tzinfo.utcoffset(None), timedelta(0))
+
+
+# **************************************************************************************
+
+
+class TestGetModifiedJulianDateAsParts(unittest.TestCase):
+    def test_mjd_zero(self) -> None:
+        """MJD 0 should return (0, 0.0) for parts."""
+        when = convert_mjd_to_datetime(0.0)
+        mjd, seconds_of_day = get_modified_julian_date_as_parts(when)
+        self.assertIsInstance(mjd, int)
+        self.assertGreaterEqual(mjd, 0)
+        self.assertGreaterEqual(seconds_of_day, 0.0)
+        self.assertEqual(mjd, 0)
+        self.assertEqual(seconds_of_day, 0.0)
+
+    def test_mjd_one(self) -> None:
+        """MJD 1 should be one day after the epoch."""
+        when = convert_mjd_to_datetime(1.0)
+        mjd, seconds_of_day = get_modified_julian_date_as_parts(when)
+        self.assertIsInstance(mjd, int)
+        self.assertGreaterEqual(mjd, 0)
+        self.assertGreaterEqual(seconds_of_day, 0.0)
+        self.assertEqual(mjd, 1)
+        self.assertEqual(seconds_of_day, 0.0)
+
+    def test_mjd_fractional(self) -> None:
+        """A fractional MJD should advance by fractional days."""
+        when = convert_mjd_to_datetime(0.5)
+        mjd, seconds_of_day = get_modified_julian_date_as_parts(when)
+        self.assertIsInstance(mjd, int)
+        self.assertGreaterEqual(mjd, 0)
+        self.assertGreaterEqual(seconds_of_day, 0.0)
+        self.assertLess(seconds_of_day, 86400.0)
+        self.assertEqual(mjd, 0)
+        self.assertAlmostEqual(seconds_of_day, 43200.0, places=5)
+
+    def test_large_mjd(self) -> None:
+        """Test a large MJD (e.g., 60000) against a known reference."""
+        when = convert_mjd_to_datetime(59349)
+        mjd, seconds_of_day = get_modified_julian_date_as_parts(when)
+        self.assertIsInstance(mjd, int)
+        self.assertGreaterEqual(mjd, 0)
+        self.assertGreaterEqual(seconds_of_day, 0.0)
+        self.assertLess(seconds_of_day, 86400.0)
+        self.assertEqual(mjd, 59349)
+        self.assertEqual(seconds_of_day, 0.0)
+
+    def test_large_mjd_fractional(self) -> None:
+        """Test a large fractional MJD (e.g., 59349.25)."""
+        when = convert_mjd_to_datetime(59349.25)
+        mjd, seconds_of_day = get_modified_julian_date_as_parts(when)
+        self.assertIsInstance(mjd, int)
+        self.assertGreaterEqual(mjd, 0)
+        self.assertGreaterEqual(seconds_of_day, 0.0)
+        self.assertLess(seconds_of_day, 86400.0)
+        self.assertEqual(mjd, 59349)
+        self.assertAlmostEqual(seconds_of_day, 21600.0, places=5)
+
+    def test_naive_datetime(self) -> None:
+        """Test a naive datetime (assumed UTC) to ensure it works."""
+        naive_datetime = datetime(2021, 5, 15, 12, 0, 0)
+        mjd, seconds_of_day = get_modified_julian_date_as_parts(naive_datetime)
+        self.assertIsInstance(mjd, int)
+        self.assertGreaterEqual(mjd, 0)
+        self.assertGreaterEqual(seconds_of_day, 0.0)
+        self.assertLess(seconds_of_day, 86400.0)
+        self.assertEqual(mjd, 59349)
+        self.assertAlmostEqual(seconds_of_day, 43200.0, places=5)
+
+    def test_utc_datetime(self) -> None:
+        """Test a UTC datetime to ensure it works."""
+        utc_datetime = datetime(2021, 5, 15, 12, 0, 0, tzinfo=timezone.utc)
+        mjd, seconds_of_day = get_modified_julian_date_as_parts(utc_datetime)
+        self.assertIsInstance(mjd, int)
+        self.assertGreaterEqual(mjd, 0)
+        self.assertGreaterEqual(seconds_of_day, 0.0)
+        self.assertLess(seconds_of_day, 86400.0)
+        self.assertEqual(mjd, 59349)
+        self.assertAlmostEqual(seconds_of_day, 43200.0, places=5)
+
+    def test_non_utc_datetime(self) -> None:
+        """Test a non-UTC datetime to ensure it converts to UTC."""
+        timezone_offset = -5
+        local_datetime = datetime(
+            2021, 5, 15, 12, 0, 0, tzinfo=timezone(timedelta(hours=timezone_offset))
+        )
+        mjd, seconds_of_day = get_modified_julian_date_as_parts(local_datetime)
+        self.assertIsInstance(mjd, int)
+        self.assertGreaterEqual(mjd, 0)
+        self.assertGreaterEqual(seconds_of_day, 0.0)
+        self.assertLess(seconds_of_day, 86400.0)
+        self.assertEqual(mjd, 59349)
+        self.assertAlmostEqual(
+            seconds_of_day, 43200.0 - (timezone_offset * 60 * 60), places=5
+        )
 
 
 # **************************************************************************************
