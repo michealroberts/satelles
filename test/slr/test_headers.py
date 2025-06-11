@@ -11,6 +11,7 @@ from satelles.slr import (
     h1_regex,
     h2_regex,
     h3_regex,
+    h4_regex,
     h5_regex,
 )
 
@@ -19,6 +20,8 @@ from satelles.slr import (
 apollo_15_h1 = "H1 CPF 2 OPA 2025 06 04 18 155 1 apollo15 OPA_ELP96"
 
 apollo_15_h2 = "H2 103 103 0 2025 6 5 0 0 0 2025 6 9 23 45 0 900 0 1 0 0 0 3"
+
+apollo_15_h4 = "H4  1000.0000    0.1234    1000.50      -0.05  86399.999999999999"
 
 # **************************************************************************************
 
@@ -40,6 +43,8 @@ lageos_h2 = "H2  7603901 1155     8820 2025 06 05 00 00 00 2025 06 12 00 00 00  
 
 lageos_h3 = "H3  0.00000  0.00000  0.00000  0.00500  0.00300  0.00200  0.02000  0.01500  0.01000"
 
+lageos_h4 = "H4  2000.0000    2.3456      37.00       0.02  43200.123456789012"
+
 lageos_h5 = "H5  0.2450"
 
 # **************************************************************************************
@@ -47,6 +52,8 @@ lageos_h5 = "H5  0.2450"
 lares_h1 = "H1 CPF  2  DGF 2025 06 05 11 156 01 lares      NONE"
 
 lares_h2 = "H2  1200601 5987    38077 2025 06 05 00 00 00 2025 06 12 00 00 00    30 1 1  0 0 0 1"
+
+lares_h4 = "H4  5000.0000    5.6789       0.00       0.10  12345.000000123456"
 
 # **************************************************************************************
 
@@ -338,6 +345,60 @@ class TestCPFH30Regex(unittest.TestCase):
 # **************************************************************************************
 
 
+class TestCPFH4Regex(unittest.TestCase):
+    def test_valid_apollo_15_h4(self):
+        m = h4_regex.match(apollo_15_h4)
+        self.assertIsNotNone(m, "Apollo 15 H4 should match")
+        self.assertEqual(m.group("pulse_repetition_frequency"), "1000.0000")
+        self.assertEqual(m.group("transponder_transmit_delay"), "0.1234")
+        self.assertEqual(m.group("transponder_utc_offset"), "1000.50")
+        self.assertEqual(m.group("transponder_oscillator_drift"), "-0.05")
+        self.assertEqual(
+            m.group("transponder_clock_reference_time"), "86399.999999999999"
+        )
+
+    def test_valid_lageos_h4(self):
+        m = h4_regex.match(lageos_h4)
+        self.assertIsNotNone(m, "Lageos H4 should match")
+        self.assertEqual(m.group("pulse_repetition_frequency"), "2000.0000")
+        self.assertEqual(m.group("transponder_transmit_delay"), "2.3456")
+        self.assertEqual(m.group("transponder_utc_offset"), "37.00")
+        self.assertEqual(m.group("transponder_oscillator_drift"), "0.02")
+        self.assertEqual(
+            m.group("transponder_clock_reference_time"), "43200.123456789012"
+        )
+
+    def test_valid_lares_h4(self):
+        m = h4_regex.match(lares_h4)
+        self.assertIsNotNone(m, "Lares H4 should match")
+        self.assertEqual(m.group("pulse_repetition_frequency"), "5000.0000")
+        self.assertEqual(m.group("transponder_transmit_delay"), "5.6789")
+        self.assertEqual(m.group("transponder_utc_offset"), "0.00")
+        self.assertEqual(m.group("transponder_oscillator_drift"), "0.10")
+        self.assertEqual(
+            m.group("transponder_clock_reference_time"), "12345.000000123456"
+        )
+
+    def test_invalid_not_h4(self):
+        bad_line = "H3 2000.0000 2.3456 37.00 0.02 43200.123456789012"
+        self.assertIsNone(
+            h4_regex.match(bad_line), "Record type other than H4 should fail"
+        )
+
+    def test_invalid_missing_fields(self):
+        bad_line = "H4 2000.0000 2.3456 37.00 0.02"
+        self.assertIsNone(h4_regex.match(bad_line), "Too few fields should fail")
+
+    def test_invalid_non_numeric(self):
+        bad_line = "H4 2000.0000 2.3456 abc.defgh 0.02 43200.123456789012"
+        self.assertIsNone(
+            h4_regex.match(bad_line), "Non-numeric transponder UTC offset should fail"
+        )
+
+
+# **************************************************************************************
+
+
 class TestCPFH5Regex(unittest.TestCase):
     def test_valid_lageos_h5(self):
         lageos_h5 = "H5 0.2450"
@@ -361,6 +422,8 @@ class TestCPFH5Regex(unittest.TestCase):
             h5_regex.match(bad_line), "Non-numeric center of mass offset should fail"
         )
 
+
+# **************************************************************************************
 
 if __name__ == "__main__":
     unittest.main()

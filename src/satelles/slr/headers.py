@@ -118,6 +118,24 @@ h3_regex = re.compile(
 
 # **************************************************************************************
 
+h4_regex = re.compile(
+    # Record type: "H4"
+    r"^H4\s+"
+    # Pulse Repetition Frequency "PRF" (Hz):
+    r"(?P<pulse_repetition_frequency>\d{1,4}\.\d{4})\s+"
+    # Transponder transmit delay (ms):
+    r"(?P<transponder_transmit_delay>\d{1,4}\.\d{4})\s+"
+    # Transponder UTC offset (ms):
+    r"(?P<transponder_utc_offset>[+-]?\d{1,4}\.\d{2})\s+"
+    # Transponder oscillator drift in parts in 10^15:
+    r"(?P<transponder_oscillator_drift>[+-]?\d{1,4}\.\d{2})\s+"
+    # Transponder clock reference time (s):
+    r"(?P<transponder_clock_reference_time>\d+\.\d{12})"
+    r"$"
+)
+
+# **************************************************************************************
+
 h5_regex = re.compile(
     # Record type: "H5"
     r"^H5\s+"
