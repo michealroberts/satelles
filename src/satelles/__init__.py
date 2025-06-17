@@ -27,6 +27,9 @@ from .earth import (
     EARTH_POLAR_RADIUS,
 )
 from .gravity import get_gravitational_acceleration
+from .interpolation import (
+    Base3DPositionInterpolator,
+)
 from .kepler import (
     get_eccentric_anomaly,
     get_semi_latus_rectum,
@@ -100,6 +103,7 @@ __all__: list[str] = [
     "propagate_verlet",
     "rotate",
     "Acceleration",
+    "Base3DPositionInterpolator",
     "CartesianCoordinate",
     "Covariance",
     "CPFEphemeris",
