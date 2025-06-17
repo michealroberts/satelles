@@ -12,6 +12,7 @@ from satelles.mjd import (
     MJD_EPOCH_AS_DATETIME,
     convert_mjd_to_datetime,
     get_modified_julian_date_as_parts,
+    get_modified_julian_date_from_parts,
 )
 
 # **************************************************************************************
@@ -74,6 +75,58 @@ class TestConvertMJDToDatetime(unittest.TestCase):
         self.assertEqual(result.second, 0)
         self.assertEqual(result.microsecond, 0)
         self.assertEqual(result.tzinfo.utcoffset(None), timedelta(0))
+
+
+# **************************************************************************************
+
+
+class TestGetModifiedJulianDateFromParts(unittest.TestCase):
+    def test_epoch_parts(self):
+        """(0 days, 0 seconds) should return the MJD epoch."""
+        dt = get_modified_julian_date_from_parts((0, 0.0))
+        self.assertEqual(dt, MJD_EPOCH_AS_DATETIME)
+
+    def test_half_day_offset(self):
+        """
+        (0 days, 43200 seconds) should return epoch + 0.5 days (i.e., 12:00 UTC on
+        the epoch date).
+        """
+        dt = get_modified_julian_date_from_parts((0, 43200.0))
+        expected = MJD_EPOCH_AS_DATETIME + timedelta(hours=12)
+        self.assertEqual(dt, expected)
+        self.assertEqual(dt.hour, 12)
+        self.assertEqual(dt.minute, 0)
+        self.assertEqual(dt.second, 0)
+        self.assertEqual(dt.microsecond, 0)
+
+    def test_large_mjd_parts(self):
+        """Test a large MJD (e.g., 59349, 0.0) against a known reference."""
+        dt = get_modified_julian_date_from_parts((59349, 0.0))
+        expected = MJD_EPOCH_AS_DATETIME + timedelta(days=59349.0)
+        self.assertEqual(dt, expected)
+        self.assertEqual(dt.year, 2021)
+        self.assertEqual(dt.month, 5)
+        self.assertEqual(dt.day, 15)
+        self.assertEqual(dt.hour, 0)
+        self.assertEqual(dt.minute, 0)
+        self.assertEqual(dt.second, 0)
+        self.assertEqual(dt.microsecond, 0)
+
+    def test_fractional_seconds_of_day_parts(self):
+        """
+        Test a large fractional MJD (e.g., 59349, 43200.0) to ensure it returns the
+        correct datetime.
+        """
+        dt = get_modified_julian_date_from_parts((59349, 43200.895))
+        expected = MJD_EPOCH_AS_DATETIME + timedelta(days=59349.0, seconds=43200.895)
+        self.assertEqual(dt, expected)
+        self.assertEqual(dt.year, 2021)
+        self.assertEqual(dt.month, 5)
+        self.assertEqual(dt.day, 15)
+        self.assertEqual(dt.hour, 12)
+        self.assertEqual(dt.minute, 0)
+        self.assertEqual(dt.second, 0)
+        self.assertEqual(dt.microsecond, 895000)
 
 
 # **************************************************************************************
