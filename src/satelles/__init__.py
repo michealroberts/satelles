@@ -30,6 +30,7 @@ from .gravity import get_gravitational_acceleration
 from .interpolation import (
     BarycentricLagrange3DPositionInterpolator,
     Base3DPositionInterpolator,
+    Hermite3DPositionInterpolator,
 )
 from .kepler import (
     get_eccentric_anomaly,
@@ -110,6 +111,7 @@ __all__: list[str] = [
     "Covariance",
     "CPFEphemeris",
     "CPFHeader",
+    "Hermite3DPositionInterpolator",
     "RungeKuttaPropagationParameters",
     "Satellite",
     "TLE",

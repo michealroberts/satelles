@@ -7,7 +7,7 @@
 
 from abc import ABC, abstractmethod
 from math import nan
-from typing import List
+from typing import List, Tuple
 
 from .models import Position
 
@@ -138,6 +138,158 @@ class BarycentricLagrange3DPositionInterpolator(Base3DPositionInterpolator):
             z=z,
             at=at,
         )
+
+
+# **************************************************************************************
+
+
+class Hermite3DPositionInterpolator(Base3DPositionInterpolator):
+    """
+    Cubic Hermite interpolation for 3D positions.
+
+    This class implements cubic Hermite interpolation for 3D positions represented
+    by the `Position` class, which includes x, y, z coordinates and a time attribute `at`.
+    Velocity at sample points is estimated via finite differences to shape the curve smoothly.
+    """
+
+    def __init__(self, positions: List[Position]):
+        super().__init__(positions)
+
+        # Prepare and compute velocity estimates at each sample via finite differences:
+        self._velocities: List[Tuple[float, float, float]] = (
+            self._prepare_basis_derivatives()
+        )
+
+    def _prepare_basis_derivatives(self) -> List[Tuple[float, float, float]]:
+        """
+        Prepare and compute velocity estimates for each position.
+
+        Returns:
+            List[Tuple[float, float, float]]: List of (vx, vy, vz) at each sample time.
+        """
+        n = len(self.positions)
+
+        derivatives: List[Tuple[float, float, float]] = []
+
+        for i, position in enumerate(self.positions):
+            t_i = position.at
+
+            # Estimate derivative at the start via forward difference:
+            if i == 0:
+                position_next = self.positions[1]
+                dt = position_next.at - t_i
+
+                if dt == 0:
+                    raise ValueError(
+                        f"Division by zero detected: position_next.at ({position_next.at}) and t_i ({t_i}) are equal."
+                    )
+
+                vx = (position_next.x - position.x) / dt
+                vy = (position_next.y - position.y) / dt
+                vz = (position_next.z - position.z) / dt
+            # Estimate derivative at the end via backward difference:
+            elif i == n - 1:
+                position_previous = self.positions[-2]
+                dt = t_i - position_previous.at
+                vx = (position.x - position_previous.x) / dt
+                vy = (position.y - position_previous.y) / dt
+                vz = (position.z - position_previous.z) / dt
+            # Estimate derivative in the interior via central difference:
+            else:
+                position_previous = self.positions[i - 1]
+                position_next = self.positions[i + 1]
+                dt = position_next.at - position_previous.at
+                vx = (position_next.x - position_previous.x) / dt
+                vy = (position_next.y - position_previous.y) / dt
+                vz = (position_next.z - position_previous.z) / dt
+
+            derivatives.append((vx, vy, vz))
+
+        return derivatives
+
+    def get_interpolated_position(self, at: float) -> Position:
+        """
+        Get the interpolated position at the specified time 'at'.
+
+        Args:
+            at (float): The time at which to interpolate the position.
+
+        Returns:
+            Position: The interpolated position at the specified time.
+        """
+        # Raise error if 'at' is before the first sample time:
+        if at < self.positions[0].at:
+            raise ValueError(
+                f"Cannot interpolate before the first sample time: {self.positions[0].at}"
+            )
+
+        # Raise error if 'at' is after the last sample time:
+        if at > self.positions[-1].at:
+            raise ValueError(
+                f"Cannot interpolate after the last sample time: {self.positions[-1].at}"
+            )
+
+        # Initialize position coordinates to NaN as the fallback:
+        x = y = z = nan
+
+        # Find the interval that contains 'at':
+        for i in range(len(self.positions) - 1):
+            position = self.positions[i]
+            position_next = self.positions[i + 1]
+            t_i, t_j = position.at, position_next.at
+
+            # Skip intervals that do not contain the query time:
+            if not (t_i <= at <= t_j):
+                continue
+
+            # Calculate the normalized time (tau) within the interval [t0, t1]:
+            dt = position_next.at - t_i
+
+            if abs(dt) < 1e-10:
+                # If the time difference is too small, use the first position:
+                return Position(
+                    x=position.x,
+                    y=position.y,
+                    z=position.z,
+                    at=t_i,
+                )
+
+            τ = (at - t_i) / dt
+
+            # Calculate Hermite basis functions for cubic interpolation:
+            h00 = 2 * τ**3 - 3 * τ**2 + 1
+            h10 = τ**3 - 2 * τ**2 + τ
+            h01 = -2 * τ**3 + 3 * τ**2
+            h11 = τ**3 - τ**2
+
+            # Retrieve precomputed velocity estimates:
+            vx0, vy0, vz0 = self._velocities[i]
+            vx1, vy1, vz1 = self._velocities[i + 1]
+
+            # Interpolate the position using the Hermite basis functions:
+            x = (
+                h00 * position.x
+                + h10 * vx0 * dt
+                + h01 * position_next.x
+                + h11 * vx1 * dt
+            )
+
+            y = (
+                h00 * position.y
+                + h10 * vy0 * dt
+                + h01 * position_next.y
+                + h11 * vy1 * dt
+            )
+
+            z = (
+                h00 * position.z
+                + h10 * vz0 * dt
+                + h01 * position_next.z
+                + h11 * vz1 * dt
+            )
+            break
+
+        return Position(x=x, y=y, z=z, at=at)
 
 
 # **************************************************************************************
