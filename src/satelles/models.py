@@ -34,6 +34,13 @@ class Position(BaseModel):
         ),
     ]
 
+    at: Annotated[
+        float,
+        Field(
+            description="Modified Julian Date (MJD) of the position; used for precise time-based calculations"
+        ),
+    ]
+
 
 # **************************************************************************************
 

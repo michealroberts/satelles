@@ -20,11 +20,15 @@ from satelles.slr import CPFEphemeris, CPFHeader
 
 class TestCPFHeaderModel(unittest.TestCase):
     def setUp(self) -> None:
+        # Modified Julian Date for 2025-06-06T12:00:00.500Z:
+        MJD = 60000 + 43200.5 / 86400.0
+
         self.valid_position_data: List[Position] = [
             Position(
                 x=1234.5,
                 y=-987.6,
                 z=0.0,
+                at=MJD,
             )
         ]
 
@@ -264,10 +268,14 @@ class TestCPFHeaderModel(unittest.TestCase):
 
 class TestCPFEphemerisModel(unittest.TestCase):
     def setUp(self) -> None:
+        # Modified Julian Date for 2025-06-06T12:00:00.500Z:
+        MJD = 60000 + 43200.5 / 86400.0
+
         self.valid_position_data: Position = Position(
             x=1234.5,
             y=-987.6,
             z=0.0,
+            at=MJD,
         )
 
         self.valid_velocity_data: Velocity = Velocity(
