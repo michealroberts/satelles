@@ -67,5 +67,12 @@ class Velocity(BaseModel):
         ),
     ]
 
+    at: Annotated[
+        float,
+        Field(
+            description="Modified Julian Date (MJD) of the velocity; used for precise time-based calculations"
+        ),
+    ]
+
 
 # **************************************************************************************

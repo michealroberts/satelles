@@ -37,6 +37,7 @@ class TestCPFHeaderModel(unittest.TestCase):
                 vx=1.0,
                 vy=2.0,
                 vz=3.0,
+                at=MJD,
             )
         ]
 
@@ -282,6 +283,7 @@ class TestCPFEphemerisModel(unittest.TestCase):
             vx=1.0,
             vy=2.0,
             vz=3.0,
+            at=MJD,
         )
 
         self.valid_cpf_data = {
