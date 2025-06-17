@@ -33,7 +33,11 @@ from .kepler import (
     get_semi_major_axis,
     get_true_anomaly,
 )
-from .mjd import convert_mjd_to_datetime, get_modified_julian_date_as_parts
+from .mjd import (
+    convert_mjd_to_datetime,
+    get_modified_julian_date_as_parts,
+    get_modified_julian_date_from_parts,
+)
 from .orbit import get_orbital_radius
 from .runge_kutta import (
     RungeKuttaPropagationParameters,
@@ -83,6 +87,7 @@ __all__: list[str] = [
     "get_eccentric_anomaly",
     "get_gravitational_acceleration",
     "get_modified_julian_date_as_parts",
+    "get_modified_julian_date_from_parts",
     "get_orbital_radius",
     "get_perifocal_coordinate",
     "get_perifocal_velocity",
