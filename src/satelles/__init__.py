@@ -28,6 +28,7 @@ from .earth import (
 )
 from .gravity import get_gravitational_acceleration
 from .interpolation import (
+    BarycentricLagrange3DPositionInterpolator,
     Base3DPositionInterpolator,
 )
 from .kepler import (
@@ -103,6 +104,7 @@ __all__: list[str] = [
     "propagate_verlet",
     "rotate",
     "Acceleration",
+    "BarycentricLagrange3DPositionInterpolator",
     "Base3DPositionInterpolator",
     "CartesianCoordinate",
     "Covariance",
