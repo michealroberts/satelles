@@ -67,11 +67,14 @@ We have also provided further usage examples in the [examples](./examples) direc
 - [X] Fully supported Two-Line Element (TLE) parsing and operations
 - [ ] Fully supported Orbital Mean Elements Message (OMM) parsing and operations
 - [ ] Fully supported TLE to OMM conversion
+- [ ] Fully supported laser ranging formats (e.g., CPF and CRD).
+- [X] Fully supported Earth Centred-Earth Fixed (ECEF) to East-North-Up (ENU) conversion
 - [X] Fully supported Earth Centric Inertial (ECI) to Equatorial Coordinate System (ECS) conversion
 - [X] Fully supported Earth Centric Inertial (ECI) to Topocentric Coordinate System (TCS) conversion
 - [ ] Fully supported SPG4-XP propagation from TLE or OMM
 - [X] Fully supported symplectic Verlet numerical propagation
 - [X] Fully supported Runge-Kutta 4th order numerical propagation
+- [X] Modified Julian Date utilities
 
 ---
 
