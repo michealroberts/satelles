@@ -29,6 +29,7 @@ from .earth import (
 from .gravity import get_gravitational_acceleration
 from .interpolation import (
     BarycentricLagrange3DPositionInterpolator,
+    Base3DKinematicInterpolator,
     Base3DPositionInterpolator,
     Hermite3DPositionInterpolator,
 )
@@ -106,6 +107,7 @@ __all__: list[str] = [
     "rotate",
     "Acceleration",
     "BarycentricLagrange3DPositionInterpolator",
+    "Base3DKinematicInterpolator",
     "Base3DPositionInterpolator",
     "CartesianCoordinate",
     "Covariance",
