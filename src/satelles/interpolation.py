@@ -7,9 +7,9 @@
 
 from abc import ABC, abstractmethod
 from math import nan
-from typing import List, Tuple
+from typing import List
 
-from .models import Position
+from .models import Position, Velocity
 
 # **************************************************************************************
 
@@ -156,20 +156,18 @@ class Hermite3DPositionInterpolator(Base3DPositionInterpolator):
         super().__init__(positions)
 
         # Prepare and compute velocity estimates at each sample via finite differences:
-        self._velocities: List[Tuple[float, float, float]] = (
-            self._prepare_basis_derivatives()
-        )
+        self.velocities: List[Velocity] = self._get_derived_velocities()
 
-    def _prepare_basis_derivatives(self) -> List[Tuple[float, float, float]]:
+    def _get_derived_velocities(self) -> List[Velocity]:
         """
         Prepare and compute velocity estimates for each position.
 
         Returns:
-            List[Tuple[float, float, float]]: List of (vx, vy, vz) at each sample time.
+            List[Velocity]: List of estimated velocities corresponding to each position.
         """
         n = len(self.positions)
 
-        derivatives: List[Tuple[float, float, float]] = []
+        velocities: List[Velocity] = []
 
         for i, position in enumerate(self.positions):
             t_i = position.at
@@ -203,9 +201,9 @@ class Hermite3DPositionInterpolator(Base3DPositionInterpolator):
                 vy = (position_next.y - position_previous.y) / dt
                 vz = (position_next.z - position_previous.z) / dt
 
-            derivatives.append((vx, vy, vz))
+            velocities.append(Velocity(at=t_i, vx=vx, vy=vy, vz=vz))
 
-        return derivatives
+        return velocities
 
     def get_interpolated_position(self, at: float) -> Position:
         """
@@ -263,29 +261,29 @@ class Hermite3DPositionInterpolator(Base3DPositionInterpolator):
             h11 = τ**3 - τ**2
 
             # Retrieve precomputed velocity estimates:
-            vx0, vy0, vz0 = self._velocities[i]
-            vx1, vy1, vz1 = self._velocities[i + 1]
+            v0 = self.velocities[i]
+            v1 = self.velocities[i + 1]
 
             # Interpolate the position using the Hermite basis functions:
             x = (
                 h00 * position.x
-                + h10 * vx0 * dt
+                + h10 * v0.vx * dt
                 + h01 * position_next.x
-                + h11 * vx1 * dt
+                + h11 * v1.vx * dt
             )
 
             y = (
                 h00 * position.y
-                + h10 * vy0 * dt
+                + h10 * v0.vy * dt
                 + h01 * position_next.y
-                + h11 * vy1 * dt
+                + h11 * v1.vy * dt
             )
 
             z = (
                 h00 * position.z
-                + h10 * vz0 * dt
+                + h10 * v0.vz * dt
                 + h01 * position_next.z
-                + h11 * vz1 * dt
+                + h11 * v1.vz * dt
             )
             break
 
