@@ -49,6 +49,63 @@ class Base3DPositionInterpolator(ABC):
 # **************************************************************************************
 
 
+class Base3DKinematicInterpolator(ABC):
+    """
+    Base class for interpolators.
+
+    This class is not intended to be instantiated directly.
+
+    It serves as a base for specific interpolation implementations.
+    """
+
+    def __init__(
+        self,
+        positions: List[Position],
+        velocities: List[Velocity],
+    ):
+        # Ensure we have at least two positions to interpolate:
+        if len(positions) < 2:
+            raise ValueError("Need at least two positions to interpolate.")
+
+        # Ensure we have at least two velocities to interpolate:
+        if len(velocities) < 2:
+            raise ValueError("Need at least two velocities to interpolate.")
+
+        # Ensure that the number of positions matches the number of velocities, as well
+        # as that they all have the same time attribute 'at':
+        if any(
+            position.at != velocity.at
+            for position, velocity in zip(positions, velocities)
+        ):
+            raise ValueError(
+                "All positions and velocities must have the same time attribute 'at'."
+            )
+
+        # Keep the raw list of positions sorted by time; avoids duplicating time/coordinate arrays:
+        self.positions: List[Position] = sorted(positions, key=lambda p: p.at)
+
+        # Keep the raw list of velocities sorted by time; avoids duplicating time/coordinate arrays:
+        self.velocities: List[Velocity] = sorted(velocities, key=lambda v: v.at)
+
+    @abstractmethod
+    def get_interpolated_position(self, at: float) -> Position:
+        """
+        Get the interpolated position at the specified time 'at'.
+
+        Args:
+            at (float): The time at which to interpolate the position.
+
+        Returns:
+            Position: The interpolated position at the specified time.
+        """
+        raise NotImplementedError(
+            "get_interpolated_position() must be implemented in the subclass."
+        )
+
+
+# **************************************************************************************
+
+
 class BarycentricLagrange3DPositionInterpolator(Base3DPositionInterpolator):
     """
     Barycentric Lagrange interpolation for 3D positions.
