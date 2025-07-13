@@ -335,6 +335,86 @@ class TestHermite3DPositionInterpolator(unittest.TestCase):
         with self.assertRaises(ValueError):
             interpolator.get_interpolated_position(600.0)
 
+    def test_interpolation_at_specific_epoch_timestamp(self) -> None:
+        """
+        Test interpolation at a specific epoch timestamp, ensuring the result is
+        within the expected range of the surrounding positions.
+        """
+        positions: List[Position] = [
+            Position(
+                x=-184511.6953189489,
+                y=6847746.881617692,
+                z=11099.5448507028,
+                at=1723510800.0,
+            ),
+            Position(
+                x=-553320.796092768,
+                y=6776094.229947866,
+                z=844998.042655855,
+                at=1723510920.0,
+            ),
+            Position(
+                x=-912267.9542356991,
+                y=6583665.700405683,
+                z=1663836.2291468324,
+                at=1723511040.0,
+            ),
+            Position(
+                x=-1254960.3162454353,
+                y=6273926.881670678,
+                z=2453028.318304866,
+                at=1723511160.0,
+            ),
+            Position(
+                x=-1575298.1845573059,
+                y=5852429.458345277,
+                z=3198524.9389684894,
+                at=1723511280.0,
+            ),
+            Position(
+                x=-1867583.0047119157,
+                y=5326710.190080691,
+                z=3887062.0219569616,
+                at=1723511400.0,
+            ),
+            Position(
+                x=-2126618.020929868,
+                y=4706155.043456231,
+                z=4506395.249857609,
+                at=1723511520.0,
+            ),
+            Position(
+                x=-2347799.873225814,
+                y=4001831.003033132,
+                z=5045516.035678472,
+                at=1723511640.0,
+            ),
+            Position(
+                x=-2527199.5783852055,
+                y=3226288.618034939,
+                z=5494845.345910571,
+                at=1723511760.0,
+            ),
+            Position(
+                x=-2661631.52875502,
+                y=2393338.8127440577,
+                z=5846402.086805565,
+                at=1723511880.0,
+            ),
+        ]
+
+        interpolator = Hermite3DPositionInterpolator(positions)
+
+        # 01:11:30 UTC corresponds to 11 minutes and 30 seconds after 01:00.
+        # This is calculated as (11 * 60 + 30) = 690 seconds:
+        at = 1723510800.0 + 690.0
+        actual = interpolator.get_interpolated_position(at)
+
+        self.assertEqual(actual.at, at)
+        self.assertAlmostEqual(actual.x, -2065238.4030487437, places=9)
+        self.assertAlmostEqual(actual.y, 4869603.41999027, places=9)
+        self.assertAlmostEqual(actual.z, 4358673.416049888, places=9)
+
 
 # **************************************************************************************
 
