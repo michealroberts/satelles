@@ -9,6 +9,7 @@ from abc import ABC, abstractmethod
 from math import nan
 from typing import List
 
+from .differentiation import compute_finite_difference_weights
 from .models import Position, Velocity
 
 # **************************************************************************************
@@ -221,71 +222,41 @@ class Hermite3DPositionInterpolator(Base3DPositionInterpolator):
 
         Returns:
             List[Velocity]: List of estimated velocities corresponding to each position.
+
+        Raises:
+            ValueError: If there are not enough position points to estimate a derivative.
         """
         n = len(self.positions)
+
+        if n < 2:
+            raise ValueError("Need at least two positions to estimate velocities.")
 
         velocities: List[Velocity] = []
 
         for i, position in enumerate(self.positions):
-            t_i = position.at
+            neighbors = list(range(max(0, i - 2), min(n, i + 3)))
 
-            # Estimate derivative at the start via forward difference:
-            if i == 0:
-                position_next = self.positions[1]
-                dt = position_next.at - t_i
+            xs = [self.positions[j].at for j in neighbors]
 
-                if dt == 0:
-                    raise ValueError(
-                        f"Division by zero detected: position_next.at ({position_next.at}) and t_i ({t_i}) are equal."
-                    )
+            # we need at least two points to estimate a derivative
+            if len(xs) < 2:
+                raise ValueError(
+                    "Not enough position points to estimate position derivative (velocity)."
+                )
 
-                vx = (position_next.x - position.x) / dt
-                vy = (position_next.y - position.y) / dt
-                vz = (position_next.z - position.z) / dt
-            # Estimate derivative at the end via backward difference:
-            elif i == n - 1:
-                position_previous = self.positions[-2]
-                dt = t_i - position_previous.at
-                vx = (position.x - position_previous.x) / dt
-                vy = (position.y - position_previous.y) / dt
-                vz = (position.z - position_previous.z) / dt
+            # compute the weights for the first derivative (order=1)
+            weights = compute_finite_difference_weights(xs, position.at, order=1)
 
-            # Estimate derivative at the second sample via central difference:
-            elif i == 1:
-                position_previous = self.positions[i - 1]
-                position_next = self.positions[i + 1]
-                dt = position_next.at - position_previous.at
+            # now form vx, vy, vz in one shot:
+            vx = vy = vz = 0.0
 
-                vx = (position_next.x - position_previous.x) / dt
-                vy = (position_next.y - position_previous.y) / dt
-                vz = (position_next.z - position_previous.z) / dt
+            for weight, j in zip(weights, neighbors):
+                p = self.positions[j]
+                vx += weight * p.x
+                vy += weight * p.y
+                vz += weight * p.z
 
-            # Estimate derivative at the penultimate sample via central difference:
-            elif i == n - 2:
-                position_previous = self.positions[i - 1]
-                position_next = self.positions[i + 1]
-                dt = position_next.at - position_previous.at
-
-                vx = (position_next.x - position_previous.x) / dt
-                vy = (position_next.y - position_previous.y) / dt
-                vz = (position_next.z - position_previous.z) / dt
-
-            # Estimate derivative in the interior via 5-point finite difference:
-            else:
-                p_m2 = self.positions[i - 2]
-                p_m1 = self.positions[i - 1]
-                p_p1 = self.positions[i + 1]
-                p_p2 = self.positions[i + 2]
-
-                # Compute sampling interval h from the immediate previous sample:
-                h = position.at - p_m1.at
-
-                # Use classic 5-point formula for fourth-order central derivative:
-                vx = (p_m2.x - 8 * p_m1.x + 8 * p_p1.x - p_p2.x) / (12 * h)
-                vy = (p_m2.y - 8 * p_m1.y + 8 * p_p1.y - p_p2.y) / (12 * h)
-                vz = (p_m2.z - 8 * p_m1.z + 8 * p_p1.z - p_p2.z) / (12 * h)
-
-            velocities.append(Velocity(at=t_i, vx=vx, vy=vy, vz=vz))
+            velocities.append(Velocity(at=position.at, vx=vx, vy=vy, vz=vz))
 
         return velocities
 
