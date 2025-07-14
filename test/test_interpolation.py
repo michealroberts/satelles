@@ -335,7 +335,7 @@ class TestHermite3DPositionInterpolator(unittest.TestCase):
         with self.assertRaises(ValueError):
             interpolator.get_interpolated_position(600.0)
 
-    def test_interpolation_at_specific_epoch_timestamp(self) -> None:
+    def test_interpolation_at_specific_epoch_timestamps(self) -> None:
         """
         Test interpolation at a specific epoch timestamp, ensuring the result is
         within the expected range of the surrounding positions.
@@ -405,15 +405,45 @@ class TestHermite3DPositionInterpolator(unittest.TestCase):
 
         interpolator = Hermite3DPositionInterpolator(positions)
 
+        # Base epoch time (2024-08-13T01:00:00Z):
+        base = 1723510800.0
+
         # 01:11:30 UTC corresponds to 11 minutes and 30 seconds after 01:00.
         # This is calculated as (11 * 60 + 30) = 690 seconds:
-        at = 1723510800.0 + 690.0
+        at = base + 690.0
         actual = interpolator.get_interpolated_position(at)
 
         self.assertEqual(actual.at, at)
         self.assertAlmostEqual(actual.x, -2065238.4030487437, places=9)
         self.assertAlmostEqual(actual.y, 4869603.41999027, places=9)
         self.assertAlmostEqual(actual.z, 4358673.416049888, places=9)
+
+        # Interpolate at 01:03:45 UTC (3 minutes 45 seconds after 01:00 → 225 seconds):
+        at = base + 225.0
+        actual = interpolator.get_interpolated_position(at)
+
+        self.assertEqual(actual.at, at)
+        self.assertAlmostEqual(actual.x, -868159.7281853468, places=9)
+        self.assertAlmostEqual(actual.y, 6614222.38183977, places=9)
+        self.assertAlmostEqual(actual.z, 1562807.8822666958, places=9)
+
+        # Interpolate at 01:07:00 UTC (7 minutes after 01:00 → 420 seconds):
+        at = base + 420.0
+        actual = interpolator.get_interpolated_position(at)
+
+        self.assertEqual(actual.at, at)
+        self.assertAlmostEqual(actual.x, -1418289.1274109124, places=9)
+        self.assertAlmostEqual(actual.y, 6076716.888540836, places=9)
+        self.assertAlmostEqual(actual.z, 2832086.369165492, places=9)
+
+        # Interpolate at 01:15:30 UTC (15 minutes 30 seconds after 01:00 → 930 seconds):
+        at = base + 930.0
+        actual = interpolator.get_interpolated_position(at)
+
+        self.assertEqual(actual.at, at)
+        self.assertAlmostEqual(actual.x, -2486443.8451187215, places=9)
+        self.assertAlmostEqual(actual.y, 3426100.572506782, places=9)
+        self.assertAlmostEqual(actual.z, 5391373.677205545, places=9)
 
 
 # **************************************************************************************
