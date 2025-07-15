@@ -31,6 +31,7 @@ from .interpolation import (
     BarycentricLagrange3DPositionInterpolator,
     Base3DKinematicInterpolator,
     Base3DPositionInterpolator,
+    Hermite3DKinematicInterpolator,
     Hermite3DPositionInterpolator,
 )
 from .kepler import (
@@ -114,6 +115,7 @@ __all__: list[str] = [
     "CPFEphemeris",
     "CPFHeader",
     "Hermite3DPositionInterpolator",
+    "Hermite3DKinematicInterpolator",
     "RungeKuttaPropagationParameters",
     "Satellite",
     "TLE",
