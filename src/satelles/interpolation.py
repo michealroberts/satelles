@@ -346,3 +346,111 @@ class Hermite3DPositionInterpolator(Base3DPositionInterpolator):
 
 
 # **************************************************************************************
+
+
+class Hermite3DKinematicInterpolator(Base3DKinematicInterpolator):
+    """
+    Cubic Hermite interpolation for 3D positions and velocities.
+
+    This class implements cubic Hermite interpolation for 3D positions represented
+    by the `Position` and `Velocity` classes, which includes x, y, z vector coordinates
+    and a time attribute `at`.
+    """
+
+    def __init__(
+        self,
+        positions: List[Position],
+        velocities: List[Velocity],
+    ):
+        super().__init__(positions, velocities)
+
+    def get_interpolated_position(self, at: float) -> Position:
+        """
+        Get the interpolated position at the specified time 'at'.
+
+        Args:
+            at (float): The time at which to interpolate the position.
+
+        Raises:
+            ValueError: If 'at' is before the first sample time or after the last sample
+            time of the provided positions.
+
+        Returns:
+            Position: The interpolated position at the specified time.
+        """
+        # Raise error if 'at' is before the first sample time:
+        if at < self.positions[0].at:
+            raise ValueError(
+                f"Cannot interpolate before the first sample time: {self.positions[0].at}"
+            )
+
+        # Raise error if 'at' is after the last sample time:
+        if at > self.positions[-1].at:
+            raise ValueError(
+                f"Cannot interpolate after the last sample time: {self.positions[-1].at}"
+            )
+
+        # Initialize position coordinates to NaN as the fallback:
+        x = y = z = nan
+
+        # Find the interval that contains 'at':
+        for i in range(len(self.positions) - 1):
+            position = self.positions[i]
+            position_next = self.positions[i + 1]
+            t_i, t_j = position.at, position_next.at
+
+            # Skip intervals that do not contain the query time:
+            if not (t_i <= at <= t_j):
+                continue
+
+            # Calculate the normalized time (tau) within the interval [t0, t1]:
+            dt = position_next.at - t_i
+
+            if abs(dt) < 1e-10:
+                # If the time difference is too small, use the first position:
+                return Position(
+                    x=position.x,
+                    y=position.y,
+                    z=position.z,
+                    at=t_i,
+                )
+
+            τ = (at - t_i) / dt
+
+            # Calculate Hermite basis functions for cubic interpolation:
+            h00 = 2 * τ**3 - 3 * τ**2 + 1
+            h10 = τ**3 - 2 * τ**2 + τ
+            h01 = -2 * τ**3 + 3 * τ**2
+            h11 = τ**3 - τ**2
+
+            # Retrieve precomputed velocity estimates:
+            v0 = self.velocities[i]
+            v1 = self.velocities[i + 1]
+
+            # Interpolate the position using the Hermite basis functions:
+            x = (
+                h00 * position.x
+                + h10 * v0.vx * dt
+                + h01 * position_next.x
+                + h11 * v1.vx * dt
+            )
+
+            y = (
+                h00 * position.y
+                + h10 * v0.vy * dt
+                + h01 * position_next.y
+                + h11 * v1.vy * dt
+            )
+
+            z = (
+                h00 * position.z
+                + h10 * v0.vz * dt
+                + h01 * position_next.z
+                + h11 * v1.vz * dt
+            )
+            break
+
+        return Position(x=x, y=y, z=z, at=at)
+
+
+# **************************************************************************************
