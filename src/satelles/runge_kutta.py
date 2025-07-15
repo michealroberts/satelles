@@ -47,7 +47,7 @@ def propagate_rk4(
         μ (float): Gravitational parameter (m^3/s^2), defaults to Earth's μ.
 
     Returns:
-        Tuple[List[CartesianCoordinate\], List[Velocity]]: Final position and velocity vectors after propagation.
+        Tuple[List[CartesianCoordinate], List[Velocity]]: Final position and velocity vectors after propagation.
     """
     # Initialize state variables for position and velocity:
     r = deepcopy(position)
