@@ -6,7 +6,7 @@
 # **************************************************************************************
 
 from .checksum import perform_checksum_compute
-from .common import Acceleration, CartesianCoordinate, Velocity
+from .common import Acceleration, CartesianCoordinate
 from .constants import GRAVITATIONAL_CONSTANT
 from .coordinates import (
     convert_ecef_to_eci,
@@ -44,6 +44,10 @@ from .mjd import (
     convert_mjd_to_datetime,
     get_modified_julian_date_as_parts,
     get_modified_julian_date_from_parts,
+)
+from .models import (
+    Position,
+    Velocity,
 )
 from .orbit import get_orbital_radius
 from .runge_kutta import (
@@ -116,6 +120,7 @@ __all__: list[str] = [
     "CPFHeader",
     "Hermite3DPositionInterpolator",
     "Hermite3DKinematicInterpolator",
+    "Position",
     "RungeKuttaPropagationParameters",
     "Satellite",
     "TLE",
