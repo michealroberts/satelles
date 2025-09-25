@@ -5,10 +5,43 @@
 
 # **************************************************************************************
 
-from math import cos, radians, sin
+from math import cos, isclose, radians, sin, sqrt
 from typing import Literal
 
 from .common import CartesianCoordinate
+
+# **************************************************************************************
+
+
+def normalise(
+    vector: CartesianCoordinate,
+) -> CartesianCoordinate:
+    """
+    Normalise a 3D vector (x, y, z) to a unit vector.
+
+    Args:
+        vector (CartesianCoordinate): The input vector.
+
+    Returns:
+        CartesianCoordinate: The unit vector in the same direction as the input vector.
+
+    Raises:
+        ValueError: If the input vector's magnitude is zero.
+    """
+    x, y, z = vector["x"], vector["y"], vector["z"]
+
+    # Compute the vector's magnitude (length):
+    r = sqrt(x**2 + y**2 + z**2)
+
+    if isclose(r, 0.0, abs_tol=1e-15):
+        raise ValueError("Cannot convert a zero-length vector to a unit vector.")
+
+    return CartesianCoordinate(
+        x=x / r,
+        y=y / r,
+        z=z / r,
+    )
+
 
 # **************************************************************************************
 

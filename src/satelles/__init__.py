@@ -64,7 +64,10 @@ from .symplectic import (
     propagate_verlet,
 )
 from .tle import TLE
-from .vector import rotate
+from .vector import (
+    normalise,
+    rotate,
+)
 from .velocity import get_perifocal_velocity
 from .visibility import is_visible
 
@@ -106,6 +109,7 @@ __all__: list[str] = [
     "get_semi_major_axis",
     "get_true_anomaly",
     "is_visible",
+    "normalise",
     "perform_checksum_compute",
     "propagate_rk4",
     "propagate_verlet",

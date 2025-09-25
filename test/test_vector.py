@@ -8,7 +8,47 @@
 import math
 import unittest
 
-from satelles import CartesianCoordinate, rotate
+from satelles import (
+    CartesianCoordinate,
+    normalise,
+    rotate,
+)
+
+# **************************************************************************************
+
+
+class TestNormaliseFunction(unittest.TestCase):
+    def test_normalise_non_zero_vector(self):
+        """
+        Normalise a non-zero vector (3, 4, 0).
+        Expected result: (0.6, 0.8, 0.0)
+        """
+        vector = CartesianCoordinate(x=3.0, y=4.0, z=0.0)
+        result = normalise(vector)
+        self.assertAlmostEqual(result["x"], 0.6, places=6)
+        self.assertAlmostEqual(result["y"], 0.8, places=6)
+        self.assertAlmostEqual(result["z"], 0.0, places=6)
+
+    def test_normalise_zero_vector(self):
+        """
+        Verify that normalising a zero-length vector raises a ValueError.
+        """
+        vector = CartesianCoordinate(x=0.0, y=0.0, z=0.0)
+        with self.assertRaises(ValueError):
+            normalise(vector)
+
+    def test_normalise_negative_components(self):
+        """
+        Normalise a vector with negative components (-1, -1, -1).
+        Expected result: (-0.577350, -0.577350, -0.577350)
+        """
+        vector = CartesianCoordinate(x=-1.0, y=-1.0, z=-1.0)
+        result = normalise(vector)
+        magnitude = -1.0 / math.sqrt(3)
+        self.assertAlmostEqual(result["x"], magnitude, places=6)
+        self.assertAlmostEqual(result["y"], magnitude, places=6)
+        self.assertAlmostEqual(result["z"], magnitude, places=6)
+
 
 # **************************************************************************************
 
