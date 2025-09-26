@@ -10,6 +10,7 @@ import unittest
 
 from satelles import (
     CartesianCoordinate,
+    dot,
     normalise,
     rotate,
 )
@@ -48,6 +49,61 @@ class TestNormaliseFunction(unittest.TestCase):
         self.assertAlmostEqual(result["x"], magnitude, places=6)
         self.assertAlmostEqual(result["y"], magnitude, places=6)
         self.assertAlmostEqual(result["z"], magnitude, places=6)
+
+
+# **************************************************************************************
+
+
+class TestDotFunction(unittest.TestCase):
+    def test_dot_orthogonal_vectors(self):
+        """
+        Dot product of orthogonal vectors (1, 0, 0) · (0, 1, 0).
+        Expected result: 0
+        """
+        i = CartesianCoordinate(x=1.0, y=0.0, z=0.0)
+        j = CartesianCoordinate(x=0.0, y=1.0, z=0.0)
+        result = dot(i, j)
+        self.assertAlmostEqual(result, 0.0, places=6)
+
+    def test_dot_parallel_vectors(self):
+        """
+        Dot product of parallel vectors (1, 2, 3) · (1, 2, 3).
+        Expected result: 1^2 + 2^2 + 3^2 = 14
+        """
+        i = CartesianCoordinate(x=1.0, y=2.0, z=3.0)
+        j = CartesianCoordinate(x=1.0, y=2.0, z=3.0)
+        result = dot(i, j)
+        self.assertAlmostEqual(result, 14.0, places=6)
+
+    def test_dot_antiparallel_vectors(self):
+        """
+        Dot product of opposite vectors (1, 0, 0) · (-1, 0, 0).
+        Expected result: -1
+        """
+        i = CartesianCoordinate(x=1.0, y=0.0, z=0.0)
+        j = CartesianCoordinate(x=-1.0, y=0.0, z=0.0)
+        result = dot(i, j)
+        self.assertAlmostEqual(result, -1.0, places=6)
+
+    def test_dot_with_zero_vector(self):
+        """
+        Dot product of any vector with the zero vector.
+        Expected result: 0
+        """
+        i = CartesianCoordinate(x=5.0, y=-3.0, z=2.0)
+        j = CartesianCoordinate(x=0.0, y=0.0, z=0.0)
+        result = dot(i, j)
+        self.assertAlmostEqual(result, 0.0, places=6)
+
+    def test_dot_negative_components(self):
+        """
+        Dot product with negative components: (1, -2, 3) · (-4, 5, -6).
+        Expected result: (1 * -4) + (-2 * 5) + (3 * -6) = -4 -10 -18 = -32
+        """
+        i = CartesianCoordinate(x=1.0, y=-2.0, z=3.0)
+        j = CartesianCoordinate(x=-4.0, y=5.0, z=-6.0)
+        result = dot(i, j)
+        self.assertAlmostEqual(result, -32.0, places=6)
 
 
 # **************************************************************************************

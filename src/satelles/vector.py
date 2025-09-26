@@ -46,6 +46,23 @@ def normalise(
 # **************************************************************************************
 
 
+def dot(i: CartesianCoordinate, j: CartesianCoordinate) -> float:
+    """
+    Compute the dot product of two 3D vectors.
+
+    Args:
+        i (CartesianCoordinate): The first vector.
+        j (CartesianCoordinate): The second vector.
+
+    Returns:
+        float: The dot product of the two vectors.
+    """
+    return i["x"] * j["x"] + i["y"] * j["y"] + i["z"] * j["z"]
+
+
+# **************************************************************************************
+
+
 def rotate(
     vector: CartesianCoordinate, angle: float, axis: Literal["x", "y", "z"]
 ) -> CartesianCoordinate:
