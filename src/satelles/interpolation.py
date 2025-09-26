@@ -605,9 +605,97 @@ class Hermite3DKinematicInterpolator(Base3DInterpolator):
         Returns:
             Velocity: The interpolated velocity at the specified time.
         """
-        raise NotImplementedError(
-            "get_interpolated_velocity() must be implemented in the subclass."
-        )
+        # Raise error if 'at' is before the first sample time:
+        if at < self.positions[0].at:
+            raise ValueError(
+                f"Cannot interpolate before the first sample time: {self.positions[0].at}"
+            )
+
+        # Raise error if 'at' is after the last sample time:
+        if at > self.positions[-1].at:
+            raise ValueError(
+                f"Cannot interpolate after the last sample time: {self.positions[-1].at}"
+            )
+
+        vx = vy = vz = nan
+
+        # Find the interval that contains 'at':
+        for i in range(len(self.positions) - 1):
+            position = self.positions[i]
+            position_next = self.positions[i + 1]
+            t_i, t_j = position.at, position_next.at
+
+            # Skip intervals that do not contain the query time:
+            if not (t_i <= at <= t_j):
+                continue
+
+            # Calculate the normalized time (tau) within the interval [t0, t1]:
+            dt = position_next.at - t_i
+
+            if abs(dt) < 1e-10:
+                v0 = self.velocities[i]
+                return Velocity(
+                    at=t_i,
+                    vx=v0.vx,
+                    vy=v0.vy,
+                    vz=v0.vz,
+                )
+
+            # If exactly at a knot, return the corresponding sample velocity:
+            if at == t_i:
+                v0 = self.velocities[i]
+                return Velocity(
+                    at=t_i,
+                    vx=v0.vx,
+                    vy=v0.vy,
+                    vz=v0.vz,
+                )
+
+            if at == t_j:
+                v1 = self.velocities[i + 1]
+                return Velocity(
+                    at=t_j,
+                    vx=v1.vx,
+                    vy=v1.vy,
+                    vz=v1.vz,
+                )
+
+            τ = (at - t_i) / dt
+
+            # Calculate derivatives of the Hermite basis functions with respect to tau:
+            h00 = 6.0 * τ * τ - 6.0 * τ
+            h10 = 3.0 * τ * τ - 4.0 * τ + 1.0
+            h01 = -6.0 * τ * τ + 6.0 * τ
+            h11 = 3.0 * τ * τ - 2.0 * τ
+
+            # Apply the chain rule to convert derivatives from tau to time:
+            idt = 1.0 / dt
+
+            v0 = self.velocities[i]
+            v1 = self.velocities[i + 1]
+
+            # Interpolate the velocity components using the Hermite derivative form:
+            vx = idt * (
+                h00 * position.x
+                + h10 * (dt * v0.vx)
+                + h01 * position_next.x
+                + h11 * (dt * v1.vx)
+            )
+            vy = idt * (
+                h00 * position.y
+                + h10 * (dt * v0.vy)
+                + h01 * position_next.y
+                + h11 * (dt * v1.vy)
+            )
+            vz = idt * (
+                h00 * position.z
+                + h10 * (dt * v0.vz)
+                + h01 * position_next.z
+                + h11 * (dt * v1.vz)
+            )
+            break
+
+        return Velocity(at=at, vx=vx, vy=vy, vz=vz)
 
 
 # **************************************************************************************
