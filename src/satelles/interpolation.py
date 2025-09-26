@@ -64,6 +64,21 @@ class Base3DInterpolator(ABC):
             "get_interpolated_position() must be implemented in the subclass."
         )
 
+    @abstractmethod
+    def get_interpolated_velocity(self, at: float) -> Velocity:
+        """
+        Get the interpolated velocity at the specified time 'at'.
+
+        Args:
+            at (float): The time at which to interpolate the velocity.
+
+        Returns:
+            Velocity: The interpolated velocity at the specified time.
+        """
+        raise NotImplementedError(
+            "get_interpolated_velocity() must be implemented in the subclass."
+        )
+
 
 # **************************************************************************************
 
@@ -205,6 +220,20 @@ class BarycentricLagrange3DPositionInterpolator(Base3DInterpolator):
             y=y,
             z=z,
             at=at,
+        )
+
+    def get_interpolated_velocity(self, at: float) -> Velocity:
+        """
+        Get the interpolated velocity at the specified time 'at'.
+
+        Args:
+            at (float): The time at which to interpolate the velocity.
+
+        Returns:
+            Velocity: The interpolated velocity at the specified time.
+        """
+        raise NotImplementedError(
+            "get_interpolated_velocity() is not implemented for BarycentricLagrange3DPositionInterpolator."
         )
 
 
@@ -356,6 +385,20 @@ class Hermite3DPositionInterpolator(Base3DInterpolator):
 
         return Position(x=x, y=y, z=z, at=at)
 
+    def get_interpolated_velocity(self, at: float) -> Velocity:
+        """
+        Get the interpolated velocity at the specified time 'at'.
+
+        Args:
+            at (float): The time at which to interpolate the velocity.
+
+        Returns:
+            Velocity: The interpolated velocity at the specified time.
+        """
+        raise NotImplementedError(
+            "get_interpolated_velocity() is not implemented for BarycentricLagrange3DPositionInterpolator."
+        )
+
 
 # **************************************************************************************
 
@@ -463,6 +506,20 @@ class Hermite3DKinematicInterpolator(Base3DInterpolator):
             break
 
         return Position(x=x, y=y, z=z, at=at)
+
+    def get_interpolated_velocity(self, at: float) -> Velocity:
+        """
+        Get the interpolated velocity at the specified time 'at'.
+
+        Args:
+            at (float): The time at which to interpolate the velocity.
+
+        Returns:
+            Velocity: The interpolated velocity at the specified time.
+        """
+        raise NotImplementedError(
+            "get_interpolated_velocity() is not implemented for BarycentricLagrange3DPositionInterpolator."
+        )
 
 
 # **************************************************************************************
