@@ -446,6 +446,79 @@ class TestHermite3DPositionInterpolator(unittest.TestCase):
         self.assertAlmostEqual(actual.y, 3426100.572506782, places=9)
         self.assertAlmostEqual(actual.z, 5391373.677205545, places=9)
 
+    def test_get_interpolated_velocity_two_point_linear_at_midpoint(self) -> None:
+        """
+        With exactly two samples and linear motion, velocity is constant at the midpoint:
+        """
+        positions: List[Position] = [
+            Position(x=0.0, y=0.0, z=0.0, at=0.0),
+            Position(x=10.0, y=20.0, z=30.0, at=10.0),
+        ]
+        interpolator = Hermite3DPositionInterpolator(positions)
+
+        # Midpoint at t=5.0:
+        velocity = interpolator.get_interpolated_velocity(5.0)
+        self.assertEqual(velocity.at, 5.0)
+        self.assertAlmostEqual(velocity.vx, 1.0, places=9)
+        self.assertAlmostEqual(velocity.vy, 2.0, places=9)
+        self.assertAlmostEqual(velocity.vz, 3.0, places=9)
+
+    def test_get_interpolated_velocity_two_point_linear_at_knots(self) -> None:
+        """
+        With exactly two samples and linear motion, velocity is constant at the knots:
+        """
+        positions: List[Position] = [
+            Position(x=0.0, y=0.0, z=0.0, at=0.0),
+            Position(x=10.0, y=20.0, z=30.0, at=10.0),
+        ]
+        interpolator = Hermite3DPositionInterpolator(positions)
+
+        v0 = interpolator.get_interpolated_velocity(0.0)
+        v1 = interpolator.get_interpolated_velocity(10.0)
+
+        self.assertEqual(v0.at, 0.0)
+        self.assertEqual(v1.at, 10.0)
+
+        self.assertAlmostEqual(v0.vx, 1.0, places=9)
+        self.assertAlmostEqual(v0.vy, 2.0, places=9)
+        self.assertAlmostEqual(v0.vz, 3.0, places=9)
+
+        self.assertAlmostEqual(v1.vx, 1.0, places=9)
+        self.assertAlmostEqual(v1.vy, 2.0, places=9)
+        self.assertAlmostEqual(v1.vz, 3.0, places=9)
+
+    def test_get_interpolated_velocity_multi_sample_linear(self) -> None:
+        """
+        With multiple samples following linear motion, velocity remains constant within bounds:
+        """
+        # Linear motion: x = 2t, y = -t, z = 0.5t over t = 0..20 in steps of 5:
+        positions: List[Position] = [
+            Position(x=2.0 * t, y=-1.0 * t, z=0.5 * t, at=t)
+            for t in (0.0, 5.0, 10.0, 15.0, 20.0)
+        ]
+        interpolator = Hermite3DPositionInterpolator(positions)
+
+        # Query at t=12.5 (between 10 and 15):
+        at: float = 12.5
+        velocity = interpolator.get_interpolated_velocity(at)
+
+        self.assertEqual(velocity.at, at)
+        self.assertAlmostEqual(velocity.vx, 2.0, places=9)
+        self.assertAlmostEqual(velocity.vy, -1.0, places=9)
+        self.assertAlmostEqual(velocity.vz, 0.5, places=9)
+
+    def test_get_interpolated_velocity_out_of_bounds(self) -> None:
+        """
+        Querying velocity before the first sample or after the last should raise ValueError:
+        """
+        interpolator = Hermite3DPositionInterpolator(self.positions)
+
+        with self.assertRaises(ValueError):
+            interpolator.get_interpolated_velocity(-60.0)
+
+        with self.assertRaises(ValueError):
+            interpolator.get_interpolated_velocity(600.0)
+
 
 # **************************************************************************************
 
