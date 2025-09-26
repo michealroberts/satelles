@@ -15,7 +15,7 @@ from .models import Position, Velocity
 # **************************************************************************************
 
 
-class Base3DPositionInterpolator(ABC):
+class Base3DInterpolator(ABC):
     """
     Base class for interpolators.
 
@@ -24,46 +24,7 @@ class Base3DPositionInterpolator(ABC):
     It serves as a base for specific interpolation implementations.
     """
 
-    def __init__(self, positions: List[Position]):
-        if len(positions) < 2:
-            raise ValueError("Need at least two positions to interpolate.")
-
-        # Keep the raw list of positions sorted by time; avoids duplicating time/coordinate arrays:
-        self.positions: List[Position] = sorted(positions, key=lambda p: p.at)
-
-    @abstractmethod
-    def get_interpolated_position(self, at: float) -> Position:
-        """
-        Get the interpolated position at the specified time 'at'.
-
-        Args:
-            at (float): The time at which to interpolate the position.
-
-        Returns:
-            Position: The interpolated position at the specified time.
-        """
-        raise NotImplementedError(
-            "get_interpolated_position() must be implemented in the subclass."
-        )
-
-
-# **************************************************************************************
-
-
-class Base3DKinematicInterpolator(ABC):
-    """
-    Base class for interpolators.
-
-    This class is not intended to be instantiated directly.
-
-    It serves as a base for specific interpolation implementations.
-    """
-
-    def __init__(
-        self,
-        positions: List[Position],
-        velocities: List[Velocity],
-    ):
+    def __init__(self, positions: List[Position], velocities: List[Velocity] = []):
         # Ensure we have at least two positions to interpolate:
         if len(positions) < 2:
             raise ValueError("Need at least two positions to interpolate.")
@@ -107,7 +68,7 @@ class Base3DKinematicInterpolator(ABC):
 # **************************************************************************************
 
 
-class BarycentricLagrange3DPositionInterpolator(Base3DPositionInterpolator):
+class BarycentricLagrange3DPositionInterpolator(Base3DInterpolator):
     """
     Barycentric Lagrange interpolation for 3D positions.
 
@@ -122,11 +83,16 @@ class BarycentricLagrange3DPositionInterpolator(Base3DPositionInterpolator):
     """
 
     def __init__(self, positions: List[Position]):
-        super().__init__(positions)
+        self.positions: List[Position] = positions
+
+        # Prepare and compute velocity estimates at each sample via finite differences:
+        self.velocities: List[Velocity] = self._get_derived_velocities()
 
         # Prepare and compute one barycentric weight per position, based solely on the
         # time attribute `at`:
         self.weights: List[float] = self._prepare_basis_weights()
+
+        super().__init__(self.positions, self.velocities)
 
     def _prepare_basis_weights(self) -> List[float]:
         """
@@ -151,6 +117,50 @@ class BarycentricLagrange3DPositionInterpolator(Base3DPositionInterpolator):
             weights[i] = 1.0 / product
 
         return weights
+
+    def _get_derived_velocities(self) -> List[Velocity]:
+        """
+        Prepare and compute velocity estimates for each position.
+
+        Returns:
+            List[Velocity]: List of estimated velocities corresponding to each position.
+
+        Raises:
+            ValueError: If there are not enough position points to estimate a derivative.
+        """
+        n = len(self.positions)
+
+        if n < 2:
+            raise ValueError("Need at least two positions to estimate velocities.")
+
+        velocities: List[Velocity] = []
+
+        for i, position in enumerate(self.positions):
+            neighbors = list(range(max(0, i - 2), min(n, i + 3)))
+
+            xs = [self.positions[j].at for j in neighbors]
+
+            # we need at least two points to estimate a derivative
+            if len(xs) < 2:
+                raise ValueError(
+                    "Not enough position points to estimate position derivative (velocity)."
+                )
+
+            # compute the weights for the first derivative (order=1)
+            weights = compute_finite_difference_weights(xs, position.at, order=1)
+
+            # now form vx, vy, vz in one shot:
+            vx = vy = vz = 0.0
+
+            for weight, j in zip(weights, neighbors):
+                p = self.positions[j]
+                vx += weight * p.x
+                vy += weight * p.y
+                vz += weight * p.z
+
+            velocities.append(Velocity(at=position.at, vx=vx, vy=vy, vz=vz))
+
+        return velocities
 
     def get_interpolated_position(self, at: float) -> Position:
         """
@@ -201,7 +211,7 @@ class BarycentricLagrange3DPositionInterpolator(Base3DPositionInterpolator):
 # **************************************************************************************
 
 
-class Hermite3DPositionInterpolator(Base3DPositionInterpolator):
+class Hermite3DPositionInterpolator(Base3DInterpolator):
     """
     Cubic Hermite interpolation for 3D positions.
 
@@ -211,10 +221,12 @@ class Hermite3DPositionInterpolator(Base3DPositionInterpolator):
     """
 
     def __init__(self, positions: List[Position]):
-        super().__init__(positions)
+        self.positions: List[Position] = positions
 
         # Prepare and compute velocity estimates at each sample via finite differences:
         self.velocities: List[Velocity] = self._get_derived_velocities()
+
+        super().__init__(self.positions, self.velocities)
 
     def _get_derived_velocities(self) -> List[Velocity]:
         """
@@ -348,7 +360,7 @@ class Hermite3DPositionInterpolator(Base3DPositionInterpolator):
 # **************************************************************************************
 
 
-class Hermite3DKinematicInterpolator(Base3DKinematicInterpolator):
+class Hermite3DKinematicInterpolator(Base3DInterpolator):
     """
     Cubic Hermite interpolation for 3D positions and velocities.
 
