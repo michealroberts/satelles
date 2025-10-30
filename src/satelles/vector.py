@@ -57,6 +57,27 @@ def subtract(
 # **************************************************************************************
 
 
+def dilate(vector: CartesianCoordinate, scale: float) -> CartesianCoordinate:
+    """
+    Scale a 3D vector (x, y, z) by a given scale.
+
+    Args:
+        vector (CartesianCoordinate): The vector to scale.
+        scale (float): The scaling factor.
+
+    Returns:
+        CartesianCoordinate: The scaled vector.
+    """
+    return CartesianCoordinate(
+        x=vector["x"] * scale,
+        y=vector["y"] * scale,
+        z=vector["z"] * scale,
+    )
+
+
+# **************************************************************************************
+
+
 def normalise(
     vector: CartesianCoordinate,
 ) -> CartesianCoordinate:
