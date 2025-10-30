@@ -10,10 +10,52 @@ import unittest
 
 from satelles import (
     CartesianCoordinate,
+    add,
     dot,
     normalise,
     rotate,
 )
+
+# **************************************************************************************
+
+
+class TestAddFunction(unittest.TestCase):
+    def test_add_positive_vectors(self):
+        """
+        Add two positive vectors (1, 2, 3) + (4, 5, 6).
+        Expected result: (5, 7, 9)
+        """
+        vector = CartesianCoordinate(x=1.0, y=2.0, z=3.0)
+        delta = CartesianCoordinate(x=4.0, y=5.0, z=6.0)
+        result = add(vector, delta)
+        self.assertAlmostEqual(result["x"], 5.0, places=6)
+        self.assertAlmostEqual(result["y"], 7.0, places=6)
+        self.assertAlmostEqual(result["z"], 9.0, places=6)
+
+    def test_add_negative_vectors(self):
+        """
+        Add two negative vectors (-1, -2, -3) + (-4, -5, -6).
+        Expected result: (-5, -7, -9)
+        """
+        vector = CartesianCoordinate(x=-1.0, y=-2.0, z=-3.0)
+        delta = CartesianCoordinate(x=-4.0, y=-5.0, z=-6.0)
+        result = add(vector, delta)
+        self.assertAlmostEqual(result["x"], -5.0, places=6)
+        self.assertAlmostEqual(result["y"], -7.0, places=6)
+        self.assertAlmostEqual(result["z"], -9.0, places=6)
+
+    def test_add_mixed_vectors(self):
+        """
+        Add mixed vectors (1, -2, 3) + (-4, 5, -6).
+        Expected result: (-3, 3, -3)
+        """
+        vector = CartesianCoordinate(x=1.0, y=-2.0, z=3.0)
+        delta = CartesianCoordinate(x=-4.0, y=5.0, z=-6.0)
+        result = add(vector, delta)
+        self.assertAlmostEqual(result["x"], -3.0, places=6)
+        self.assertAlmostEqual(result["y"], 3.0, places=6)
+        self.assertAlmostEqual(result["z"], -3.0, places=6)
+
 
 # **************************************************************************************
 
