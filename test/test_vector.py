@@ -11,6 +11,7 @@ import unittest
 from satelles import (
     CartesianCoordinate,
     add,
+    cross,
     dilate,
     dot,
     normalise,
@@ -230,6 +231,83 @@ class TestDotFunction(unittest.TestCase):
         j = CartesianCoordinate(x=-4.0, y=5.0, z=-6.0)
         result = dot(i, j)
         self.assertAlmostEqual(result, -32.0, places=6)
+
+
+# **************************************************************************************
+
+
+class TestCrossFunction(unittest.TestCase):
+    def test_cross_orthogonal_vectors(self):
+        """
+        Cross product of orthogonal vectors (1, 0, 0) x (0, 1, 0).
+        Expected result: (0, 0, 1)
+        """
+        i = CartesianCoordinate(x=1.0, y=0.0, z=0.0)
+        j = CartesianCoordinate(x=0.0, y=1.0, z=0.0)
+        result = cross(i, j)
+        self.assertAlmostEqual(result["x"], 0.0, places=6)
+        self.assertAlmostEqual(result["y"], 0.0, places=6)
+        self.assertAlmostEqual(result["z"], 1.0, places=6)
+
+    def test_cross_non_orthogonal_vectors(self):
+        """
+        Cross product of non-orthogonal vectors (1, 2, 3) x (4, 5, 6).
+        Expected result: (-3, 6, -3)
+        """
+        i = CartesianCoordinate(x=1.0, y=2.0, z=3.0)
+        j = CartesianCoordinate(x=4.0, y=5.0, z=6.0)
+        result = cross(i, j)
+        self.assertAlmostEqual(result["x"], -3.0, places=6)
+        self.assertAlmostEqual(result["y"], 6.0, places=6)
+        self.assertAlmostEqual(result["z"], -3.0, places=6)
+
+    def test_cross_parallel_vectors(self):
+        """
+        Cross product of parallel vectors (1, 2, 3) x (2, 4, 6).
+        Expected result: (0, 0, 0)
+        """
+        i = CartesianCoordinate(x=1.0, y=2.0, z=3.0)
+        j = CartesianCoordinate(x=2.0, y=4.0, z=6.0)
+        result = cross(i, j)
+        self.assertAlmostEqual(result["x"], 0.0, places=6)
+        self.assertAlmostEqual(result["y"], 0.0, places=6)
+        self.assertAlmostEqual(result["z"], 0.0, places=6)
+
+    def test_cross_antiparallel_vectors(self):
+        """
+        Cross product of opposite vectors (1, 0, 0) x (-1, 0, 0).
+        Expected result: (0, 0, 0)
+        """
+        i = CartesianCoordinate(x=1.0, y=0.0, z=0.0)
+        j = CartesianCoordinate(x=-1.0, y=0.0, z=0.0)
+        result = cross(i, j)
+        self.assertAlmostEqual(result["x"], 0.0, places=6)
+        self.assertAlmostEqual(result["y"], 0.0, places=6)
+        self.assertAlmostEqual(result["z"], 0.0, places=6)
+
+    def test_cross_zero_vector(self):
+        """
+        Cross product of any vector with the zero vector.
+        Expected result: (0, 0, 0)
+        """
+        i = CartesianCoordinate(x=5.0, y=-3.0, z=2.0)
+        j = CartesianCoordinate(x=0.0, y=0.0, z=0.0)
+        result = cross(i, j)
+        self.assertAlmostEqual(result["x"], 0.0, places=6)
+        self.assertAlmostEqual(result["y"], 0.0, places=6)
+        self.assertAlmostEqual(result["z"], 0.0, places=6)
+
+    def test_cross_negative_components(self):
+        """
+        Cross product with negative components: (1, -2, 3) x (-4, 5, -6).
+        Expected result: (-3, -6, -3)
+        """
+        i = CartesianCoordinate(x=1.0, y=-2.0, z=3.0)
+        j = CartesianCoordinate(x=-4.0, y=5.0, z=-6.0)
+        result = cross(i, j)
+        self.assertAlmostEqual(result["x"], -3.0, places=6)
+        self.assertAlmostEqual(result["y"], -6.0, places=6)
+        self.assertAlmostEqual(result["z"], -3.0, places=6)
 
 
 # **************************************************************************************
