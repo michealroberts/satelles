@@ -73,6 +73,7 @@ from .vector import (
     magnitude,
     normalise,
     project,
+    reject,
     rotate,
     subtract,
 )
@@ -129,6 +130,7 @@ __all__: list[str] = [
     "propagate_rk4",
     "propagate_verlet",
     "project",
+    "reject",
     "rotate",
     "subtract",
     "Acceleration",

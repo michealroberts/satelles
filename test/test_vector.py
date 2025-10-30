@@ -18,6 +18,7 @@ from satelles import (
     dot,
     normalise,
     project,
+    reject,
     rotate,
     subtract,
 )
@@ -527,6 +528,81 @@ class TestProjectFunction(unittest.TestCase):
         onto = CartesianCoordinate(x=0.0, y=0.0, z=0.0)
         with self.assertRaises(ValueError):
             project(vector, onto)
+
+
+# **************************************************************************************
+
+
+class TestRejectFunction(unittest.TestCase):
+    def test_reject_from_parallel_vector(self):
+        """
+        Reject (2, 4, 6) from (1, 2, 3).
+        Expected result: (0, 0, 0) because they are parallel (projection equals the vector).
+        """
+        vector = CartesianCoordinate(x=2.0, y=4.0, z=6.0)
+        base = CartesianCoordinate(x=1.0, y=2.0, z=3.0)
+        result = reject(vector, base)
+        self.assertAlmostEqual(result["x"], 0.0, places=6)
+        self.assertAlmostEqual(result["y"], 0.0, places=6)
+        self.assertAlmostEqual(result["z"], 0.0, places=6)
+
+    def test_reject_from_orthogonal_vector(self):
+        """
+        Reject (1, 0, 0) from (0, 1, 0).
+        Expected result: (1, 0, 0) because projection is zero.
+        """
+        vector = CartesianCoordinate(x=1.0, y=0.0, z=0.0)
+        base = CartesianCoordinate(x=0.0, y=1.0, z=0.0)
+        result = reject(vector, base)
+        self.assertAlmostEqual(result["x"], 1.0, places=6)
+        self.assertAlmostEqual(result["y"], 0.0, places=6)
+        self.assertAlmostEqual(result["z"], 0.0, places=6)
+
+    def test_reject_from_non_unit_vector(self):
+        """
+        Reject (3, 3, 0) from (1, 0, 0).
+        Expected result: (0, 3, 0).
+        """
+        vector = CartesianCoordinate(x=3.0, y=3.0, z=0.0)
+        base = CartesianCoordinate(x=1.0, y=0.0, z=0.0)
+        result = reject(vector, base)
+        self.assertAlmostEqual(result["x"], 0.0, places=6)
+        self.assertAlmostEqual(result["y"], 3.0, places=6)
+        self.assertAlmostEqual(result["z"], 0.0, places=6)
+
+    def test_reject_negative_components(self):
+        """
+        Reject (-3, 6, -9) from (1, -2, 3).
+        Expected result: (0, 0, 0) because the vector is exactly -3 * base.
+        """
+        vector = CartesianCoordinate(x=-3.0, y=6.0, z=-9.0)
+        base = CartesianCoordinate(x=1.0, y=-2.0, z=3.0)
+        result = reject(vector, base)
+        self.assertAlmostEqual(result["x"], 0.0, places=6)
+        self.assertAlmostEqual(result["y"], 0.0, places=6)
+        self.assertAlmostEqual(result["z"], 0.0, places=6)
+
+    def test_reject_zero_vector_from_anything(self):
+        """
+        Reject (0, 0, 0) from any non-zero vector.
+        Expected result: (0, 0, 0)
+        """
+        vector = CartesianCoordinate(x=0.0, y=0.0, z=0.0)
+        base = CartesianCoordinate(x=1.0, y=1.0, z=1.0)
+        result = reject(vector, base)
+        self.assertAlmostEqual(result["x"], 0.0, places=6)
+        self.assertAlmostEqual(result["y"], 0.0, places=6)
+        self.assertAlmostEqual(result["z"], 0.0, places=6)
+
+    def test_reject_from_zero_vector_raises(self):
+        """
+        Rejection relative to a zero vector must raise ValueError
+        (because projection onto a zero vector is undefined).
+        """
+        vector = CartesianCoordinate(x=1.0, y=2.0, z=3.0)
+        base = CartesianCoordinate(x=0.0, y=0.0, z=0.0)
+        with self.assertRaises(ValueError):
+            reject(vector, base)
 
 
 # **************************************************************************************

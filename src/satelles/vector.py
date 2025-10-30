@@ -300,3 +300,23 @@ def project(
 
 
 # **************************************************************************************
+
+
+def reject(
+    vector: CartesianCoordinate, base: CartesianCoordinate
+) -> CartesianCoordinate:
+    """
+    Compute the rejection of one 3D vector from another.
+
+    Args:
+        vector (CartesianCoordinate): The vector to be rejected.
+        base (CartesianCoordinate): The vector to reject from.
+
+    Returns:
+        CartesianCoordinate: The rejection vector.
+    """
+    # Compute the rejection by subtracting the projection from the original vector:
+    return subtract(vector, project(vector, base))
+
+
+# **************************************************************************************
