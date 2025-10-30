@@ -270,3 +270,33 @@ def rotate(
 
 
 # **************************************************************************************
+
+
+def project(
+    vector: CartesianCoordinate, onto: CartesianCoordinate
+) -> CartesianCoordinate:
+    """
+    Project one 3D vector onto another.
+
+    Args:
+        vector (CartesianCoordinate): The vector to be projected.
+        onto (CartesianCoordinate): The vector to project onto.
+
+    Returns:
+        CartesianCoordinate: The projected vector.
+    """
+    # Compute the dot product of 'onto' with itself:
+    oo = dot(onto, onto)
+
+    # Check for zero-length 'onto' vector to avoid division by zero:
+    if isclose(oo, 0.0, abs_tol=TOLERANCE):
+        raise ValueError("Cannot project onto a zero-length vector.")
+
+    # Compute the scaling factor for the projection:
+    scale = dot(vector, onto) / oo
+
+    # Return the projected vector:
+    return dilate(onto, scale)
+
+
+# **************************************************************************************

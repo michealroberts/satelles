@@ -72,6 +72,7 @@ from .vector import (
     dot,
     magnitude,
     normalise,
+    project,
     rotate,
     subtract,
 )
@@ -127,6 +128,7 @@ __all__: list[str] = [
     "perform_checksum_compute",
     "propagate_rk4",
     "propagate_verlet",
+    "project",
     "rotate",
     "subtract",
     "Acceleration",

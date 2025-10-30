@@ -17,6 +17,7 @@ from satelles import (
     distance,
     dot,
     normalise,
+    project,
     rotate,
     subtract,
 )
@@ -451,6 +452,81 @@ class TestRotateFunction(unittest.TestCase):
         vector = CartesianCoordinate(x=1.0, y=2.0, z=3.0)
         with self.assertRaises(ValueError):
             rotate(vector, 45, "a")  # "a" is not a valid axis
+
+
+# **************************************************************************************
+
+
+class TestProjectFunction(unittest.TestCase):
+    def test_project_onto_parallel_vector(self):
+        """
+        Project (2, 4, 6) onto (1, 2, 3).
+        Expected result: (2, 4, 6) because they are parallel.
+        """
+        vector = CartesianCoordinate(x=2.0, y=4.0, z=6.0)
+        onto = CartesianCoordinate(x=1.0, y=2.0, z=3.0)
+        result = project(vector, onto)
+        self.assertAlmostEqual(result["x"], 2.0, places=6)
+        self.assertAlmostEqual(result["y"], 4.0, places=6)
+        self.assertAlmostEqual(result["z"], 6.0, places=6)
+
+    def test_project_onto_orthogonal_vector(self):
+        """
+        Project (1, 0, 0) onto (0, 1, 0).
+        Expected result: (0, 0, 0) because they are orthogonal.
+        """
+        vector = CartesianCoordinate(x=1.0, y=0.0, z=0.0)
+        onto = CartesianCoordinate(x=0.0, y=1.0, z=0.0)
+        result = project(vector, onto)
+        self.assertAlmostEqual(result["x"], 0.0, places=6)
+        self.assertAlmostEqual(result["y"], 0.0, places=6)
+        self.assertAlmostEqual(result["z"], 0.0, places=6)
+
+    def test_project_onto_non_unit_vector(self):
+        """
+        Project (3, 3, 0) onto (1, 0, 0).
+        Expected result: (3, 0, 0).
+        """
+        vector = CartesianCoordinate(x=3.0, y=3.0, z=0.0)
+        onto = CartesianCoordinate(x=1.0, y=0.0, z=0.0)
+        result = project(vector, onto)
+        self.assertAlmostEqual(result["x"], 3.0, places=6)
+        self.assertAlmostEqual(result["y"], 0.0, places=6)
+        self.assertAlmostEqual(result["z"], 0.0, places=6)
+
+    def test_project_negative_components(self):
+        """
+        Project (-3, 6, -9) onto (1, -2, 3).
+        Expected: parallel vector scaled correctly.
+        """
+        vector = CartesianCoordinate(x=-3.0, y=6.0, z=-9.0)
+        onto = CartesianCoordinate(x=1.0, y=-2.0, z=3.0)
+        result = project(vector, onto)
+        # The input is exactly -3 * onto, so projection = vector
+        self.assertAlmostEqual(result["x"], -3.0, places=6)
+        self.assertAlmostEqual(result["y"], 6.0, places=6)
+        self.assertAlmostEqual(result["z"], -9.0, places=6)
+
+    def test_project_zero_vector_onto_anything(self):
+        """
+        Project (0, 0, 0) onto any non-zero vector.
+        Expected result: (0, 0, 0)
+        """
+        vector = CartesianCoordinate(x=0.0, y=0.0, z=0.0)
+        onto = CartesianCoordinate(x=1.0, y=1.0, z=1.0)
+        result = project(vector, onto)
+        self.assertAlmostEqual(result["x"], 0.0, places=6)
+        self.assertAlmostEqual(result["y"], 0.0, places=6)
+        self.assertAlmostEqual(result["z"], 0.0, places=6)
+
+    def test_project_onto_zero_vector_raises(self):
+        """
+        Projection onto a zero vector must raise ValueError.
+        """
+        vector = CartesianCoordinate(x=1.0, y=2.0, z=3.0)
+        onto = CartesianCoordinate(x=0.0, y=0.0, z=0.0)
+        with self.assertRaises(ValueError):
+            project(vector, onto)
 
 
 # **************************************************************************************
