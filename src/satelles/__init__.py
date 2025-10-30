@@ -39,6 +39,9 @@ from .kepler import (
     get_semi_major_axis,
     get_true_anomaly,
 )
+from .matrix import (
+    Matrix3x3,
+)
 from .mjd import (
     convert_mjd_to_datetime,
     get_modified_julian_date_as_parts,
@@ -49,6 +52,12 @@ from .models import (
     Velocity,
 )
 from .orbit import get_orbital_radius
+from .quaternion import (
+    EulerRotation,
+    Quaternion,
+    QuaternionEulerKind,
+    QuaternionEulerOrder,
+)
 from .runge_kutta import (
     RungeKuttaPropagationParameters,
     propagate_rk4,
@@ -140,9 +149,14 @@ __all__: list[str] = [
     "Covariance",
     "CPFEphemeris",
     "CPFHeader",
+    "EulerRotation",
     "Hermite3DPositionInterpolator",
     "Hermite3DKinematicInterpolator",
+    "Matrix3x3",
     "Position",
+    "Quaternion",
+    "QuaternionEulerKind",
+    "QuaternionEulerOrder",
     "RungeKuttaPropagationParameters",
     "Satellite",
     "TLE",
