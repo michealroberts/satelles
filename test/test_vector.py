@@ -11,6 +11,7 @@ import unittest
 from satelles import (
     CartesianCoordinate,
     add,
+    dilate,
     dot,
     normalise,
     rotate,
@@ -97,6 +98,47 @@ class TestSubtractFunction(unittest.TestCase):
         self.assertAlmostEqual(result["x"], 5.0, places=6)
         self.assertAlmostEqual(result["y"], -7.0, places=6)
         self.assertAlmostEqual(result["z"], 9.0, places=6)
+
+
+# **************************************************************************************
+
+
+class TestDilateFunction(unittest.TestCase):
+    def test_dilate_positive_vector(self):
+        """
+        Dilate a positive vector (1, 2, 3) by a scale of 2.
+        Expected result: (2, 4, 6)
+        """
+        vector = CartesianCoordinate(x=1.0, y=2.0, z=3.0)
+        scale = 2.0
+        result = dilate(vector, scale)
+        self.assertAlmostEqual(result["x"], 2.0, places=6)
+        self.assertAlmostEqual(result["y"], 4.0, places=6)
+        self.assertAlmostEqual(result["z"], 6.0, places=6)
+
+    def test_dilate_negative_vector(self):
+        """
+        Dilate a negative vector (-1, -2, -3) by a scale of 3.
+        Expected result: (-3, -6, -9)
+        """
+        vector = CartesianCoordinate(x=-1.0, y=-2.0, z=-3.0)
+        scale = 3.0
+        result = dilate(vector, scale)
+        self.assertAlmostEqual(result["x"], -3.0, places=6)
+        self.assertAlmostEqual(result["y"], -6.0, places=6)
+        self.assertAlmostEqual(result["z"], -9.0, places=6)
+
+    def test_dilate_zero_vector(self):
+        """
+        Dilate the zero vector (0, 0, 0) by any scale (e.g., 5).
+        Expected result: (0, 0, 0)
+        """
+        vector = CartesianCoordinate(x=0.0, y=0.0, z=0.0)
+        scale = 5.0
+        result = dilate(vector, scale)
+        self.assertAlmostEqual(result["x"], 0.0, places=6)
+        self.assertAlmostEqual(result["y"], 0.0, places=6)
+        self.assertAlmostEqual(result["z"], 0.0, places=6)
 
 
 # **************************************************************************************
