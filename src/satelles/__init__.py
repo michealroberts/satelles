@@ -65,6 +65,7 @@ from .symplectic import (
 from .tle import TLE
 from .vector import (
     add,
+    cross,
     dilate,
     dot,
     magnitude,
@@ -103,6 +104,7 @@ __all__: list[str] = [
     "convert_lla_to_ecef",
     "convert_mjd_to_datetime",
     "convert_perifocal_to_eci",
+    "cross",
     "dilate",
     "dot",
     "get_eccentric_anomaly",

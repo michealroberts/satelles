@@ -144,6 +144,27 @@ def dot(i: CartesianCoordinate, j: CartesianCoordinate) -> float:
 # **************************************************************************************
 
 
+def cross(i: CartesianCoordinate, j: CartesianCoordinate) -> CartesianCoordinate:
+    """
+    Compute the cross product of two 3D vectors.
+
+    Args:
+        i (CartesianCoordinate): The first vector.
+        j (CartesianCoordinate): The second vector.
+
+    Returns:
+        CartesianCoordinate: The cross product of the two vectors.
+    """
+    return CartesianCoordinate(
+        x=i["y"] * j["z"] - i["z"] * j["y"],
+        y=i["z"] * j["x"] - i["x"] * j["z"],
+        z=i["x"] * j["y"] - i["y"] * j["x"],
+    )
+
+
+# **************************************************************************************
+
+
 def rotate(
     vector: CartesianCoordinate, angle: float, axis: Literal["x", "y", "z"]
 ) -> CartesianCoordinate:
