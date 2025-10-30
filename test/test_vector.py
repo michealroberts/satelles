@@ -13,6 +13,7 @@ from satelles import (
     add,
     cross,
     dilate,
+    distance,
     dot,
     normalise,
     rotate,
@@ -176,6 +177,51 @@ class TestNormaliseFunction(unittest.TestCase):
         self.assertAlmostEqual(result["x"], magnitude, places=6)
         self.assertAlmostEqual(result["y"], magnitude, places=6)
         self.assertAlmostEqual(result["z"], magnitude, places=6)
+
+
+# **************************************************************************************
+
+
+class TestDistanceFunction(unittest.TestCase):
+    def test_distance_between_points(self):
+        """
+        Distance between two points (1, 2, 3) and (4, 5, 6).
+        Expected result: sqrt((4-1)^2 + (5-2)^2 + (6-3)^2) = sqrt(27) = 5.196152
+        """
+        i = CartesianCoordinate(x=1.0, y=2.0, z=3.0)
+        j = CartesianCoordinate(x=4.0, y=5.0, z=6.0)
+        result = distance(i, j)
+        self.assertAlmostEqual(result, math.sqrt(27), places=6)
+
+    def test_distance_same_point(self):
+        """
+        Distance between the same point (1, 2, 3) and (1, 2, 3).
+        Expected result: 0
+        """
+        i = CartesianCoordinate(x=1.0, y=2.0, z=3.0)
+        j = CartesianCoordinate(x=1.0, y=2.0, z=3.0)
+        result = distance(i, j)
+        self.assertAlmostEqual(result, 0.0, places=6)
+
+    def test_distance_negative_coordinates(self):
+        """
+        Distance between points with negative coordinates (-1, -2, -3) and (4, 5, 6).
+        Expected result: sqrt((4+1)^2 + (5+2)^2 + (6+3)^2) = sqrt(155) = 12.449900
+        """
+        i = CartesianCoordinate(x=-1.0, y=-2.0, z=-3.0)
+        j = CartesianCoordinate(x=4.0, y=5.0, z=6.0)
+        result = distance(i, j)
+        self.assertAlmostEqual(result, math.sqrt(155), places=6)
+
+    def test_distance_mixed_coordinates(self):
+        """
+        Distance between points with mixed coordinates (1, -2, 3) and (-4, 5, -6).
+        Expected result: sqrt((-4-1)^2 + (5+2)^2 + (-6-3)^2) = sqrt(155) = 12.449900
+        """
+        i = CartesianCoordinate(x=1.0, y=-2.0, z=3.0)
+        j = CartesianCoordinate(x=-4.0, y=5.0, z=-6.0)
+        result = distance(i, j)
+        self.assertAlmostEqual(result, math.sqrt(155), places=6)
 
 
 # **************************************************************************************

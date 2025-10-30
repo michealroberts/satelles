@@ -127,6 +127,23 @@ def magnitude(vector: CartesianCoordinate) -> float:
 # **************************************************************************************
 
 
+def distance(i: CartesianCoordinate, j: CartesianCoordinate) -> float:
+    """
+    Compute the distance between two points in 3D space.
+
+    Args:
+        i (CartesianCoordinate): The first point.
+        j (CartesianCoordinate): The second point.
+
+    Returns:
+        float: The distance between the two points.
+    """
+    return magnitude(subtract(j, i))
+
+
+# **************************************************************************************
+
+
 def dot(i: CartesianCoordinate, j: CartesianCoordinate) -> float:
     """
     Compute the dot product of two 3D vectors.
