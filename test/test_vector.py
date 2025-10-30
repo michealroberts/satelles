@@ -11,6 +11,7 @@ import unittest
 from satelles import (
     CartesianCoordinate,
     add,
+    angle,
     cross,
     dilate,
     distance,
@@ -354,6 +355,41 @@ class TestCrossFunction(unittest.TestCase):
         self.assertAlmostEqual(result["x"], -3.0, places=6)
         self.assertAlmostEqual(result["y"], -6.0, places=6)
         self.assertAlmostEqual(result["z"], -3.0, places=6)
+
+
+# **************************************************************************************
+
+
+class TestAngleFunction(unittest.TestCase):
+    def test_angle_between_perpendicular_vectors(self):
+        """
+        Angle between perpendicular vectors (1, 0, 0) and (0, 1, 0).
+        Expected result: 90 degrees
+        """
+        i = CartesianCoordinate(x=1.0, y=0.0, z=0.0)
+        j = CartesianCoordinate(x=0.0, y=1.0, z=0.0)
+        result = angle(i, j)
+        self.assertAlmostEqual(result, 90.0, places=6)
+
+    def test_angle_between_parallel_vectors(self):
+        """
+        Angle between parallel vectors (1, 2, 3) and (2, 4, 6).
+        Expected result: 0 degrees
+        """
+        i = CartesianCoordinate(x=1.0, y=2.0, z=3.0)
+        j = CartesianCoordinate(x=2.0, y=4.0, z=6.0)
+        result = angle(i, j)
+        self.assertAlmostEqual(result, 0.0, places=6)
+
+    def test_angle_between_antiparallel_vectors(self):
+        """
+        Angle between opposite vectors (1, 0, 0) and (-1, 0, 0).
+        Expected result: 180 degrees
+        """
+        i = CartesianCoordinate(x=1.0, y=0.0, z=0.0)
+        j = CartesianCoordinate(x=-1.0, y=0.0, z=0.0)
+        result = angle(i, j)
+        self.assertAlmostEqual(result, 180.0, places=6)
 
 
 # **************************************************************************************

@@ -5,10 +5,15 @@
 
 # **************************************************************************************
 
-from math import cos, isclose, radians, sin, sqrt
+from math import acos, cos, degrees, isclose, radians, sin, sqrt
+from sys import float_info
 from typing import Literal
 
 from .common import CartesianCoordinate
+
+# **************************************************************************************
+
+TOLERANCE = float_info.epsilon
 
 # **************************************************************************************
 
@@ -96,7 +101,7 @@ def normalise(
     # Compute the vector's magnitude (length):
     r = magnitude(vector)
 
-    if isclose(r, 0.0, abs_tol=1e-15):
+    if isclose(r, 0.0, abs_tol=TOLERANCE):
         raise ValueError("Cannot convert a zero-length vector to a unit vector.")
 
     return CartesianCoordinate(
@@ -177,6 +182,40 @@ def cross(i: CartesianCoordinate, j: CartesianCoordinate) -> CartesianCoordinate
         y=i["z"] * j["x"] - i["x"] * j["z"],
         z=i["x"] * j["y"] - i["y"] * j["x"],
     )
+
+
+# **************************************************************************************
+
+
+def angle(i: CartesianCoordinate, j: CartesianCoordinate) -> float:
+    """
+    Compute the angle in degrees between two 3D vectors.
+
+    Args:
+        i (CartesianCoordinate): The first vector.
+        j (CartesianCoordinate): The second vector.
+
+    Returns:
+        float: The angle between the two vectors in degrees.
+    """
+    # Compute the magnitude of vector i:
+    im = magnitude(i)
+
+    # Compute the magnitude of vector j:
+    jm = magnitude(j)
+
+    # Check for zero-length vectors to avoid division by zero:
+    if isclose(im, 0.0, abs_tol=TOLERANCE) or isclose(jm, 0.0, abs_tol=TOLERANCE):
+        raise ValueError("Cannot compute the angle with a zero-length vector.")
+
+    # Compute the cosine of the angle using the dot product formula:
+    angle = dot(i, j) / (im * jm)
+
+    # Clamp the cosine value to the valid range [-1, 1] to avoid numerical issues:
+    angle = max(-1.0, min(1.0, angle))
+
+    # Compute the angle in radians and then convert to degrees:
+    return degrees(acos(angle))
 
 
 # **************************************************************************************
