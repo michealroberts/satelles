@@ -34,6 +34,29 @@ def add(vector: CartesianCoordinate, delta: CartesianCoordinate) -> CartesianCoo
 # **************************************************************************************
 
 
+def subtract(
+    vector: CartesianCoordinate, delta: CartesianCoordinate
+) -> CartesianCoordinate:
+    """
+    Subtract one 3D vector (x, y, z) from another component-wise.
+
+    Args:
+        vector (CartesianCoordinate): The original vector.
+        delta (CartesianCoordinate): The vector to subtract.
+
+    Returns:
+        CartesianCoordinate: The resulting vector after subtraction.
+    """
+    return CartesianCoordinate(
+        x=vector["x"] - delta["x"],
+        y=vector["y"] - delta["y"],
+        z=vector["z"] - delta["z"],
+    )
+
+
+# **************************************************************************************
+
+
 def normalise(
     vector: CartesianCoordinate,
 ) -> CartesianCoordinate:
