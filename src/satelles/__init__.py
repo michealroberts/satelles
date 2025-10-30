@@ -65,6 +65,7 @@ from .symplectic import (
 from .tle import TLE
 from .vector import (
     add,
+    angle,
     cross,
     dilate,
     distance,
@@ -97,6 +98,7 @@ __all__: list[str] = [
     "EARTH_MEAN_RADIUS",
     "GRAVITATIONAL_CONSTANT",
     "add",
+    "angle",
     "convert_ecef_to_eci",
     "convert_ecef_to_enu",
     "convert_eci_to_ecef",
