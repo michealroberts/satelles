@@ -13,6 +13,27 @@ from .common import CartesianCoordinate
 # **************************************************************************************
 
 
+def add(vector: CartesianCoordinate, delta: CartesianCoordinate) -> CartesianCoordinate:
+    """
+    Add two 3D vectors (x, y, z) component-wise.
+
+    Args:
+        vector (CartesianCoordinate): The original vector.
+        delta (CartesianCoordinate): The vector to add.
+
+    Returns:
+        CartesianCoordinate: The resulting vector after addition.
+    """
+    return CartesianCoordinate(
+        x=vector["x"] + delta["x"],
+        y=vector["y"] + delta["y"],
+        z=vector["z"] + delta["z"],
+    )
+
+
+# **************************************************************************************
+
+
 def normalise(
     vector: CartesianCoordinate,
 ) -> CartesianCoordinate:
