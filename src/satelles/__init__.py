@@ -68,6 +68,7 @@ from .vector import (
     dot,
     normalise,
     rotate,
+    subtract,
 )
 from .velocity import get_perifocal_velocity
 from .visibility import is_visible
@@ -117,6 +118,7 @@ __all__: list[str] = [
     "propagate_rk4",
     "propagate_verlet",
     "rotate",
+    "subtract",
     "Acceleration",
     "BarycentricLagrange3DPositionInterpolator",
     "Base3DInterpolator",

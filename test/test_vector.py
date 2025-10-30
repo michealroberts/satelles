@@ -14,6 +14,7 @@ from satelles import (
     dot,
     normalise,
     rotate,
+    subtract,
 )
 
 # **************************************************************************************
@@ -55,6 +56,47 @@ class TestAddFunction(unittest.TestCase):
         self.assertAlmostEqual(result["x"], -3.0, places=6)
         self.assertAlmostEqual(result["y"], 3.0, places=6)
         self.assertAlmostEqual(result["z"], -3.0, places=6)
+
+
+# **************************************************************************************
+
+
+class TestSubtractFunction(unittest.TestCase):
+    def test_subtract_positive_vectors(self):
+        """
+        Subtract two positive vectors (5, 7, 9) - (1, 2, 3).
+        Expected result: (4, 5, 6)
+        """
+        vector = CartesianCoordinate(x=5.0, y=7.0, z=9.0)
+        delta = CartesianCoordinate(x=1.0, y=2.0, z=3.0)
+        result = subtract(vector, delta)
+        self.assertAlmostEqual(result["x"], 4.0, places=6)
+        self.assertAlmostEqual(result["y"], 5.0, places=6)
+        self.assertAlmostEqual(result["z"], 6.0, places=6)
+
+    def test_subtract_negative_vectors(self):
+        """
+        Subtract two negative vectors (-1, -2, -3) - (-4, -5, -6).
+        Expected result: (3, 3, 3)
+        """
+        vector = CartesianCoordinate(x=-1.0, y=-2.0, z=-3.0)
+        delta = CartesianCoordinate(x=-4.0, y=-5.0, z=-6.0)
+        result = subtract(vector, delta)
+        self.assertAlmostEqual(result["x"], 3.0, places=6)
+        self.assertAlmostEqual(result["y"], 3.0, places=6)
+        self.assertAlmostEqual(result["z"], 3.0, places=6)
+
+    def test_subtract_mixed_vectors(self):
+        """
+        Subtract mixed vectors (1, -2, 3) - (-4, 5, -6).
+        Expected result: (5, -7, 9)
+        """
+        vector = CartesianCoordinate(x=1.0, y=-2.0, z=3.0)
+        delta = CartesianCoordinate(x=-4.0, y=5.0, z=-6.0)
+        result = subtract(vector, delta)
+        self.assertAlmostEqual(result["x"], 5.0, places=6)
+        self.assertAlmostEqual(result["y"], -7.0, places=6)
+        self.assertAlmostEqual(result["z"], 9.0, places=6)
 
 
 # **************************************************************************************
