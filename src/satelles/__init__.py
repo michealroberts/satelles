@@ -66,6 +66,7 @@ from .tle import TLE
 from .vector import (
     add,
     dot,
+    magnitude,
     normalise,
     rotate,
     subtract,
@@ -114,6 +115,7 @@ __all__: list[str] = [
     "get_true_anomaly",
     "is_visible",
     "normalise",
+    "magnitude",
     "perform_checksum_compute",
     "propagate_rk4",
     "propagate_verlet",

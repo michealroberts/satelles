@@ -72,19 +72,35 @@ def normalise(
     Raises:
         ValueError: If the input vector's magnitude is zero.
     """
-    x, y, z = vector["x"], vector["y"], vector["z"]
-
     # Compute the vector's magnitude (length):
-    r = sqrt(x**2 + y**2 + z**2)
+    r = magnitude(vector)
 
     if isclose(r, 0.0, abs_tol=1e-15):
         raise ValueError("Cannot convert a zero-length vector to a unit vector.")
 
     return CartesianCoordinate(
-        x=x / r,
-        y=y / r,
-        z=z / r,
+        x=vector["x"] / r,
+        y=vector["y"] / r,
+        z=vector["z"] / r,
     )
+
+
+# **************************************************************************************
+
+
+def magnitude(vector: CartesianCoordinate) -> float:
+    """
+    Compute the magnitude (length) of a 3D vector.
+
+    Args:
+        vector (CartesianCoordinate): The input vector.
+
+    Returns:
+        float: The magnitude of the vector.
+    """
+    x, y, z = vector["x"], vector["y"], vector["z"]
+
+    return sqrt(x**2 + y**2 + z**2)
 
 
 # **************************************************************************************
