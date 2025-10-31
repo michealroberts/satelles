@@ -73,6 +73,7 @@ from .symplectic import (
 )
 from .tle import TLE
 from .vector import (
+    Vector,
     add,
     angle,
     cross,
@@ -160,6 +161,7 @@ __all__: list[str] = [
     "RungeKuttaPropagationParameters",
     "Satellite",
     "TLE",
+    "Vector",
     "Velocity",
     "VerletPropagationParameters",
 ]
