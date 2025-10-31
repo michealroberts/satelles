@@ -1,6 +1,6 @@
 [project]
 name = "satelles"
-version = "0.18.0"
+version = "0.19.0"
 description = "Modern, type-safe python library for TLE, OMM et al. handling and orbit propagation to accurately locate your satellites in the sky."
 authors = [{ name = "michealroberts", email = "michael@observerly.com" }]
 keywords = [
@@ -34,7 +34,6 @@ build-backend = "hatchling.build"
 
 [dependency-groups]
 dev = [
-    "astropy>=7.0.1",
     "mypy>=1.15.0",
     "pre-commit>=4.1.0",
     "pytest>=8.3.4",
