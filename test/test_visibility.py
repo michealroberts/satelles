@@ -38,7 +38,9 @@ class TestIsVisible(unittest.TestCase):
     def setUp(self) -> None:
         # Set the observer to be in San Francisco, CA, USA:
         self.observer: GeographicCoordinate = GeographicCoordinate(
-            lat=37.7749, lon=-122.4194, el=0.0
+            latitude=37.7749,
+            longitude=-122.4194,
+            elevation=0.0,
         )
 
     def test_gps26_should_be_visible(self) -> None:

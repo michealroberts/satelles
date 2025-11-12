@@ -219,8 +219,8 @@ def convert_ecef_to_enu(
     dz = ecef["z"] - site["z"]
 
     # Convert the latitude and longitude to radians:
-    φ = radians(observer["lat"])
-    θ = radians(observer["lon"])
+    φ = radians(observer["latitude"])
+    θ = radians(observer["longitude"])
 
     # The east coordinate is the projection of the ECEF coordinates onto the local
     # east-west plane. The negative sine is used here because the eastward direction
@@ -292,13 +292,13 @@ def convert_lla_to_ecef(
     earth_radius = EARTH_EQUATORIAL_RADIUS
 
     # Convert the latitude to radians:
-    φ = radians(lla["lat"])
+    φ = radians(lla["latitude"])
 
     # Convert the longitude to radians:
-    θ = radians(lla["lon"])
+    θ = radians(lla["longitude"])
 
     # The height (el) is the height above the ellipsoid (e.g., the elevation):
-    h = lla["el"]
+    h = lla["elevation"]
 
     # The flattening factor (f) is the ratio of the difference between the equatorial
     # and polar radii to the equatorial radius, in the WGS-84 ellipsoid model:
