@@ -13,18 +13,18 @@ from satelles import convert_ecef_to_enu, convert_enu_to_horizontal, convert_lla
 
 # A location on the Earth's surface, defined by geographic coordinates (e.g., in Slough, UK):
 observer = GeographicCoordinate(
-    lat=51.51084959252545,
-    lon=-0.5930215986816242,
-    el=0.0,
+    latitude=51.51084959252545,
+    longitude=-0.5930215986816242,
+    elevation=0.0,
 )
 
 # **************************************************************************************
 
 # An aircraft's location, defined by geographic coordinates (e.g., just taking off from Heathrow Airport):
 aircraft = GeographicCoordinate(
-    lat=51.46570730163472,
-    lon=-0.5195854299267121,
-    el=100.0,
+    latitude=51.46570730163472,
+    longitude=-0.5195854299267121,
+    elevation=100.0,
 )
 
 # **************************************************************************************

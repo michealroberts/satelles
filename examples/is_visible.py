@@ -14,7 +14,11 @@ from satelles import TLE, is_visible
 # **************************************************************************************
 
 # Set some observer to be in San Francisco, CA, USA:
-observer = GeographicCoordinate(lat=37.7749, lon=-122.4194, el=0.0)
+observer = GeographicCoordinate(
+    latitude=37.7749,
+    longitude=-122.4194,
+    elevation=0.0,
+)
 
 # **************************************************************************************
 
