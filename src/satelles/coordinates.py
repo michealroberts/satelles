@@ -97,6 +97,40 @@ def convert_perifocal_to_eci(
 # **************************************************************************************
 
 
+def convert_eci_to_perifocal(
+    eci: CartesianCoordinate,
+    argument_of_perigee: float,
+    inclination: float,
+    raan: float,
+) -> CartesianCoordinate:
+    """
+    Convert Earth-Centered Inertial (ECI) coordinates to perifocal coordinates.
+
+    Args:
+        eci (CartesianCoordinate): The ECI coordinates (x, y, z).
+        argument_of_perigee (float): The argument of perigee (ω) (
+        inclination (float): The inclination (i) (in degrees).
+        raan (float): The right ascension of ascending node (Ω) (in degrees
+
+    Returns:
+        CartesianCoordinate: The perifocal coordinates (x, y, z).
+    """
+    # Inverse rotate by Right Ascension of Ascending Node (RAAN) around the z-axis:
+    rotated_z = rotate(eci, -raan, "z")
+
+    # Inverse rotate by inclination around the x-axis:
+    rotated_x = rotate(rotated_z, -inclination, "x")
+
+    # Inverse rotate by argument of perigee around the z-axis:
+    perifocal = rotate(rotated_x, -argument_of_perigee, "z")
+
+    # The perifocal coordinates are now in the inversely rotated frame:
+    return perifocal
+
+
+# **************************************************************************************
+
+
 def convert_ecef_to_eci(
     ecef: CartesianCoordinate,
     when: datetime,

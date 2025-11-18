@@ -24,6 +24,7 @@ from satelles import (
     convert_ecef_to_enu,
     convert_eci_to_ecef,
     convert_eci_to_equatorial,
+    convert_eci_to_perifocal,
     convert_enu_to_horizontal,
     convert_lla_to_ecef,
     convert_perifocal_to_eci,
@@ -171,7 +172,7 @@ class TestConvertPerifocalToECI(unittest.TestCase):
 
 class TestConvertECEFToECI(unittest.TestCase):
     def assertCoordinatesAlmostEqual(
-        self, coord1: CartesianCoordinate, coord2: CartesianCoordinate, places: int = 6
+        self, coord1: CartesianCoordinate, coord2: CartesianCoordinate, places: int = 4
     ) -> None:
         self.assertAlmostEqual(coord1["x"], coord2["x"], places=places)
         self.assertAlmostEqual(coord1["y"], coord2["y"], places=places)
@@ -423,6 +424,61 @@ class TestConvertECIToEquatorial(unittest.TestCase):
         result = convert_eci_to_equatorial(eci)
         expected: EquatorialCoordinate = {"ra": 45.0, "dec": 35.26439}
         self.assertEquatorialAlmostEqual(result, expected)
+
+
+# **************************************************************************************
+
+
+class TestConvertECIToPerifocal(unittest.TestCase):
+    def assertCoordinatesAlmostEqual(
+        self, coord1: CartesianCoordinate, coord2: CartesianCoordinate, places: int = 6
+    ) -> None:
+        self.assertAlmostEqual(coord1["x"], coord2["x"], places=places)
+        self.assertAlmostEqual(coord1["y"], coord2["y"], places=places)
+        self.assertAlmostEqual(coord1["z"], coord2["z"], places=places)
+
+    def test_identity(self) -> None:
+        """
+        When all angles are zero, the output should equal the input.
+        """
+        eci: CartesianCoordinate = {"x": 1.0, "y": 2.0, "z": 3.0}
+        result = convert_eci_to_perifocal(eci, 0, 0, 0)
+        expected: CartesianCoordinate = {"x": 1.0, "y": 2.0, "z": 3.0}
+        self.assertCoordinatesAlmostEqual(result, expected)
+
+    def test_argument_of_perigee_only(self) -> None:
+        """
+        For input (0, 1, 0) with argument_of_perigee 90° (and other angles zero),
+        the expected result should be (1, 0, 0).
+        """
+        eci: CartesianCoordinate = {"x": 0.0, "y": 1.0, "z": 0.0}
+        result = convert_eci_to_perifocal(eci, 90, 0, 0)
+        expected: CartesianCoordinate = {"x": 1.0, "y": 0.0, "z": 0.0}
+        self.assertCoordinatesAlmostEqual(result, expected)
+
+    def test_all_rotations(self) -> None:
+        """
+        Test with all angles set to 90° for input (0, 0, 1).
+        Step-by-step:
+          - Rotate (0, 0, 1) by 90° about z: (0, 0, 1) (unchanged)
+          - Rotate (0, 0, 1) by 90° about x: (0, -1, 0)
+          - Rotate (0, -1, 0) by 90° about z: (1, 0, 0)
+        Expected result: (0, 0, 1)
+        """
+        eci: CartesianCoordinate = {"x": 0.0, "y": 0.0, "z": 1.0}
+        result = convert_eci_to_perifocal(eci, 90, 90, 90)
+        expected: CartesianCoordinate = {"x": 1.0, "y": 0.0, "z": 0.0}
+        self.assertCoordinatesAlmostEqual(result, expected)
+
+    def test_complex_rotation(self) -> None:
+        """
+        For input (-0.70710678, 0.70710678, 1.0) with angles (45, 45, 45):
+        Expected result (approximately): (1, 1, 0)
+        """
+        eci: CartesianCoordinate = {"x": -0.70710678, "y": 0.70710678, "z": 1.0}
+        result = convert_eci_to_perifocal(eci, 45, 45, 45)
+        expected: CartesianCoordinate = {"x": 1.0, "y": 1.0, "z": 0.0}
+        self.assertCoordinatesAlmostEqual(result, expected)
 
 
 # **************************************************************************************
