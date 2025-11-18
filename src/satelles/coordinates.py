@@ -108,9 +108,9 @@ def convert_eci_to_perifocal(
 
     Args:
         eci (CartesianCoordinate): The ECI coordinates (x, y, z).
-        argument_of_perigee (float): The argument of perigee (ω) (
+        argument_of_perigee (float): The argument of perigee (ω) (in degrees).
         inclination (float): The inclination (i) (in degrees).
-        raan (float): The right ascension of ascending node (Ω) (in degrees
+        raan (float): The right ascension of ascending node (Ω) (in degrees).
 
     Returns:
         CartesianCoordinate: The perifocal coordinates (x, y, z).
