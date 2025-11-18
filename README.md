@@ -9,13 +9,15 @@ Modern, type-safe, zero-dependency python library for TLE, OMM et al. handling a
 
 ## Installation
 
+We recommend using [uv](https://uv.astral.sh) to manage your Python environments. 
+
+To install `satelles` into your uv environment, run:
+
 ```bash
 uv add satelles
 ```
 
-or
-
-using your preferred environment / package manager of choice, e.g., `poetry`, `conda` or `pip`:
+_Alternatively_, you can install `satelles` using your preferred environment or package manager of choice, e.g., `poetry`, `conda`, or `pip`:
 
 ```bash
 pip install satelles
@@ -80,4 +82,4 @@ We have also provided further usage examples in the [examples](./examples) direc
 
 ### License
 
-This project is licensed under the terms of the MIT license.
+This project is licensed under the terms of the MIT license. See the [LICENSE](./LICENSE) file for details.
