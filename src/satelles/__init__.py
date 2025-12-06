@@ -29,6 +29,8 @@ from .earth import (
 )
 from .frame import (
     Reference,
+    Transform,
+    TransformProvider,
 )
 from .gravity import get_gravitational_acceleration
 from .interpolation import (
@@ -167,6 +169,8 @@ __all__: list[str] = [
     "RungeKuttaPropagationParameters",
     "Satellite",
     "TLE",
+    "Transform",
+    "TransformProvider",
     "Vector",
     "Velocity",
     "VerletPropagationParameters",
