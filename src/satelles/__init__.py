@@ -27,6 +27,9 @@ from .earth import (
     EARTH_MEAN_RADIUS,
     EARTH_POLAR_RADIUS,
 )
+from .frame import (
+    Reference,
+)
 from .gravity import get_gravitational_acceleration
 from .interpolation import (
     BarycentricLagrange3DPositionInterpolator,
@@ -160,6 +163,7 @@ __all__: list[str] = [
     "Quaternion",
     "QuaternionEulerKind",
     "QuaternionEulerOrder",
+    "Reference",
     "RungeKuttaPropagationParameters",
     "Satellite",
     "TLE",
