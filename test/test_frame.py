@@ -6,9 +6,11 @@
 # **************************************************************************************
 
 import unittest
+from datetime import datetime
 
+from satelles.body import Body
 from satelles.common import CartesianCoordinate
-from satelles.frame import Reference, Transform
+from satelles.frame import Frame, Reference, Transform
 from satelles.quaternion import Quaternion
 
 # **************************************************************************************
@@ -109,6 +111,213 @@ class TestTransform(unittest.TestCase):
         self.assertAlmostEqual(original["x"], sequential["x"], places=12)
         self.assertAlmostEqual(original["y"], sequential["y"], places=12)
         self.assertAlmostEqual(original["z"], sequential["z"], places=12)
+
+
+# **************************************************************************************
+
+
+class TestFrame(unittest.TestCase):
+    def test_same_frame_identity(self) -> None:
+        """Transform to the same frame should be identity."""
+        time = datetime(2025, 1, 1)
+
+        root = Frame(
+            reference=Reference.ECI,
+            origin=Body.EARTH,
+            is_inertial=True,
+            parent=None,
+            transform_to_parent=lambda time: Transform(
+                rotation=Quaternion.identity(),
+                translation=CartesianCoordinate(
+                    x=0.0,
+                    y=0.0,
+                    z=0.0,
+                ),
+            ),
+            name="ROOT",
+        )
+
+        transform = root.transform_to(time, root)
+
+        position = CartesianCoordinate(
+            x=3.0,
+            y=-1.0,
+            z=5.0,
+        )
+        result = transform.apply_to_position(position)
+
+        self.assertAlmostEqual(result["x"], position["x"])
+        self.assertAlmostEqual(result["y"], position["y"])
+        self.assertAlmostEqual(result["z"], position["z"])
+
+    def test_child_to_parent_translation(self) -> None:
+        """Child to parent transform should map child origin to parent offset."""
+        time = datetime(2025, 1, 1)
+
+        root = Frame(
+            reference=Reference.ECI,
+            origin=Body.EARTH,
+            is_inertial=True,
+            parent=None,
+            transform_to_parent=lambda time: Transform(
+                rotation=Quaternion.identity(),
+                translation=CartesianCoordinate(
+                    x=0.0,
+                    y=0.0,
+                    z=0.0,
+                ),
+            ),
+            name="ROOT",
+        )
+
+        child = Frame(
+            reference=Reference.ECI,
+            origin=Body.EARTH,
+            is_inertial=True,
+            parent=root,
+            transform_to_parent=lambda time: Transform(
+                rotation=Quaternion.identity(),
+                translation=CartesianCoordinate(
+                    x=1.0,
+                    y=0.0,
+                    z=0.0,
+                ),
+            ),
+            name="CHILD",
+        )
+
+        transform = child.transform_to(time, root)
+
+        position = CartesianCoordinate(
+            x=0.0,
+            y=0.0,
+            z=0.0,
+        )
+        result = transform.apply_to_position(position)
+
+        self.assertAlmostEqual(result["x"], 1.0)
+        self.assertAlmostEqual(result["y"], 0.0)
+        self.assertAlmostEqual(result["z"], 0.0)
+
+    def test_parent_to_child_inverse(self) -> None:
+        """Parent to child transform should be inverse of child to parent."""
+        time = datetime(2025, 1, 1)
+
+        root = Frame(
+            reference=Reference.ECI,
+            origin=Body.EARTH,
+            is_inertial=True,
+            parent=None,
+            transform_to_parent=lambda time: Transform(
+                rotation=Quaternion.identity(),
+                translation=CartesianCoordinate(
+                    x=0.0,
+                    y=0.0,
+                    z=0.0,
+                ),
+            ),
+            name="ROOT",
+        )
+
+        child = Frame(
+            reference=Reference.ECI,
+            origin=Body.EARTH,
+            is_inertial=True,
+            parent=root,
+            transform_to_parent=lambda time: Transform(
+                rotation=Quaternion.identity(),
+                translation=CartesianCoordinate(
+                    x=1.0,
+                    y=0.0,
+                    z=0.0,
+                ),
+            ),
+            name="CHILD",
+        )
+
+        forward = root.transform_to(time, child)
+        backward = child.transform_to(time, root)
+
+        origin_root = CartesianCoordinate(
+            x=0.0,
+            y=0.0,
+            z=0.0,
+        )
+        origin_child = forward.apply_to_position(origin_root)
+        origin_back = backward.apply_to_position(origin_child)
+
+        self.assertAlmostEqual(origin_child["x"], -1.0)
+        self.assertAlmostEqual(origin_child["y"], 0.0)
+        self.assertAlmostEqual(origin_child["z"], 0.0)
+
+        self.assertAlmostEqual(origin_back["x"], origin_root["x"])
+        self.assertAlmostEqual(origin_back["y"], origin_root["y"])
+        self.assertAlmostEqual(origin_back["z"], origin_root["z"])
+
+    def test_sibling_frames_via_common_ancestor(self) -> None:
+        """Sibling frames should transform correctly via common ancestor."""
+        time = datetime(2025, 1, 1)
+
+        root = Frame(
+            reference=Reference.ECI,
+            origin=Body.EARTH,
+            is_inertial=True,
+            parent=None,
+            transform_to_parent=lambda time: Transform(
+                rotation=Quaternion.identity(),
+                translation=CartesianCoordinate(
+                    x=0.0,
+                    y=0.0,
+                    z=0.0,
+                ),
+            ),
+            name="ROOT",
+        )
+
+        first = Frame(
+            reference=Reference.ECI,
+            origin=Body.EARTH,
+            is_inertial=True,
+            parent=root,
+            transform_to_parent=lambda time: Transform(
+                rotation=Quaternion.identity(),
+                translation=CartesianCoordinate(
+                    x=1.0,
+                    y=0.0,
+                    z=0.0,
+                ),
+            ),
+            name="FIRST",
+        )
+
+        second = Frame(
+            reference=Reference.ECI,
+            origin=Body.EARTH,
+            is_inertial=True,
+            parent=root,
+            transform_to_parent=lambda time: Transform(
+                rotation=Quaternion.identity(),
+                translation=CartesianCoordinate(
+                    x=0.0,
+                    y=2.0,
+                    z=0.0,
+                ),
+            ),
+            name="SECOND",
+        )
+
+        transform = first.transform_to(time, second)
+
+        position = CartesianCoordinate(
+            x=0.0,
+            y=0.0,
+            z=0.0,
+        )
+        result = transform.apply_to_position(position)
+
+        self.assertAlmostEqual(result["x"], 1.0)
+        self.assertAlmostEqual(result["y"], -2.0)
+        self.assertAlmostEqual(result["z"], 0.0)
 
 
 # **************************************************************************************
