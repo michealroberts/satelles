@@ -5,6 +5,7 @@
 
 # **************************************************************************************
 
+from .body import Body
 from .checksum import perform_checksum_compute
 from .common import Acceleration, CartesianCoordinate
 from .constants import GRAVITATIONAL_CONSTANT
@@ -28,6 +29,7 @@ from .earth import (
     EARTH_POLAR_RADIUS,
 )
 from .frame import (
+    Frame,
     Reference,
     Transform,
     TransformProvider,
@@ -153,11 +155,13 @@ __all__: list[str] = [
     "Acceleration",
     "BarycentricLagrange3DPositionInterpolator",
     "Base3DInterpolator",
+    "Body",
     "CartesianCoordinate",
     "Covariance",
     "CPFEphemeris",
     "CPFHeader",
     "EulerRotation",
+    "Frame",
     "Hermite3DPositionInterpolator",
     "Hermite3DKinematicInterpolator",
     "Matrix3x3",
