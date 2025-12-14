@@ -60,6 +60,7 @@ from .models import (
     Velocity,
 )
 from .orbit import get_orbital_radius
+from .origin import Origin
 from .quaternion import (
     EulerRotation,
     Quaternion,
@@ -173,6 +174,7 @@ __all__: list[str] = [
     "Hermite3DPositionInterpolator",
     "Hermite3DKinematicInterpolator",
     "Matrix3x3",
+    "Origin",
     "Position",
     "Quaternion",
     "QuaternionEulerKind",
