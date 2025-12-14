@@ -82,6 +82,7 @@ from .symplectic import (
 from .tle import TLE
 from .transforms import (
     ecef_to_eci_transform_provider,
+    eci_to_ecef_transform_provider,
     identity_transform_provider,
 )
 from .vector import (
@@ -137,6 +138,7 @@ __all__: list[str] = [
     "distance",
     "dot",
     "ecef_to_eci_transform_provider",
+    "eci_to_ecef_transform_provider",
     "get_eccentric_anomaly",
     "get_gravitational_acceleration",
     "get_modified_julian_date_as_parts",

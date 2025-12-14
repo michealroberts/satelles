@@ -12,6 +12,7 @@ from satelles.coordinates import CartesianCoordinate
 from satelles.quaternion import Quaternion
 from satelles.transforms import (
     ecef_to_eci_transform_provider,
+    eci_to_ecef_transform_provider,
     identity_transform_provider,
 )
 
@@ -155,6 +156,67 @@ class TestECEFToECITransformProvider(unittest.TestCase):
         when = datetime(2025, 6, 1, 0, 0, 0, tzinfo=timezone.utc)
 
         transform = ecef_to_eci_transform_provider(when)
+
+        self.assertEqual(transform.translation["x"], 0.0)
+        self.assertEqual(transform.translation["y"], 0.0)
+        self.assertEqual(transform.translation["z"], 0.0)
+
+
+# **************************************************************************************
+
+
+class TestECIToECEFTransformProvider(unittest.TestCase):
+    def test_eci_to_ecef_rotates_z_axis_only(self) -> None:
+        """
+        Test that the transform has a rotation about the Z-axis only.
+        """
+        when = datetime(2025, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
+
+        transform = eci_to_ecef_transform_provider(when)
+
+        expected_rotation = Quaternion(
+            w=-0.7737981347150147,
+            x=0.0,
+            y=0.0,
+            z=-0.6334322747631067,
+        )
+
+        self.assertEqual(transform.rotation.w, expected_rotation.w)
+        self.assertEqual(transform.rotation.x, expected_rotation.x)
+        self.assertEqual(transform.rotation.y, expected_rotation.y)
+        self.assertEqual(transform.rotation.z, expected_rotation.z)
+
+        when = datetime(2025, 6, 1, 0, 0, 0, tzinfo=timezone.utc)
+
+        transform = eci_to_ecef_transform_provider(when)
+
+        expected_rotation = Quaternion(
+            w=-0.5716613583006416,
+            x=0.0,
+            y=0.0,
+            z=-0.8204896656423318,
+        )
+
+        self.assertEqual(transform.rotation.w, expected_rotation.w)
+        self.assertEqual(transform.rotation.x, expected_rotation.x)
+        self.assertEqual(transform.rotation.y, expected_rotation.y)
+        self.assertEqual(transform.rotation.z, expected_rotation.z)
+
+    def test_eci_to_ecef_has_zero_translation(self) -> None:
+        """
+        Test that the transform has zero translation.
+        """
+        when = datetime(2025, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
+
+        transform = eci_to_ecef_transform_provider(when)
+
+        self.assertEqual(transform.translation["x"], 0.0)
+        self.assertEqual(transform.translation["y"], 0.0)
+        self.assertEqual(transform.translation["z"], 0.0)
+
+        when = datetime(2025, 6, 1, 0, 0, 0, tzinfo=timezone.utc)
+
+        transform = eci_to_ecef_transform_provider(when)
 
         self.assertEqual(transform.translation["x"], 0.0)
         self.assertEqual(transform.translation["y"], 0.0)
