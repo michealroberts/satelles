@@ -139,7 +139,7 @@ def get_true_anomaly(
     Calculate the true anomaly (ν) from the mean anomaly (M) and eccentricity (e).
 
     Args:
-        mean_anomaly: The mean anomaly (M) in radians.
+        mean_anomaly: The mean anomaly (M) (in degrees)
         eccentricity: The orbital eccentricity (e).
         tolerance: Convergence tolerance. Defaults to 1e-8.
 
