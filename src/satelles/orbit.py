@@ -5,7 +5,7 @@
 
 # **************************************************************************************
 
-from math import cos
+from math import cos, radians
 
 from .kepler import get_eccentric_anomaly
 
@@ -29,7 +29,7 @@ def get_orbital_radius(
     Returns:
         float: The orbital radius (r) in meters.
     """
-    E = get_eccentric_anomaly(mean_anomaly, eccentricity)
+    E = radians(get_eccentric_anomaly(mean_anomaly, eccentricity))
 
     # Calculate the orbital radius (r) (in meters):
     return semi_major_axis * (1 - eccentricity * cos(E))

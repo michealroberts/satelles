@@ -86,7 +86,7 @@ def get_eccentric_anomaly(
         ValueError: If the maximum number of iterations is reached without convergence.
 
     Returns:
-        float: The eccentric anomaly (E) (in radians)
+        float: The eccentric anomaly (E) (in degrees).
     """
     # Start with an initial guess for the eccentric anomaly equal to the mean anomaly:
     E = radians(mean_anomaly)
@@ -126,7 +126,7 @@ def get_eccentric_anomaly(
             "Failed to converge to the desired tolerance after 1,000,000 iterations."
         )
 
-    return E
+    return degrees(E)
 
 
 # **************************************************************************************
@@ -156,7 +156,7 @@ def get_true_anomaly(
         )
 
     # Compute the eccentric anomaly (E):
-    E = get_eccentric_anomaly(mean_anomaly, eccentricity, tolerance)
+    E = radians(get_eccentric_anomaly(mean_anomaly, eccentricity, tolerance))
 
     # Compute the true anomaly (ν) using the formula from Kepler's laws:
     ν = degrees(
