@@ -6,7 +6,7 @@
 # **************************************************************************************
 
 import unittest
-from math import atan2, cos, degrees, pi, sin, sqrt
+from math import atan2, cos, degrees, pi, radians, sin, sqrt
 
 from satelles import (
     EARTH_MASS,
@@ -137,8 +137,9 @@ class TestEccentricAnomaly(unittest.TestCase):
         """
         for M in [0, pi / 6, pi, 2 * pi]:
             with self.subTest(mean_anomaly=M):
-                E = get_eccentric_anomaly(degrees(M), 0)
-                self.assertAlmostEqual(E, M, places=8)
+                E = radians(get_eccentric_anomaly(degrees(M), 0))
+                difference = E - M
+                self.assertAlmostEqual(difference, 0.0, places=8)
 
     def test_convergence_residual(self):
         """
@@ -149,10 +150,10 @@ class TestEccentricAnomaly(unittest.TestCase):
         # Test a range of mean anomaly values.
         for M in [0.0, 0.1, 1.0, pi / 2, pi, 3 * pi / 2, 2 * pi]:
             with self.subTest(mean_anomaly=M):
-                E = get_eccentric_anomaly(degrees(M), e)
+                E = radians(get_eccentric_anomaly(degrees(M), e))
                 # The residual should be close to zero.
                 residual = E - e * sin(E) - M
-                self.assertAlmostEqual(residual, 0, places=8)
+                self.assertAlmostEqual(residual, 0.0, places=8)
 
     def test_negative_mean_anomaly(self):
         """
@@ -160,9 +161,9 @@ class TestEccentricAnomaly(unittest.TestCase):
         """
         e = 0.1
         M = -0.5  # radians
-        E = get_eccentric_anomaly(degrees(M), e)
+        E = radians(get_eccentric_anomaly(degrees(M), e))
         residual = E - e * sin(E) - M
-        self.assertAlmostEqual(residual, 0, places=8)
+        self.assertAlmostEqual(residual, 0.0, places=8)
 
 
 # **************************************************************************************
@@ -225,7 +226,7 @@ class TestTrueAnomaly(unittest.TestCase):
         eccentricity = 0.1
         mean_anomaly = 0.75
         # Compute the eccentric anomaly using the dependent function.
-        E = get_eccentric_anomaly(mean_anomaly, eccentricity)
+        E = radians(get_eccentric_anomaly(mean_anomaly, eccentricity))
         expected = 2 * atan2(
             sqrt(1 + eccentricity) * sin(E / 2),
             sqrt(1 - eccentricity) * cos(E / 2),

@@ -6,7 +6,7 @@
 # **************************************************************************************
 
 import unittest
-from math import cos, degrees, pi
+from math import cos, degrees, pi, radians
 
 from satelles.kepler import get_eccentric_anomaly
 from satelles.orbit import get_orbital_radius
@@ -43,7 +43,7 @@ class TestOrbitalRadius(unittest.TestCase):
         for mean_anomaly in [0.75, pi / 3, pi, 2.5]:
             with self.subTest(mean_anomaly=mean_anomaly):
                 # Compute the eccentric anomaly.
-                E = get_eccentric_anomaly(degrees(mean_anomaly), eccentricity)
+                E = radians(get_eccentric_anomaly(degrees(mean_anomaly), eccentricity))
                 expected_radius = semi_major_axis * (1 - eccentricity * cos(E))
                 r = get_orbital_radius(
                     semi_major_axis,
@@ -60,7 +60,7 @@ class TestOrbitalRadius(unittest.TestCase):
         semi_major_axis = 7_000_000.0  # in meters
         eccentricity = 0.2
         mean_anomaly = -0.3
-        E = get_eccentric_anomaly(degrees(mean_anomaly), eccentricity)
+        E = radians(get_eccentric_anomaly(degrees(mean_anomaly), eccentricity))
         expected_radius = semi_major_axis * (1 - eccentricity * cos(E))
         r = get_orbital_radius(
             semi_major_axis,

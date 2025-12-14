@@ -65,7 +65,7 @@ class TestGetPerifocalPosition(unittest.TestCase):
         true_anomaly = 2.5
 
         # Compute the eccentric anomaly (E) using get_eccentric_anomaly:
-        E = get_eccentric_anomaly(degrees(mean_anomaly), eccentricity)
+        E = radians(get_eccentric_anomaly(degrees(mean_anomaly), eccentricity))
 
         expected_r = semi_major_axis * (1 - eccentricity * cos(E))
         expected_x = expected_r * cos(true_anomaly)
@@ -94,7 +94,7 @@ class TestGetPerifocalPosition(unittest.TestCase):
         true_anomaly = -1.0
 
         # Compute the eccentric anomaly (E) using get_eccentric_anomaly:
-        E = get_eccentric_anomaly(degrees(mean_anomaly), eccentricity)
+        E = radians(get_eccentric_anomaly(degrees(mean_anomaly), eccentricity))
         expected_r = semi_major_axis * (1 - eccentricity * cos(E))
         expected_x = expected_r * cos(true_anomaly)
         expected_y = expected_r * sin(true_anomaly)
