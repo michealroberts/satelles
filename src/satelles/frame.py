@@ -12,6 +12,7 @@ from typing import Callable, List, Optional
 
 from .body import Body
 from .common import CartesianCoordinate
+from .origin import Origin
 from .quaternion import Quaternion
 
 # **************************************************************************************
@@ -165,8 +166,9 @@ class Frame:
     # The reference model for this frame, e.g., "ECI", "ECEF", etc.:
     reference: Reference
 
-    # The origin body for this frame, e.g., "Earth", "Moon", etc.:
-    origin: Body
+    # The origin for this frame (a Body or an Origin), e.g., "Earth", "Moon", or a
+    # specific origin point:
+    origin: Body | Origin
 
     # Whether this frame is inertial (non-rotating) or not:
     is_inertial: bool
