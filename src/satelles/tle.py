@@ -38,7 +38,7 @@ line2_regex = re.compile(
     r"(?P<eccentricity>\d{7})\s+"
     r"(?P<argument_of_perigee>\d+\.\d+)\s+"
     r"(?P<mean_anomaly>\d+\.\d+)\s+"
-    r"(?P<mean_motion>\d+\.\d+)\s+"
+    r"(?P<mean_motion>\d+\.\d{8})\s*"
     r"(?P<number_of_revolutions>\d+)$"
 )
 
