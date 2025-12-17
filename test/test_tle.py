@@ -56,6 +56,12 @@ iss3LEWithAlpha5Zeroth: str = """
   2 E5544  51.6442 147.1064 0004607  95.6506 329.8285 15.49249062  2423
 """
 
+iss3LEWithIncorrectSpacing: str = """
+ISS (ZARYA)
+1 25544U 98067A   08264.51782528 -.00002182  00000-0 -11606-4 0  2927
+2 25544  51.6416 247.4627 0006703 130.5360 325.0288 15.72125391563537
+"""
+
 starlink5833: str = """
   0 STARLINK-5833
   1 55773U 23028AJ  25098.97241231  .00000576  00000-0  56023-4 0  9993
@@ -275,6 +281,33 @@ class TestTLERegex(unittest.TestCase):
             "mean_anomaly": "329.8285",
             "mean_motion": "15.49249062",
             "number_of_revolutions": "2423",
+        }
+        self.check_line1(line1, expected_line1)
+        self.check_line2(line2, expected_line2)
+
+    def test_iss3LEWithIncorrectSpacing(self) -> None:
+        line1, line2 = self.extract_lines(iss3LEWithIncorrectSpacing)
+        expected_line1 = {
+            "id": "25544",
+            "classification": "U",
+            "designator": "98067A",
+            "year": "08",
+            "day": "264.51782528",
+            "first_derivative_of_mean_motion": "-.00002182",
+            "second_derivative_of_mean_motion": "00000-0",
+            "drag": "-11606-4",
+            "ephemeris": "0",
+            "set": "2927",
+        }
+        expected_line2 = {
+            "id": "25544",
+            "inclination": "51.6416",
+            "raan": "247.4627",
+            "eccentricity": "0006703",
+            "argument_of_perigee": "130.5360",
+            "mean_anomaly": "325.0288",
+            "mean_motion": "15.72125391",
+            "number_of_revolutions": "563537",
         }
         self.check_line1(line1, expected_line1)
         self.check_line2(line2, expected_line2)
