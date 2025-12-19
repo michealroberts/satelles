@@ -5,6 +5,7 @@
 
 # **************************************************************************************
 
+from datetime import datetime
 from typing import TypedDict
 
 # **************************************************************************************
@@ -44,6 +45,24 @@ class Acceleration(TypedDict):
     ax: float
     ay: float
     az: float
+
+
+# **************************************************************************************
+
+
+class TopocentricCoordinate(TypedDict):
+    # The date and time of the observation (in UTC):
+    at: datetime
+    # The altitude angle above the horizon for the observed object (in degrees):
+    altitude: float
+    # The azimuth angle measured clockwise from true north to the
+    # direction of the observed object (in degrees):
+    azimuth: float
+    # The distance from the observation point to the observed object (in meters):
+    range: float
+    # The round-trip (two-way) light time for a signal between the observed object
+    # and the observation point (in seconds):
+    time_of_flight: float
 
 
 # **************************************************************************************
