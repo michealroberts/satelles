@@ -7,7 +7,7 @@
 
 from .body import Body
 from .checksum import perform_checksum_compute
-from .common import Acceleration, CartesianCoordinate
+from .common import Acceleration, CartesianCoordinate, TopocentricCoordinate
 from .constants import GRAVITATIONAL_CONSTANT
 from .coordinates import (
     convert_ecef_to_eci,
@@ -15,6 +15,7 @@ from .coordinates import (
     convert_eci_to_ecef,
     convert_eci_to_equatorial,
     convert_eci_to_perifocal,
+    convert_eci_to_topocentric,
     convert_enu_to_horizontal,
     convert_lla_to_ecef,
     convert_perifocal_to_eci,
@@ -130,6 +131,7 @@ __all__: list[str] = [
     "convert_eci_to_ecef",
     "convert_eci_to_equatorial",
     "convert_eci_to_perifocal",
+    "convert_eci_to_topocentric",
     "convert_enu_to_horizontal",
     "convert_lla_to_ecef",
     "convert_mjd_to_datetime",
@@ -183,6 +185,7 @@ __all__: list[str] = [
     "RungeKuttaPropagationParameters",
     "Satellite",
     "TLE",
+    "TopocentricCoordinate",
     "Transform",
     "TransformProvider",
     "Vector",
