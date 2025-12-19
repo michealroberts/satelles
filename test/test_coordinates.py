@@ -6,9 +6,10 @@
 # **************************************************************************************
 
 import unittest
-from datetime import datetime
+from datetime import datetime, timezone
 from math import atan2, cos, degrees, radians, sin, sqrt
 
+from celerity.constants import c as SPEED_OF_LIGHT
 from celerity.coordinates import (
     EquatorialCoordinate,
     GeographicCoordinate,
@@ -20,11 +21,13 @@ from satelles import (
     EARTH_EQUATORIAL_RADIUS,
     EARTH_FLATTENING_FACTOR,
     CartesianCoordinate,
+    TopocentricCoordinate,
     convert_ecef_to_eci,
     convert_ecef_to_enu,
     convert_eci_to_ecef,
     convert_eci_to_equatorial,
     convert_eci_to_perifocal,
+    convert_eci_to_topocentric,
     convert_enu_to_horizontal,
     convert_lla_to_ecef,
     convert_perifocal_to_eci,
@@ -190,7 +193,7 @@ class TestConvertECEFToECI(unittest.TestCase):
                 "z": 3.0,
             }
         )
-        when = datetime(2025, 1, 1, 0, 0, 0)
+        when = datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
 
         result = convert_ecef_to_eci(ecef, when)
         expected: CartesianCoordinate = {"x": 1.0, "y": 2.0, "z": 3.0}
@@ -273,7 +276,7 @@ class TestConvertECIToECEF(unittest.TestCase):
         date and time.
         """
         eci: CartesianCoordinate = {"x": 1.0, "y": 2.0, "z": 3.0}
-        when = datetime(2025, 1, 1, 0, 0, 0)
+        when = datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
 
         result = convert_eci_to_ecef(eci, when)
         expected: CartesianCoordinate = CartesianCoordinate(
@@ -479,6 +482,250 @@ class TestConvertECIToPerifocal(unittest.TestCase):
         result = convert_eci_to_perifocal(eci, 45, 45, 45)
         expected: CartesianCoordinate = {"x": 1.0, "y": 1.0, "z": 0.0}
         self.assertCoordinatesAlmostEqual(result, expected)
+
+
+# **************************************************************************************
+
+
+class TestConvertECIToTopocentric(unittest.TestCase):
+    def assertTopocentricAlmostEqual(
+        self,
+        result: TopocentricCoordinate,
+        expected: TopocentricCoordinate,
+        places: int = 4,
+    ) -> None:
+        self.assertEqual(result["at"], expected["at"])
+        self.assertAlmostEqual(result["altitude"], expected["altitude"], places=places)
+        self.assertAlmostEqual(result["azimuth"], expected["azimuth"], places=places)
+        self.assertAlmostEqual(result["range"], expected["range"], places=places)
+        self.assertAlmostEqual(
+            result["time_of_flight"], expected["time_of_flight"], places=places
+        )
+
+    def test_directly_overhead(self) -> None:
+        """
+        At latitude=0°, longitude=0°, a satellite 400km directly above should have
+        altitude=90° and range=400km.
+        """
+        observer = GeographicCoordinate(
+            {
+                "latitude": 0.0,
+                "longitude": 0.0,
+                "elevation": 0.0,
+            }
+        )
+
+        when = datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+
+        height = 400_000.0
+
+        ecef = CartesianCoordinate(
+            {
+                "x": EARTH_EQUATORIAL_RADIUS + height,
+                "y": 0.0,
+                "z": 0.0,
+            }
+        )
+
+        eci = convert_ecef_to_eci(ecef=ecef, when=when)
+
+        result = convert_eci_to_topocentric(eci=eci, when=when, observer=observer)
+
+        expected = TopocentricCoordinate(
+            at=when,
+            altitude=90.0,
+            azimuth=0.0,
+            range=400_000.0,
+            time_of_flight=2 * 400_000.0 / SPEED_OF_LIGHT,
+        )
+
+        self.assertTopocentricAlmostEqual(result, expected)
+
+    def test_pure_east(self) -> None:
+        """
+        At latitude=0°, longitude=0°, a satellite at ECEF (R, R, 0) should have
+        azimuth=90° and altitude=0°.
+        """
+        observer = GeographicCoordinate(
+            {
+                "latitude": 0.0,
+                "longitude": 0.0,
+                "elevation": 0.0,
+            }
+        )
+
+        when = datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+
+        ecef = CartesianCoordinate(
+            {
+                "x": EARTH_EQUATORIAL_RADIUS,
+                "y": EARTH_EQUATORIAL_RADIUS,
+                "z": 0.0,
+            }
+        )
+        eci = convert_ecef_to_eci(ecef=ecef, when=when)
+
+        result = convert_eci_to_topocentric(eci=eci, when=when, observer=observer)
+
+        expected = TopocentricCoordinate(
+            at=when,
+            altitude=0.0,
+            azimuth=90.0,
+            range=EARTH_EQUATORIAL_RADIUS,
+            time_of_flight=2 * EARTH_EQUATORIAL_RADIUS / SPEED_OF_LIGHT,
+        )
+
+        self.assertTopocentricAlmostEqual(result, expected)
+
+    def test_pure_north(self) -> None:
+        """
+        At latitude=0°, longitude=0°, a satellite at ECEF (R, 0, R) should have
+        azimuth=0° and altitude=0°.
+        """
+        observer = GeographicCoordinate(
+            {
+                "latitude": 0.0,
+                "longitude": 0.0,
+                "elevation": 0.0,
+            }
+        )
+
+        when = datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+
+        ecef = CartesianCoordinate(
+            {
+                "x": EARTH_EQUATORIAL_RADIUS,
+                "y": 0.0,
+                "z": EARTH_EQUATORIAL_RADIUS,
+            }
+        )
+
+        eci = convert_ecef_to_eci(ecef=ecef, when=when)
+
+        result = convert_eci_to_topocentric(eci=eci, when=when, observer=observer)
+
+        expected = TopocentricCoordinate(
+            at=when,
+            altitude=0.0,
+            azimuth=0.0,
+            range=EARTH_EQUATORIAL_RADIUS,
+            time_of_flight=2 * EARTH_EQUATORIAL_RADIUS / SPEED_OF_LIGHT,
+        )
+
+        self.assertTopocentricAlmostEqual(result, expected)
+
+    def test_pure_west(self) -> None:
+        """
+        At latitude=0°, longitude=0°, a satellite at ECEF (R, -R, 0) should have
+        azimuth=270° and altitude=0°.
+        """
+        observer = GeographicCoordinate(
+            {
+                "latitude": 0.0,
+                "longitude": 0.0,
+                "elevation": 0.0,
+            }
+        )
+
+        when = datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+
+        ecef = CartesianCoordinate(
+            {
+                "x": EARTH_EQUATORIAL_RADIUS,
+                "y": -EARTH_EQUATORIAL_RADIUS,
+                "z": 0.0,
+            }
+        )
+        eci = convert_ecef_to_eci(ecef=ecef, when=when)
+
+        result = convert_eci_to_topocentric(eci=eci, when=when, observer=observer)
+
+        expected = TopocentricCoordinate(
+            at=when,
+            altitude=0.0,
+            azimuth=270.0,
+            range=EARTH_EQUATORIAL_RADIUS,
+            time_of_flight=2 * EARTH_EQUATORIAL_RADIUS / SPEED_OF_LIGHT,
+        )
+
+        self.assertTopocentricAlmostEqual(result, expected)
+
+    def test_pure_south(self) -> None:
+        """
+        At latitude=0°, longitude=0°, a satellite at ECEF (R, 0, -R) should have
+        azimuth=180° and altitude=0°.
+        """
+        observer = GeographicCoordinate(
+            {
+                "latitude": 0.0,
+                "longitude": 0.0,
+                "elevation": 0.0,
+            }
+        )
+
+        when = datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+
+        ecef = CartesianCoordinate(
+            {
+                "x": EARTH_EQUATORIAL_RADIUS,
+                "y": 0.0,
+                "z": -EARTH_EQUATORIAL_RADIUS,
+            }
+        )
+        eci = convert_ecef_to_eci(ecef=ecef, when=when)
+
+        result = convert_eci_to_topocentric(eci=eci, when=when, observer=observer)
+
+        expected = TopocentricCoordinate(
+            at=when,
+            altitude=0.0,
+            azimuth=180.0,
+            range=EARTH_EQUATORIAL_RADIUS,
+            time_of_flight=2 * EARTH_EQUATORIAL_RADIUS / SPEED_OF_LIGHT,
+        )
+
+        self.assertTopocentricAlmostEqual(result, expected)
+
+    def test_northeast_elevated(self) -> None:
+        """
+        At latitude=0°, longitude=0°, a satellite offset +100km in each of up, east,
+        and north should have azimuth=45°.
+        """
+        observer = GeographicCoordinate(
+            {
+                "latitude": 0.0,
+                "longitude": 0.0,
+                "elevation": 0.0,
+            }
+        )
+
+        when = datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+
+        offset = 100_000.0
+
+        ecef = CartesianCoordinate(
+            {
+                "x": EARTH_EQUATORIAL_RADIUS + offset,
+                "y": offset,
+                "z": offset,
+            }
+        )
+
+        eci = convert_ecef_to_eci(ecef=ecef, when=when)
+
+        expected_range = sqrt(offset**2 + offset**2 + offset**2)
+
+        result = convert_eci_to_topocentric(eci=eci, when=when, observer=observer)
+
+        expected = TopocentricCoordinate(
+            at=when,
+            altitude=degrees(atan2(offset, sqrt(offset**2 + offset**2))),
+            azimuth=45.0,
+            range=expected_range,
+            time_of_flight=2 * expected_range / SPEED_OF_LIGHT,
+        )
+
+        self.assertTopocentricAlmostEqual(result, expected)
 
 
 # **************************************************************************************

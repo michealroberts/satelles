@@ -8,6 +8,7 @@
 from datetime import datetime
 from math import asin, atan2, cos, degrees, pi, pow, radians, sin, sqrt
 
+from celerity.constants import c as SPEED_OF_LIGHT
 from celerity.coordinates import (
     EquatorialCoordinate,
     GeographicCoordinate,
@@ -15,7 +16,7 @@ from celerity.coordinates import (
 )
 from celerity.temporal import get_greenwich_sidereal_time
 
-from .common import CartesianCoordinate
+from .common import CartesianCoordinate, TopocentricCoordinate
 from .earth import EARTH_EQUATORIAL_RADIUS, EARTH_FLATTENING_FACTOR
 from .orbit import get_orbital_radius
 from .vector import rotate
@@ -219,6 +220,50 @@ def convert_eci_to_equatorial(
         ra += 360
 
     return EquatorialCoordinate(ra=ra % 360, dec=dec)
+
+
+# **************************************************************************************
+
+
+def convert_eci_to_topocentric(
+    eci: CartesianCoordinate,
+    when: datetime,
+    observer: GeographicCoordinate,
+) -> TopocentricCoordinate:
+    """
+    Convert Earth-Centered Inertial (ECI) coordinates to topocentric coordinates.
+
+    Args:
+        eci (CartesianCoordinate): The ECI coordinates (x, y, z).
+        when (datetime): The date and time for the conversion.
+        observer (GeographicCoordinate): The geographic coordinates (lat, lon, el) of the observer.
+
+    Returns:
+        TopocentricCoordinate: The topocentric coordinates (altitude, azimuth, range, time_of_flight).
+    """
+    # Convert ECI → ECEF at the given time:
+    ecef = convert_eci_to_ecef(eci=eci, when=when)
+
+    # Convert ECEF → ENU using the observer's location:
+    enu = convert_ecef_to_enu(ecef=ecef, observer=observer)
+
+    # Convert ENU → Horizontal:
+    horizontal = convert_enu_to_horizontal(enu=enu)
+
+    # Range from ENU vector magnitude to the satellite (the observer is at the origin
+    # as we have already converted to ENU):
+    r = sqrt(enu["x"] ** 2 + enu["y"] ** 2 + enu["z"] ** 2)
+
+    # Two-way time of flight (for a light signal):
+    time_of_flight = 2 * r / SPEED_OF_LIGHT
+
+    return TopocentricCoordinate(
+        at=when,
+        altitude=horizontal["alt"],
+        azimuth=horizontal["az"],
+        range=r,
+        time_of_flight=time_of_flight,
+    )
 
 
 # **************************************************************************************
