@@ -351,6 +351,107 @@ def convert_enu_to_horizontal(
 # **************************************************************************************
 
 
+def convert_ecef_to_lla(
+    ecef: CartesianCoordinate,
+    *,
+    tolerance: float = 1e-12,
+    iterations: int = 10,
+) -> GeographicCoordinate:
+    """
+    Convert Earth-Centered Earth-Fixed (ECEF) coordinates to geographic coordinates
+    (latitude, longitude, height).
+
+    Args:
+        ecef (CartesianCoordinate): The ECEF coordinates (x, y, z).
+        tolerance (float): Convergence tolerance for latitude iteration (in radians).
+        iterations (int): Maximum number of iterations for convergence.
+
+    Returns:
+        GeographicCoordinate: The geographic coordinates for the location.
+
+    Raises:
+        ValueError: If the iteration does not converge within the specified iterations.
+    """
+    earth_radius = EARTH_EQUATORIAL_RADIUS
+
+    x, y, z = ecef["x"], ecef["y"], ecef["z"]
+
+    # Compute the longitude, θ, (in radians):
+    θ = atan2(y, x)
+
+    # The flattening factor (f) is the ratio of the difference between the equatorial
+    # and polar radii to the equatorial radius, in the WGS-84 ellipsoid model:
+    f = EARTH_FLATTENING_FACTOR
+
+    # The square of the flattening factor (FF) is used to calculate the radius of
+    # curvature in the prime vertical (N):
+    FF = f * (2 - f)
+
+    # Compute the semi-minor axis (b) of the Earth ellipsoid:
+    b = earth_radius * (1 - f)
+
+    # Compute the distance from the z-axis:
+    r = sqrt(x**2 + y**2)
+
+    # Compute height above the ellipsoid (h) (in meters):
+    h = abs(z) - b
+
+    # Handle polar singularity (when directly above a pole, we assume the convention that
+    # longitude is zero at the poles):
+    if r < 1e-10:
+        φ = pi / 2 if z >= 0 else -pi / 2
+
+        return GeographicCoordinate(
+            latitude=degrees(φ),
+            longitude=0.0,
+            elevation=h,
+        )
+
+    # Initial estimate for latitude, φ, (in radians) using spherical approximation:
+    φ = atan2(z, r * (1 - FF))
+
+    for _ in range(iterations):
+        # The radius of curvature in the prime vertical (N) is the Earth’s east–west
+        # curvature radius at the given latitude, accounting for ellipsoidal flattening:
+        C = 1 / sqrt(1 - (FF * pow(sin(φ), 2)))
+
+        # The radius of curvature in the prime vertical (N):
+        N = earth_radius * C
+
+        # Update the estimate for latitude, φ, (in radians):
+        φ_prev = φ
+
+        # Compute the current latitude, φ, (in radians):
+        φ = atan2(z + FF * N * sin(φ), r)
+
+        # Check for convergence:
+        if abs(φ - φ_prev) < tolerance:
+            break
+    else:
+        raise ValueError(
+            f"ECEF to LLA conversion did not converge within {iterations} iterations."
+        )
+
+    # The radius of curvature in the prime vertical (N) is the Earth’s east–west
+    # curvature radius at the given latitude, accounting for ellipsoidal flattening:
+    C = 1 / sqrt(1 - (FF * pow(sin(φ), 2)))
+
+    # The radius of curvature in the prime vertical (N):
+    N = earth_radius * C
+
+    # Compute height above the ellipsoid (h) (in meters):
+    h = r / cos(φ) - N
+
+    return GeographicCoordinate(
+        latitude=degrees(φ),
+        longitude=degrees(θ),
+        elevation=h,
+    )
+
+
+# **************************************************************************************
+
+
 def convert_lla_to_ecef(
     lla: GeographicCoordinate,
 ) -> CartesianCoordinate:
@@ -358,7 +459,7 @@ def convert_lla_to_ecef(
     Convert geographic coordinates (latitude, longitude, height) to ECEF coordinates.
 
     Args:
-        lla (GeographicCoordinate): The geographic coordinates (lat, lon, el).
+        lla (GeographicCoordinate): The geographic coordinates for the location.
 
     Returns:
         CartesianCoordinate: The ECEF coordinates (x, y, z).
