@@ -6,7 +6,7 @@
 # **************************************************************************************
 
 from datetime import datetime, timedelta, timezone
-from typing import Annotated, Any, Dict, Literal, Optional, cast
+from typing import Annotated, Dict, Literal, Optional, cast
 
 from pydantic import (
     BaseModel,
@@ -324,19 +324,19 @@ class CPFHeader(BaseModel):
         )
 
     @model_validator(mode="after")
-    def is_start_before_end(cls, data: Any) -> "CPFHeader":
-        if not isinstance(data.start, datetime):
-            raise TypeError(f"start must be a datetime, not {type(data.start)}")
+    def is_start_before_end(self) -> "CPFHeader":
+        if not isinstance(self.start, datetime):
+            raise TypeError(f"start must be a datetime, not {type(self.start)}")
 
-        if not isinstance(data.end, datetime):
-            raise TypeError(f"end must be a datetime, not {type(data.end)}")
+        if not isinstance(self.end, datetime):
+            raise TypeError(f"end must be a datetime, not {type(self.end)}")
 
-        if data.start >= data.end:
+        if self.start >= self.end:
             raise ValueError(
-                f"start ({data.start!r}) must be strictly before end ({data.end!r})"
+                f"start ({self.start!r}) must be strictly before end ({self.end!r})"
             )
 
-        return data
+        return self
 
 
 # **************************************************************************************
