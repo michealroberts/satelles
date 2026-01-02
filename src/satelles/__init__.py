@@ -12,6 +12,7 @@ from .constants import GRAVITATIONAL_CONSTANT
 from .coordinates import (
     convert_ecef_to_eci,
     convert_ecef_to_enu,
+    convert_ecef_to_lla,
     convert_eci_to_ecef,
     convert_eci_to_equatorial,
     convert_eci_to_perifocal,
@@ -128,6 +129,7 @@ __all__: list[str] = [
     "angle",
     "convert_ecef_to_eci",
     "convert_ecef_to_enu",
+    "convert_ecef_to_lla",
     "convert_eci_to_ecef",
     "convert_eci_to_equatorial",
     "convert_eci_to_perifocal",

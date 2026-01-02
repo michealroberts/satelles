@@ -24,6 +24,7 @@ from satelles import (
     TopocentricCoordinate,
     convert_ecef_to_eci,
     convert_ecef_to_enu,
+    convert_ecef_to_lla,
     convert_eci_to_ecef,
     convert_eci_to_equatorial,
     convert_eci_to_perifocal,
@@ -924,6 +925,320 @@ class TestConvertEnuToHorizontal(unittest.TestCase):
         expected = HorizontalCoordinate({"az": 315.0, "alt": 0.0})
         result = convert_enu_to_horizontal(enu)
         self.assertHorizontalCoordinatesAlmostEqual(result, expected)
+
+
+# **************************************************************************************
+
+
+class TestConvertECEFToLLA(unittest.TestCase):
+    def assertGeographicAlmostEqual(
+        self,
+        coord1: GeographicCoordinate,
+        coord2: GeographicCoordinate,
+        places: int = 6,
+    ) -> None:
+        self.assertAlmostEqual(coord1["latitude"], coord2["latitude"], places=places)
+        self.assertAlmostEqual(coord1["longitude"], coord2["longitude"], places=places)
+        self.assertAlmostEqual(coord1["elevation"], coord2["elevation"], places=places)
+
+    def test_equator_prime_meridian(self) -> None:
+        """
+        At ECEF (R, 0, 0), the result should be latitude=0°, longitude=0°, elevation=0.
+        """
+        ecef = CartesianCoordinate(
+            {
+                "x": EARTH_EQUATORIAL_RADIUS,
+                "y": 0.0,
+                "z": 0.0,
+            }
+        )
+
+        result = convert_ecef_to_lla(ecef)
+
+        expected = GeographicCoordinate(
+            {
+                "latitude": 0.0,
+                "longitude": 0.0,
+                "elevation": 0.0,
+            }
+        )
+
+        self.assertGeographicAlmostEqual(result, expected)
+
+    def test_equator_ninety_east(self) -> None:
+        """
+        At ECEF (0, R, 0), the result should be latitude=0°, longitude=90°, elevation=0.
+        """
+        ecef = CartesianCoordinate(
+            {
+                "x": 0.0,
+                "y": EARTH_EQUATORIAL_RADIUS,
+                "z": 0.0,
+            }
+        )
+
+        result = convert_ecef_to_lla(ecef)
+
+        expected = GeographicCoordinate(
+            {
+                "latitude": 0.0,
+                "longitude": 90.0,
+                "elevation": 0.0,
+            }
+        )
+
+        self.assertGeographicAlmostEqual(result, expected)
+
+    def test_equator_ninety_west(self) -> None:
+        """
+        At ECEF (0, -R, 0), the result should be latitude=0°, longitude=-90°, elevation=0.
+        """
+        ecef = CartesianCoordinate(
+            {
+                "x": 0.0,
+                "y": -EARTH_EQUATORIAL_RADIUS,
+                "z": 0.0,
+            }
+        )
+
+        result = convert_ecef_to_lla(ecef)
+
+        expected = GeographicCoordinate(
+            {
+                "latitude": 0.0,
+                "longitude": -90.0,
+                "elevation": 0.0,
+            }
+        )
+
+        self.assertGeographicAlmostEqual(result, expected)
+
+    def test_equator_antimeridian(self) -> None:
+        """
+        At ECEF (-R, 0, 0), the result should be latitude=0°, longitude=180°, elevation=0.
+        """
+        ecef = CartesianCoordinate(
+            {
+                "x": -EARTH_EQUATORIAL_RADIUS,
+                "y": 0.0,
+                "z": 0.0,
+            }
+        )
+
+        result = convert_ecef_to_lla(ecef)
+
+        expected = GeographicCoordinate(
+            {
+                "latitude": 0.0,
+                "longitude": 180.0,
+                "elevation": 0.0,
+            }
+        )
+
+        self.assertGeographicAlmostEqual(result, expected)
+
+    def test_north_pole(self) -> None:
+        """
+        At the North Pole, latitude=90°, longitude=0° (by convention), elevation=0.
+        """
+        a = EARTH_EQUATORIAL_RADIUS
+        f = EARTH_FLATTENING_FACTOR
+        e2 = f * (2 - f)
+        b = a * sqrt(1 - e2)
+
+        ecef = CartesianCoordinate(
+            {
+                "x": 0.0,
+                "y": 0.0,
+                "z": b,
+            }
+        )
+
+        result = convert_ecef_to_lla(ecef)
+
+        expected = GeographicCoordinate(
+            {
+                "latitude": 90.0,
+                "longitude": 0.0,
+                "elevation": 0.0,
+            }
+        )
+
+        self.assertGeographicAlmostEqual(result, expected)
+
+    def test_south_pole(self) -> None:
+        """
+        At the South Pole, latitude=-90°, longitude=0° (by convention), elevation=0.
+        """
+        a = EARTH_EQUATORIAL_RADIUS
+        f = EARTH_FLATTENING_FACTOR
+        e2 = f * (2 - f)
+        b = a * sqrt(1 - e2)
+
+        ecef = CartesianCoordinate(
+            {
+                "x": 0.0,
+                "y": 0.0,
+                "z": -b,
+            }
+        )
+
+        result = convert_ecef_to_lla(ecef)
+
+        expected = GeographicCoordinate(
+            {
+                "latitude": -90.0,
+                "longitude": 0.0,
+                "elevation": 0.0,
+            }
+        )
+
+        self.assertGeographicAlmostEqual(result, expected)
+
+    def test_with_elevation(self) -> None:
+        """
+        At latitude=0°, longitude=0° with height=1000m, ECEF x = R + h.
+        """
+        h = 1000.0
+
+        ecef = CartesianCoordinate(
+            {
+                "x": EARTH_EQUATORIAL_RADIUS + h,
+                "y": 0.0,
+                "z": 0.0,
+            }
+        )
+
+        result = convert_ecef_to_lla(ecef)
+
+        expected = GeographicCoordinate(
+            {
+                "latitude": 0.0,
+                "longitude": 0.0,
+                "elevation": h,
+            }
+        )
+
+        self.assertGeographicAlmostEqual(result, expected)
+
+    def test_roundtrip_equator(self) -> None:
+        """
+        Round-trip: LLA → ECEF → LLA should return the original coordinates.
+        """
+        original = GeographicCoordinate(
+            {
+                "latitude": 0.0,
+                "longitude": 45.0,
+                "elevation": 500.0,
+            }
+        )
+
+        ecef = convert_lla_to_ecef(original)
+        result = convert_ecef_to_lla(ecef)
+
+        self.assertGeographicAlmostEqual(result, original)
+
+    def test_roundtrip_mid_latitude(self) -> None:
+        """
+        Round-trip: LLA → ECEF → LLA for a mid-latitude location.
+        """
+        original = GeographicCoordinate(
+            {
+                "latitude": 45.0,
+                "longitude": 45.0,
+                "elevation": 1000.0,
+            }
+        )
+
+        ecef = convert_lla_to_ecef(original)
+        result = convert_ecef_to_lla(ecef)
+
+        self.assertGeographicAlmostEqual(result, original)
+
+    def test_roundtrip_southern_hemisphere(self) -> None:
+        """
+        Round-trip: LLA → ECEF → LLA for a southern hemisphere location.
+        """
+        original = GeographicCoordinate(
+            {
+                "latitude": -33.8688,
+                "longitude": 151.2093,
+                "elevation": 58.0,
+            }
+        )
+
+        ecef = convert_lla_to_ecef(original)
+        result = convert_ecef_to_lla(ecef)
+
+        self.assertGeographicAlmostEqual(result, original, places=4)
+
+    def test_roundtrip_negative_longitude(self) -> None:
+        """
+        Round-trip: LLA → ECEF → LLA for a negative longitude (western hemisphere).
+        """
+        original = GeographicCoordinate(
+            {
+                "latitude": 40.7128,
+                "longitude": -74.0060,
+                "elevation": 10.0,
+            }
+        )
+
+        ecef = convert_lla_to_ecef(original)
+        result = convert_ecef_to_lla(ecef)
+
+        self.assertGeographicAlmostEqual(result, original, places=4)
+
+    def test_roundtrip_high_altitude(self) -> None:
+        """
+        Round-trip: LLA → ECEF → LLA for a high altitude (e.g., aircraft or satellite).
+        """
+        original = GeographicCoordinate(
+            {
+                "latitude": 51.4700,
+                "longitude": -0.4543,
+                "elevation": 10_000.0,
+            }
+        )
+
+        ecef = convert_lla_to_ecef(original)
+        result = convert_ecef_to_lla(ecef)
+
+        self.assertGeographicAlmostEqual(result, original, places=4)
+
+    def test_roundtrip_near_pole(self) -> None:
+        """
+        Round-trip: LLA → ECEF → LLA for a location near the North Pole.
+        """
+        original = GeographicCoordinate(
+            {
+                "latitude": 89.0,
+                "longitude": 45.0,
+                "elevation": 0.0,
+            }
+        )
+
+        ecef = convert_lla_to_ecef(original)
+        result = convert_ecef_to_lla(ecef)
+
+        self.assertGeographicAlmostEqual(result, original, places=4)
+
+    def test_geostationary_orbit_altitude(self) -> None:
+        """
+        Round-trip: LLA → ECEF → LLA for geostationary orbit altitude (~35,786 km).
+        """
+        original = GeographicCoordinate(
+            {
+                "latitude": 0.0,
+                "longitude": 0.0,
+                "elevation": 35_786_000.0,
+            }
+        )
+
+        ecef = convert_lla_to_ecef(original)
+        result = convert_ecef_to_lla(ecef)
+
+        self.assertGeographicAlmostEqual(result, original, places=2)
 
 
 # **************************************************************************************
