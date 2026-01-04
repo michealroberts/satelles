@@ -34,7 +34,7 @@ def convert_mjd_to_datetime(mjd: float) -> datetime:
 # **************************************************************************************
 
 
-def get_modified_julian_date_from_parts(mjd: Tuple[int, float]) -> datetime:
+def get_modified_julian_date_from_parts(mjd: Tuple[int, float]) -> float:
     """
     Convert a tuple of (days, seconds) representing Modified Julian Date (MJD)
     to a UTC datetime object.
@@ -47,7 +47,7 @@ def get_modified_julian_date_from_parts(mjd: Tuple[int, float]) -> datetime:
     """
     days, seconds = mjd
 
-    return MJD_EPOCH_AS_DATETIME + timedelta(days=days, seconds=seconds)
+    return days + (seconds / 86400.0)
 
 
 # **************************************************************************************
