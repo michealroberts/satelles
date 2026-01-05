@@ -24,6 +24,17 @@ class CartesianCoordinate(TypedDict):
 # **************************************************************************************
 
 
+class Position(CartesianCoordinate):
+    """
+    Typed dictionary for a position vector.
+    """
+
+    ...
+
+
+# **************************************************************************************
+
+
 class Velocity(TypedDict):
     """
     Typed dictionary for a velocity vector.
@@ -45,6 +56,17 @@ class Acceleration(TypedDict):
     ax: float
     ay: float
     az: float
+
+
+# **************************************************************************************
+
+
+class StateVector(Position, Velocity):
+    """
+    Typed dictionary for a state vector, combining position and velocity.
+    """
+
+    ...
 
 
 # **************************************************************************************
