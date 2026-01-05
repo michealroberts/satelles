@@ -7,7 +7,12 @@
 
 from .body import Body
 from .checksum import perform_checksum_compute
-from .common import Acceleration, CartesianCoordinate, TopocentricCoordinate
+from .common import (
+    Acceleration,
+    CartesianCoordinate,
+    StateVector,
+    TopocentricCoordinate,
+)
 from .constants import GRAVITATIONAL_CONSTANT
 from .coordinates import (
     convert_ecef_to_eci,
@@ -188,6 +193,7 @@ __all__: list[str] = [
     "Reference",
     "RungeKuttaPropagationParameters",
     "Satellite",
+    "StateVector",
     "TLE",
     "TopocentricCoordinate",
     "Transform",
