@@ -53,6 +53,7 @@ from .matrix import (
     Matrix3x3,
 )
 from .mjd import (
+    convert_mjd_as_parts_to_datetime,
     convert_mjd_to_datetime,
     get_modified_julian_date_as_parts,
     get_modified_julian_date_from_parts,
@@ -136,6 +137,7 @@ __all__: list[str] = [
     "convert_eci_to_topocentric",
     "convert_enu_to_horizontal",
     "convert_lla_to_ecef",
+    "convert_mjd_as_parts_to_datetime",
     "convert_mjd_to_datetime",
     "convert_perifocal_to_eci",
     "cross",
