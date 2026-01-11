@@ -99,3 +99,26 @@ class HohmannTransferParameters(BaseModel):
 
 
 # **************************************************************************************
+
+
+def get_hohmann_transfer_semi_major_axis(
+    r1: float,
+    r2: float,
+) -> float:
+    """
+    Calculate the semi-major axis (a) of the Hohmann transfer ellipse.
+
+    The transfer ellipse has its periapsis at r1 and apoapsis at r2 (or vice versa), so
+    the semi-major axis is simply the average of the two radii.
+
+    Args:
+        r1: Radius of the initial circular orbit (in meters).
+        r2: Radius of the final circular orbit (in meters).
+
+    Returns:
+        The semi-major axis (a) of the transfer orbit (in meters).
+    """
+    return (r1 + r2) / 2
+
+
+# **************************************************************************************
