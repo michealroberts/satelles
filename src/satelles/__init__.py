@@ -45,6 +45,7 @@ from .gravity import get_gravitational_acceleration
 from .hohmann import (
     HohmannTransferParameters,
     get_hohmann_transfer_eccentricity,
+    get_hohmann_transfer_parameters,
     get_hohmann_transfer_phase_angle,
     get_hohmann_transfer_semi_major_axis,
 )
@@ -160,6 +161,7 @@ __all__: list[str] = [
     "get_eccentric_anomaly",
     "get_gravitational_acceleration",
     "get_hohmann_transfer_eccentricity",
+    "get_hohmann_transfer_parameters",
     "get_hohmann_transfer_phase_angle",
     "get_hohmann_transfer_semi_major_axis",
     "get_modified_julian_date_as_parts",
