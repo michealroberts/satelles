@@ -10,6 +10,7 @@ import unittest
 
 from satelles import (
     get_hohmann_transfer_eccentricity,
+    get_hohmann_transfer_phase_angle,
     get_hohmann_transfer_semi_major_axis,
 )
 
@@ -112,6 +113,134 @@ class TestGetHohmannTransferEccentricity(unittest.TestCase):
 
 
 # **************************************************************************************
+
+
+class TestGetHohmannTransferPhaseAngle(unittest.TestCase):
+    def test_phase_angle_ascent_leo_to_geo(self) -> None:
+        """
+        Test phase angle for a LEO to GEO transfer (ascent).
+        """
+        φ = get_hohmann_transfer_phase_angle(
+            r1=LEO_RADIUS_IN_METERS,
+            r2=GEO_RADIUS_IN_METERS,
+        )
+
+        # Phase angle should be positive for ascent (target ahead):
+        self.assertGreater(φ, 0)
+        # Expected value approximately 108.19° for LEO to GEO transfer:
+        self.assertAlmostEqual(φ, 108.19, delta=1.0)
+
+    def test_phase_angle_descent_geo_to_leo(self) -> None:
+        """
+        Test phase angle for a GEO to LEO transfer (descent).
+        """
+        φ = get_hohmann_transfer_phase_angle(
+            r1=GEO_RADIUS_IN_METERS,
+            r2=LEO_RADIUS_IN_METERS,
+        )
+
+        # Phase angle should be negative for descent (target behind):
+        self.assertLess(φ, 0)
+
+        # Should be symmetric with the ascent case:
+        self.assertAlmostEqual(φ, -108.19, delta=1.0)
+
+    def test_phase_angle_symmetry(self) -> None:
+        """
+        Test that ascent and descent phase angles are symmetric (opposite signs).
+        """
+        φ_ascent = get_hohmann_transfer_phase_angle(
+            r1=7_000_000,
+            r2=14_000_000,
+        )
+
+        φ_descent = get_hohmann_transfer_phase_angle(
+            r1=14_000_000,
+            r2=7_000_000,
+        )
+
+        self.assertAlmostEqual(φ_ascent, -φ_descent, places=9)
+
+    def test_phase_angle_small_transfer(self) -> None:
+        """
+        Test phase angle for a small orbital transfer (close orbits).
+        """
+        r1 = 7_000_000
+        r2 = 7_500_000
+
+        φ = get_hohmann_transfer_phase_angle(
+            r1=r1,
+            r2=r2,
+        )
+
+        self.assertGreater(φ, 0)
+        self.assertLess(φ, 30)
+
+    def test_phase_angle_large_transfer(self) -> None:
+        """
+        Test phase angle for a large orbital transfer (distant orbits).
+        """
+        r1 = 7_000_000
+        r2 = 70_000_000
+
+        φ = get_hohmann_transfer_phase_angle(
+            r1=r1,
+            r2=r2,
+        )
+
+        # For large transfers, phase angle approaches but stays below 180°:
+        self.assertGreater(φ, 100)
+        self.assertLess(φ, 180)
+
+    def test_phase_angle_2_to_1_ratio(self) -> None:
+        """
+        Test phase angle for a 2:1 orbital radius ratio.
+        """
+        r1 = 10_000_000
+        r2 = 20_000_000
+
+        φ = get_hohmann_transfer_phase_angle(
+            r1=r1,
+            r2=r2,
+        )
+
+        # For 2:1 ratio, expected phase angle ≈ 63.1° for ascent:
+        self.assertAlmostEqual(φ, 63.1, delta=1.5)
+
+    def test_phase_angle_negative_r1_raises_value_error(self) -> None:
+        """
+        Test that a negative initial orbit radius raises ValueError.
+        """
+        with self.assertRaises(ValueError):
+            get_hohmann_transfer_phase_angle(
+                r1=-7_000_000,
+                r2=14_000_000,
+            )
+
+    def test_phase_angle_negative_r2_raises_value_error(self) -> None:
+        """
+        Test that a negative final orbit radius raises ValueError.
+        """
+        with self.assertRaises(ValueError):
+            get_hohmann_transfer_phase_angle(
+                r1=7_000_000,
+                r2=-14_000_000,
+            )
+
+    def test_phase_angle_equal_radii_raises_value_error(self) -> None:
+        """
+        Test that equal orbit radii raises ValueError.
+        """
+        with self.assertRaises(ValueError):
+            get_hohmann_transfer_phase_angle(
+                r1=10_000_000,
+                r2=10_000_000,
+            )
+
+
+# **************************************************************************************
+
+
 if __name__ == "__main__":
     unittest.main()
 

@@ -5,6 +5,7 @@
 
 # **************************************************************************************
 
+from math import degrees, pi, sqrt
 from typing import Annotated
 
 from pydantic import BaseModel, Field
@@ -152,6 +153,62 @@ def get_hohmann_transfer_eccentricity(
         )
 
     return abs(r2 - r1) / (r1 + r2)
+
+
+# **************************************************************************************
+
+
+def get_hohmann_transfer_phase_angle(
+    r1: float,
+    r2: float,
+) -> float:
+    """
+    Calculate the required phase angle (φ) for a Hohmann transfer rendezvous.
+
+    The phase angle is the angular separation between the target and the spacecraft at
+    the time of the departure burn, measured in the direction of orbital motion.
+
+    Args:
+        r1: Radius of the initial circular orbit (in meters).
+        r2: Radius of the final circular orbit (in meters).
+
+    Returns:
+        The required phase angle φ (in degrees).
+    """
+    # Guard against non-positive orbit radii for the initial orbit:
+    if r1 <= 0:
+        raise ValueError("Initial orbit radius r1 must be positive.")
+
+    # Guard against non-positive orbit radii for the final orbit:
+    if r2 <= 0:
+        raise ValueError("Final orbit radius r2 must be positive.")
+
+    # Guard against identical orbit radii which would make a transfer meaningless:
+    if r1 == r2:
+        raise ValueError("Initial and final orbit radii must be different.")
+
+    # Ratio of radii (always express as outer/inner for the formula):
+    if r2 > r1:
+        # Transfer to higher orbit: therefore the target must be ahead:
+        ratio = r1 / r2
+
+        # Angular travel of target during transfer:
+        α = pi * sqrt(((1 + ratio) / 2) ** 3)
+
+        # Phase angle for ascent phase:
+        φ = pi - α
+    else:
+        # Transfer to lower orbit: therefore the target must be behind:
+        ratio = r2 / r1
+
+        # Angular travel of target during transfer:
+        α = pi * sqrt(((1 + ratio) / 2) ** 3)
+
+        # Phase angle for descent phase:
+        φ = α - pi
+
+    # Convert to degrees (result is already in range [-180, 180] due to the formula):
+    return degrees(φ)
 
 
 # **************************************************************************************
