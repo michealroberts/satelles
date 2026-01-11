@@ -42,6 +42,9 @@ from .frame import (
     TransformProvider,
 )
 from .gravity import get_gravitational_acceleration
+from .hohmann import (
+    HohmannTransferParameters,
+)
 from .interpolation import (
     BarycentricLagrange3DPositionInterpolator,
     Base3DInterpolator,
@@ -184,6 +187,7 @@ __all__: list[str] = [
     "Frame",
     "Hermite3DPositionInterpolator",
     "Hermite3DKinematicInterpolator",
+    "HohmannTransferParameters",
     "Matrix3x3",
     "Origin",
     "Position",
