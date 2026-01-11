@@ -122,3 +122,36 @@ def get_hohmann_transfer_semi_major_axis(
 
 
 # **************************************************************************************
+
+
+def get_hohmann_transfer_eccentricity(
+    r1: float,
+    r2: float,
+) -> float:
+    """
+    Calculate the eccentricity (e) of the Hohmann transfer ellipse.
+
+    The eccentricity is calculated based on the periapsis and apoapsis radii of the
+    transfer orbit.
+
+    Args:
+        r1: Radius of the initial circular orbit (in meters).
+        r2: Radius of the final circular orbit (in meters).
+
+    Returns:
+        The eccentricity (e) of the transfer orbit (dimensionless).
+    """
+    # Guard against identical orbit radii which would lead to 0 eccentricity:
+    if r1 == r2:
+        return 0.0
+
+    # Guard against invalid inputs that would lead to division by zero:
+    if r1 + r2 == 0:
+        raise ValueError(
+            "The sum of r1 and r2 must be greater than zero to calculate eccentricity."
+        )
+
+    return abs(r2 - r1) / (r1 + r2)
+
+
+# **************************************************************************************
