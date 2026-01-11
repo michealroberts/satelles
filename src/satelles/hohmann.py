@@ -10,6 +10,9 @@ from typing import Annotated
 
 from pydantic import BaseModel, Field
 
+from .constants import GRAVITATIONAL_CONSTANT
+from .earth import EARTH_MASS
+
 # **************************************************************************************
 
 
@@ -209,6 +212,85 @@ def get_hohmann_transfer_phase_angle(
 
     # Convert to degrees (result is already in range [-180, 180] due to the formula):
     return degrees(φ)
+
+
+# **************************************************************************************
+
+
+def get_hohmann_transfer_parameters(
+    r1: float,
+    r2: float,
+    *,
+    μ: float = GRAVITATIONAL_CONSTANT * EARTH_MASS,
+) -> HohmannTransferParameters:
+    """
+    Calculate the parameters for a Hohmann transfer between two circular orbits.
+
+    This function computes the properties of the elliptical transfer orbit and the
+    associated velocity changes (Δv) required to move from an initial circular
+    orbit of radius r1 to a final circular orbit of radius r2 under a
+    central gravitational field with parameter μ.
+
+    Args:
+        r1: Radius of the initial circular orbit (in meters).
+        r2: Radius of the final circular orbit (in meters).
+        μ: Gravitational parameter (GM) in m³/s². Defaults to Earth's μ.
+
+    Returns:
+        HohmannTransferParameters: The computed transfer parameters, including
+        the transfer-orbit semi-major axis, eccentricity, burn Δv values,
+        total Δv, transfer time and the phase angle.
+
+    Raises:
+        ValueError: If r1 is not positive, if r2 is not positive, or if r1 equals r2.
+    """
+    # Guard against non-positive orbit radii for the initial orbit:
+    if r1 <= 0:
+        raise ValueError("Initial orbit radius r1 must be positive.")
+
+    # Guard against non-positive orbit radii for the final orbit:
+    if r2 <= 0:
+        raise ValueError("Final orbit radius r2 must be positive.")
+
+    # Guard against identical orbit radii which would make a transfer meaningless:
+    if r1 == r2:
+        raise ValueError("Initial and final orbit radii must be different.")
+
+    # Calculate the semi-major axis of the transfer orbit:
+    a = get_hohmann_transfer_semi_major_axis(r1=r1, r2=r2)
+
+    # Calculate the eccentricity of the transfer orbit:
+    e = get_hohmann_transfer_eccentricity(
+        r1=r1,
+        r2=r2,
+    )
+
+    # Calculate the Δv for the first burn (at periapsis / apoapsis):
+    Δv1 = sqrt(μ / r1) - sqrt(μ * (2 / r1 - 1 / a))
+
+    # Calculate the Δv for the second burn (at apoapsis / periapsis):
+    Δv2 = sqrt(μ / r2) - sqrt(μ * (2 / r2 - 1 / a))
+
+    # Calculate the total Δv required:
+    Δv = abs(Δv1) + abs(Δv2)
+
+    # Calculate the transfer time (half the orbital period of the ellipse):
+    T = pi * sqrt(a**3 / μ)
+
+    # Calculate the required phase angle for rendezvous:
+    φ = get_hohmann_transfer_phase_angle(r1=r1, r2=r2)
+
+    return HohmannTransferParameters(
+        r1=r1,
+        r2=r2,
+        a=a,
+        e=e,
+        Δv1=Δv1,
+        Δv2=Δv2,
+        Δv=Δv,
+        T=T,
+        φ=φ,
+    )
 
 
 # **************************************************************************************
