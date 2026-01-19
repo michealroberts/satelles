@@ -87,10 +87,6 @@ from .runge_kutta import (
     propagate_rk4,
 )
 from .satellite import Satellite
-from .slr import (
-    CPFEphemeris,
-    CPFHeader,
-)
 from .symplectic import (
     VerletPropagationParameters,
     propagate_verlet,
@@ -189,8 +185,6 @@ __all__: list[str] = [
     "Body",
     "CartesianCoordinate",
     "Covariance",
-    "CPFEphemeris",
-    "CPFHeader",
     "EulerRotation",
     "Frame",
     "Hermite3DPositionInterpolator",
