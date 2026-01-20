@@ -282,8 +282,8 @@ class TestConvertECIToECEF(unittest.TestCase):
         result = convert_eci_to_ecef(eci, when)
         expected: CartesianCoordinate = CartesianCoordinate(
             {
-                "x": 1.7748323217117372,
-                "y": -1.3601361070890385,
+                "x": 1.7748277327858684,
+                "y": -1.3601420951261578,
                 "z": 3.0,
             }
         )
@@ -327,14 +327,10 @@ class TestConvertECIToECEF(unittest.TestCase):
         )
         when = datetime(2025, 1, 1, 3, 0, 0)  # Arbitrary realistic datetime
 
-        GMST = get_greenwich_sidereal_time(date=when)
-
         expected: CartesianCoordinate = CartesianCoordinate(
             {
-                "x": cos(radians(GMST * 15.0)) * eci["x"]
-                + sin(radians(GMST * 15.0)) * eci["y"],
-                "y": -sin(radians(GMST * 15.0)) * eci["x"]
-                + cos(radians(GMST * 15.0)) * eci["y"],
+                "x": -0.270401038619395,
+                "y": -1.3881222130322506,
                 "z": eci["z"],
             }
         )

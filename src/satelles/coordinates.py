@@ -14,7 +14,10 @@ from celerity.coordinates import (
     GeographicCoordinate,
     HorizontalCoordinate,
 )
-from celerity.temporal import get_greenwich_sidereal_time
+from celerity.temporal import (
+    get_greenwich_sidereal_time,
+    get_ut1_utc_offset,
+)
 
 from .common import CartesianCoordinate, TopocentricCoordinate
 from .earth import EARTH_EQUATORIAL_RADIUS, EARTH_FLATTENING_FACTOR
@@ -147,8 +150,13 @@ def convert_ecef_to_eci(
     Returns:
         CartesianCoordinate: The ECI coordinates (x, y, z).
     """
+    dut1 = get_ut1_utc_offset(when)
+
     # Get the Greenwich Mean Sidereal Time (GMST) for the given date:
-    GMST = get_greenwich_sidereal_time(date=when)
+    GMST = get_greenwich_sidereal_time(
+        date=when,
+        dut1=dut1,
+    )
 
     # Rotate around Z-axis (from ECEF to ECI) using the GMST:
     return CartesianCoordinate(
@@ -176,8 +184,13 @@ def convert_eci_to_ecef(
     Returns:
         CartesianCoordinate: The ECEF coordinates (x, y, z).
     """
+    dut1 = get_ut1_utc_offset(when)
+
     # Get the Greenwich Mean Sidereal Time (GMST) for the given date:
-    GMST = get_greenwich_sidereal_time(date=when)
+    GMST = get_greenwich_sidereal_time(
+        date=when,
+        dut1=dut1,
+    )
 
     # Rotate around Z-axis (from ECI to ECEF) using the GMST:
     return CartesianCoordinate(
