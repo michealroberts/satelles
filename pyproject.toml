@@ -27,7 +27,7 @@ classifiers = [
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.11"
-dependencies = ["celerity>=0.28.0", "pydantic>=2.12.4"]
+dependencies = ["celerity>=0.41.0", "pydantic>=2.12.4"]
 
 [build-system]
 requires = ["hatchling"]
