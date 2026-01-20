@@ -1,6 +1,6 @@
 [project]
 name = "satelles"
-version = "0.27.0"
+version = "0.28.0"
 description = "Modern, type-safe python library for TLE, OMM et al. handling and orbit propagation to accurately locate your satellites in the sky."
 authors = [{ name = "michealroberts", email = "michael@observerly.com" }]
 keywords = [
