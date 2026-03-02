@@ -98,7 +98,10 @@ class BarycentricLagrange3DPositionInterpolator(Base3DInterpolator):
     """
 
     def __init__(self, positions: List[Position]):
-        self.positions: List[Position] = positions
+        self.positions: List[Position] = sorted(
+            positions,
+            key=lambda position: position.at,
+        )
 
         # Prepare and compute velocity estimates at each sample via finite differences:
         self.velocities: List[Velocity] = self._get_derived_velocities()
@@ -232,8 +235,61 @@ class BarycentricLagrange3DPositionInterpolator(Base3DInterpolator):
         Returns:
             Velocity: The interpolated velocity at the specified time.
         """
-        raise NotImplementedError(
-            "get_interpolated_velocity() must be implemented in the subclass."
+        # Raise error if 'at' is before the first sample time:
+        if at < self.positions[0].at:
+            raise ValueError(
+                f"Cannot interpolate before the first sample time: {self.positions[0].at}"
+            )
+
+        # Raise error if 'at' is after the last sample time:
+        if at > self.positions[-1].at:
+            raise ValueError(
+                f"Cannot interpolate after the last sample time: {self.positions[-1].at}"
+            )
+
+        # If exactly at a knot, return the precomputed finite-difference velocity:
+        for i, position in enumerate(self.positions):
+            if at == position.at:
+                v = self.velocities[i]
+                return Velocity(
+                    at=at,
+                    vx=v.vx,
+                    vy=v.vy,
+                    vz=v.vz,
+                )
+
+        # Compute the interpolated position at 'at':
+        interpolated = self.get_interpolated_position(at)
+
+        vx = vy = vz = nan
+
+        # Accumulate the analytic derivative of the barycentric Lagrange interpolant:
+        numerator_vx = numerator_vy = numerator_vz = 0.0
+
+        denominator = 0.0
+
+        # The derivative of the barycentric Lagrange interpolant can be expressed in
+        # terms of the same weights and positions, so we can re-use the pre-computed
+        # weights and time geometry:
+        for position, weight in zip(self.positions, self.weights):
+            dt = at - position.at
+            factor = weight / dt
+            denominator += factor
+
+            numerator_vx += (factor / dt) * (interpolated.x - position.x)
+            numerator_vy += (factor / dt) * (interpolated.y - position.y)
+            numerator_vz += (factor / dt) * (interpolated.z - position.z)
+
+        if denominator != 0.0:
+            vx = numerator_vx / denominator
+            vy = numerator_vy / denominator
+            vz = numerator_vz / denominator
+
+        return Velocity(
+            at=at,
+            vx=vx,
+            vy=vy,
+            vz=vz,
         )
 
 

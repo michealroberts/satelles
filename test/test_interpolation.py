@@ -179,6 +179,147 @@ class TestBarycentricLagrange3DPositionInterpolator(unittest.TestCase):
             any(isfinite(position) for position in (after.x, after.y, after.z))
         )
 
+    def test_get_interpolated_velocity_two_point_linear_at_midpoint(self) -> None:
+        """
+        With exactly two samples and linear motion, velocity is constant at the midpoint:
+        """
+        positions: List[Position] = [
+            Position(
+                x=0.0,
+                y=0.0,
+                z=0.0,
+                at=0.0,
+            ),
+            Position(
+                x=10.0,
+                y=20.0,
+                z=30.0,
+                at=10.0,
+            ),
+        ]
+        interpolator = BarycentricLagrange3DPositionInterpolator(positions)
+
+        # Midpoint at t=5.0:
+        velocity = interpolator.get_interpolated_velocity(5.0)
+        self.assertEqual(velocity.at, 5.0)
+        self.assertAlmostEqual(velocity.vx, 1.0, places=9)
+        self.assertAlmostEqual(velocity.vy, 2.0, places=9)
+        self.assertAlmostEqual(velocity.vz, 3.0, places=9)
+
+    def test_get_interpolated_velocity_two_point_linear_at_knots(self) -> None:
+        """
+        With exactly two samples and linear motion, velocity is constant at the knots:
+        """
+        positions: List[Position] = [
+            Position(
+                x=0.0,
+                y=0.0,
+                z=0.0,
+                at=0.0,
+            ),
+            Position(
+                x=10.0,
+                y=20.0,
+                z=30.0,
+                at=10.0,
+            ),
+        ]
+        interpolator = BarycentricLagrange3DPositionInterpolator(positions)
+
+        v0 = interpolator.get_interpolated_velocity(0.0)
+        v1 = interpolator.get_interpolated_velocity(10.0)
+
+        self.assertEqual(v0.at, 0.0)
+        self.assertEqual(v1.at, 10.0)
+
+        self.assertAlmostEqual(v0.vx, 1.0, places=9)
+        self.assertAlmostEqual(v0.vy, 2.0, places=9)
+        self.assertAlmostEqual(v0.vz, 3.0, places=9)
+
+        self.assertAlmostEqual(v1.vx, 1.0, places=9)
+        self.assertAlmostEqual(v1.vy, 2.0, places=9)
+        self.assertAlmostEqual(v1.vz, 3.0, places=9)
+
+    def test_get_interpolated_velocity_multi_sample_linear(self) -> None:
+        """
+        With multiple samples following linear motion, velocity remains constant within bounds:
+        """
+        # Linear motion: x = 2t, y = -t, z = 0.5t over t = 0..20 in steps of 5:
+        positions: List[Position] = [
+            Position(x=2.0 * t, y=-1.0 * t, z=0.5 * t, at=t)
+            for t in (0.0, 5.0, 10.0, 15.0, 20.0)
+        ]
+        interpolator = BarycentricLagrange3DPositionInterpolator(positions)
+
+        # Query at t=12.5 (between 10 and 15):
+        at: float = 12.5
+        velocity = interpolator.get_interpolated_velocity(at)
+
+        self.assertEqual(velocity.at, at)
+        self.assertAlmostEqual(velocity.vx, 2.0, places=9)
+        self.assertAlmostEqual(velocity.vy, -1.0, places=9)
+        self.assertAlmostEqual(velocity.vz, 0.5, places=9)
+
+    def test_get_interpolated_velocity_out_of_bounds(self) -> None:
+        """
+        Querying velocity before the first sample or after the last should raise ValueError:
+        """
+        interpolator = BarycentricLagrange3DPositionInterpolator(self.positions)
+
+        with self.assertRaises(ValueError):
+            interpolator.get_interpolated_velocity(-60.0)
+
+        with self.assertRaises(ValueError):
+            interpolator.get_interpolated_velocity(600.0)
+
+    def test_get_interpolated_velocity_is_finite(self) -> None:
+        """
+        Velocity should be finite at all interior query points.
+        """
+        interpolator = BarycentricLagrange3DPositionInterpolator(self.positions)
+
+        for at in [90.0, 150.0, 270.0, 390.0, 450.0]:
+            velocity = interpolator.get_interpolated_velocity(at)
+            self.assertTrue(
+                isfinite(velocity.vx),
+                f"vx not finite at t={at}",
+            )
+            self.assertTrue(
+                isfinite(velocity.vy),
+                f"vy not finite at t={at}",
+            )
+            self.assertTrue(
+                isfinite(velocity.vz),
+                f"vz not finite at t={at}",
+            )
+
+    def test_get_interpolated_velocity_consistent_with_position_derivative(
+        self,
+    ) -> None:
+        """
+        The interpolated velocity should agree with a central-difference numerical
+        derivative of the interpolated position at interior query points.
+        """
+        interpolator = BarycentricLagrange3DPositionInterpolator(self.positions)
+
+        h: float = 0.01  # seconds
+
+        for at in [90.0, 150.0, 270.0, 390.0, 450.0]:
+            p_plus = interpolator.get_interpolated_position(at + h)
+            p_minus = interpolator.get_interpolated_position(at - h)
+
+            analytic = interpolator.get_interpolated_velocity(at)
+
+            self.assertAlmostEqual(
+                analytic.vx, (p_plus.x - p_minus.x) / (2 * h), places=3
+            )
+            self.assertAlmostEqual(
+                analytic.vy, (p_plus.y - p_minus.y) / (2 * h), places=3
+            )
+            self.assertAlmostEqual(
+                analytic.vz, (p_plus.z - p_minus.z) / (2 * h), places=3
+            )
+
 
 # **************************************************************************************
 
@@ -451,8 +592,18 @@ class TestHermite3DPositionInterpolator(unittest.TestCase):
         With exactly two samples and linear motion, velocity is constant at the midpoint:
         """
         positions: List[Position] = [
-            Position(x=0.0, y=0.0, z=0.0, at=0.0),
-            Position(x=10.0, y=20.0, z=30.0, at=10.0),
+            Position(
+                x=0.0,
+                y=0.0,
+                z=0.0,
+                at=0.0,
+            ),
+            Position(
+                x=10.0,
+                y=20.0,
+                z=30.0,
+                at=10.0,
+            ),
         ]
         interpolator = Hermite3DPositionInterpolator(positions)
 
@@ -468,8 +619,18 @@ class TestHermite3DPositionInterpolator(unittest.TestCase):
         With exactly two samples and linear motion, velocity is constant at the knots:
         """
         positions: List[Position] = [
-            Position(x=0.0, y=0.0, z=0.0, at=0.0),
-            Position(x=10.0, y=20.0, z=30.0, at=10.0),
+            Position(
+                x=0.0,
+                y=0.0,
+                z=0.0,
+                at=0.0,
+            ),
+            Position(
+                x=10.0,
+                y=20.0,
+                z=30.0,
+                at=10.0,
+            ),
         ]
         interpolator = Hermite3DPositionInterpolator(positions)
 
