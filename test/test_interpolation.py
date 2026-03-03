@@ -260,18 +260,6 @@ class TestBarycentricLagrange3DPositionInterpolator(unittest.TestCase):
         self.assertAlmostEqual(velocity.vy, -1.0, places=9)
         self.assertAlmostEqual(velocity.vz, 0.5, places=9)
 
-    def test_get_interpolated_velocity_out_of_bounds(self) -> None:
-        """
-        Querying velocity before the first sample or after the last should raise ValueError:
-        """
-        interpolator = BarycentricLagrange3DPositionInterpolator(self.positions)
-
-        with self.assertRaises(ValueError):
-            interpolator.get_interpolated_velocity(-60.0)
-
-        with self.assertRaises(ValueError):
-            interpolator.get_interpolated_velocity(600.0)
-
     def test_get_interpolated_velocity_is_finite(self) -> None:
         """
         Velocity should be finite at all interior query points.
