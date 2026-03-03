@@ -7,7 +7,7 @@
 
 from abc import ABC, abstractmethod
 from math import nan
-from typing import List
+from typing import List, Tuple
 
 from .differentiation import compute_finite_difference_weights
 from .models import Position, Velocity
@@ -97,7 +97,7 @@ class BarycentricLagrange3DPositionInterpolator(Base3DInterpolator):
     without needing to recompute time lists for each dimension.
     """
 
-    def __init__(self, positions: List[Position]):
+    def __init__(self, positions: List[Position], stencil_size: int = 10):
         self.positions: List[Position] = sorted(
             positions,
             key=lambda position: position.at,
@@ -106,9 +106,10 @@ class BarycentricLagrange3DPositionInterpolator(Base3DInterpolator):
         # Prepare and compute velocity estimates at each sample via finite differences:
         self.velocities: List[Velocity] = self._get_derived_velocities()
 
-        # Prepare and compute one barycentric weight per position, based solely on the
-        # time attribute `at`:
-        self.weights: List[float] = self._prepare_basis_weights()
+        # The stencil size determines how many nearby points to use for interpolation.
+        # It should be at least 2 to perform interpolation, and at most the total number
+        # of positions:
+        self.stencil_size: int = min(stencil_size, len(self.positions))
 
         super().__init__(self.positions, self.velocities)
 
@@ -135,6 +136,90 @@ class BarycentricLagrange3DPositionInterpolator(Base3DInterpolator):
             weights[i] = 1.0 / product
 
         return weights
+
+    def _get_local_stencil(self, at: float) -> range:
+        """
+        Get the indices of the nearest positions surrounding the query time 'at'.
+
+        The stencil is centred as closely as possible around 'at', clamped to the
+        bounds of the available positions.
+
+        Args:
+            at (float): The query time.
+
+        Returns:
+            range: The index range of the local stencil.
+        """
+        n = len(self.positions)
+
+        # Find the rightmost position with at <= query time:
+        idx = 0
+
+        for i in range(n):
+            if self.positions[i].at > at:
+                break
+            idx = i
+
+        # Centre the stencil around the insertion point:
+        half = self.stencil_size // 2
+
+        start = max(0, idx - half)
+
+        end = start + self.stencil_size
+
+        if end > n:
+            end = n
+            start = max(0, end - self.stencil_size)
+
+        return range(start, end)
+
+    def _compute_local_weights(self, stencil: range) -> Tuple[List[float], float]:
+        """
+        Compute barycentric weights for a local subset of positions.
+
+        The time differences are scaled by the inverse capacity factor following
+        Berrut and Trefethen (2004, Section 7) to prevent floating-point overflow
+        and underflow.
+
+        Args:
+            stencil (range): The index range of positions to use.
+
+        Returns:
+            Tuple[List[float], float]: Barycentric weights for the local subset and
+                the inverse capacity scaling factor.
+        """
+        local_positions = [self.positions[i] for i in stencil]
+
+        n = len(local_positions)
+
+        # Compute the inverse capacity scaling factor for this local stencil
+        # (Berrut & Trefethen 2004, p. 510). Scaling by 4 / (t_max - t_min) keeps
+        # intermediate products near unity, preventing floating-point overflow and
+        # underflow during weight computation:
+        t_min = local_positions[0].at
+        t_max = local_positions[-1].at
+
+        inverse_capacity = 4.0 / (t_max - t_min) if t_max != t_min else 1.0
+
+        weights: List[float] = [0.0] * n
+
+        for i in range(n):
+            at_i = local_positions[i].at
+
+            product = 1.0
+
+            for j in range(n):
+                if j == i:
+                    continue
+
+                product *= inverse_capacity * (at_i - local_positions[j].at)
+
+            if product == 0.0:
+                raise ValueError("Interpolation points must be distinct.")
+
+            weights[i] = 1.0 / product
+
+        return weights, inverse_capacity
 
     def _get_derived_velocities(self) -> List[Velocity]:
         """
@@ -194,8 +279,8 @@ class BarycentricLagrange3DPositionInterpolator(Base3DInterpolator):
 
         denominator = 0.0
 
-        for position, weight in zip(self.positions, self.weights):
-            # If we are at an exact position time, return a new Position instance:
+        # If we are at an exact position time, return a new Position instance:
+        for position in self.positions:
             if at == position.at:
                 return Position(
                     x=position.x,
@@ -204,7 +289,15 @@ class BarycentricLagrange3DPositionInterpolator(Base3DInterpolator):
                     at=position.at,
                 )
 
-            factor = weight / (at - position.at)
+        stencil = self._get_local_stencil(at)
+
+        positions = [self.positions[i] for i in stencil]
+
+        weights, inverse_capacity = self._compute_local_weights(stencil)
+
+        for position, weight in zip(positions, weights):
+            factor = weight / (inverse_capacity * (at - position.at))
+
             x += factor * position.x
             y += factor * position.y
             z += factor * position.z
@@ -235,18 +328,6 @@ class BarycentricLagrange3DPositionInterpolator(Base3DInterpolator):
         Returns:
             Velocity: The interpolated velocity at the specified time.
         """
-        # Raise error if 'at' is before the first sample time:
-        if at < self.positions[0].at:
-            raise ValueError(
-                f"Cannot interpolate before the first sample time: {self.positions[0].at}"
-            )
-
-        # Raise error if 'at' is after the last sample time:
-        if at > self.positions[-1].at:
-            raise ValueError(
-                f"Cannot interpolate after the last sample time: {self.positions[-1].at}"
-            )
-
         # If exactly at a knot, return the precomputed finite-difference velocity:
         for i, position in enumerate(self.positions):
             if at == position.at:
@@ -263,27 +344,39 @@ class BarycentricLagrange3DPositionInterpolator(Base3DInterpolator):
 
         vx = vy = vz = nan
 
-        # Accumulate the analytic derivative of the barycentric Lagrange interpolant:
+        stencil = self._get_local_stencil(at)
+
+        positions = [self.positions[i] for i in stencil]
+
+        weights, inverse_capacity = self._compute_local_weights(stencil)
+
         numerator_vx = numerator_vy = numerator_vz = 0.0
 
         denominator = 0.0
 
         # The derivative of the barycentric Lagrange interpolant can be expressed in
-        # terms of the same weights and positions, so we can re-use the pre-computed
+        # terms of the same weights and positions, so we can re-use the local
         # weights and time geometry:
-        for position, weight in zip(self.positions, self.weights):
+        for position, weight in zip(positions, weights):
+            # Use the real (unscaled) time difference for the derivative, since
+            # dp/dt has units of position/time:
             dt = at - position.at
-            factor = weight / dt
+
+            # Use the capacity-scaled time difference for the barycentric weight
+            # ratio (matching the scale used in weight computation):
+            scaled_time_difference = inverse_capacity * dt
+
+            factor = weight / scaled_time_difference
+
             denominator += factor
 
             numerator_vx += (factor / dt) * (interpolated.x - position.x)
             numerator_vy += (factor / dt) * (interpolated.y - position.y)
             numerator_vz += (factor / dt) * (interpolated.z - position.z)
 
-        if denominator != 0.0:
-            vx = numerator_vx / denominator
-            vy = numerator_vy / denominator
-            vz = numerator_vz / denominator
+        vx = numerator_vx / denominator if denominator != 0 else nan
+        vy = numerator_vy / denominator if denominator != 0 else nan
+        vz = numerator_vz / denominator if denominator != 0 else nan
 
         return Velocity(
             at=at,
