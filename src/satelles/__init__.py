@@ -74,7 +74,11 @@ from .models import (
     Position,
     Velocity,
 )
-from .orbit import get_orbital_radius
+from .orbit import (
+    OrbitClassification,
+    classify_orbit,
+    get_orbital_radius,
+)
 from .origin import Origin
 from .quaternion import (
     EulerRotation,
@@ -136,6 +140,7 @@ __all__: list[str] = [
     "GRAVITATIONAL_CONSTANT",
     "add",
     "angle",
+    "classify_orbit",
     "convert_ecef_to_eci",
     "convert_ecef_to_enu",
     "convert_ecef_to_lla",
@@ -191,6 +196,7 @@ __all__: list[str] = [
     "Hermite3DKinematicInterpolator",
     "HohmannTransferParameters",
     "Matrix3x3",
+    "OrbitClassification",
     "Origin",
     "Position",
     "Quaternion",
