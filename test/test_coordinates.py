@@ -259,6 +259,48 @@ class TestConvertECEFToECI(unittest.TestCase):
         result = convert_ecef_to_eci(ecef, when)
         self.assertCoordinatesAlmostEqual(result, expected)
 
+    def test_x_polar_motion_affects_z_component(self) -> None:
+        """
+        X polar motion should tilt ECEF +x toward +z before the sidereal rotation.
+        """
+        ecef: CartesianCoordinate = CartesianCoordinate(
+            {
+                "x": 1.0,
+                "y": 0.0,
+                "z": 0.0,
+            }
+        )
+        when = datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+
+        result = convert_ecef_to_eci(
+            ecef=ecef,
+            when=when,
+            polar_motion={"x": 1.0, "y": 0.0},
+        )
+
+        self.assertAlmostEqual(result["z"], sin(radians(1.0)), places=6)
+
+    def test_y_polar_motion_affects_z_component(self) -> None:
+        """
+        Y polar motion should tilt ECEF +y toward -z before the sidereal rotation.
+        """
+        ecef: CartesianCoordinate = CartesianCoordinate(
+            {
+                "x": 0.0,
+                "y": 1.0,
+                "z": 0.0,
+            }
+        )
+        when = datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+
+        result = convert_ecef_to_eci(
+            ecef=ecef,
+            when=when,
+            polar_motion={"x": 0.0, "y": 1.0},
+        )
+
+        self.assertAlmostEqual(result["z"], -sin(radians(1.0)), places=6)
+
 
 # **************************************************************************************
 
