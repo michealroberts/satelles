@@ -13,7 +13,10 @@ from .common import (
     StateVector,
     TopocentricCoordinate,
 )
-from .constants import GRAVITATIONAL_CONSTANT
+from .constants import (
+    GRAVITATIONAL_CONSTANT,
+    G,
+)
 from .coordinates import (
     convert_ecef_to_eci,
     convert_ecef_to_enu,
@@ -135,6 +138,7 @@ __all__: list[str] = [
     "EARTH_POLAR_RADIUS",
     "EARTH_MEAN_RADIUS",
     "GRAVITATIONAL_CONSTANT",
+    "G",
     "UNIX_EPOCH_AS_MODIFIED_JULIAN_DATE",
     "add",
     "angle",
