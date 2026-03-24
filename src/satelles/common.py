@@ -72,6 +72,18 @@ class StateVector(Position, Velocity):
 # **************************************************************************************
 
 
+class StateVectorAtEpoch(StateVector):
+    """
+    Typed dictionary for a state vector at a specific epoch time.
+    """
+
+    # The date and time of the observation (in UTC) as a Unix timestamp:
+    at: float
+
+
+# **************************************************************************************
+
+
 class TopocentricCoordinate(TypedDict):
     # The date and time of the observation (in UTC):
     at: datetime
