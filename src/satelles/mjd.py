@@ -7,13 +7,17 @@
 
 from datetime import datetime, timedelta, timezone
 from math import floor
-from typing import Tuple
+from typing import Final, Tuple
 
 from celerity.temporal import get_modified_julian_date
 
 # **************************************************************************************
 
 MJD_EPOCH_AS_DATETIME = datetime(1858, 11, 17, 0, 0, 0, tzinfo=timezone.utc)
+
+# **************************************************************************************
+
+UNIX_EPOCH_AS_MODIFIED_JULIAN_DATE: Final[int] = 40587
 
 # **************************************************************************************
 

@@ -65,6 +65,7 @@ from .matrix import (
     Matrix3x3,
 )
 from .mjd import (
+    UNIX_EPOCH_AS_MODIFIED_JULIAN_DATE,
     convert_mjd_as_parts_to_datetime,
     convert_mjd_to_datetime,
     get_modified_julian_date_as_parts,
@@ -134,6 +135,7 @@ __all__: list[str] = [
     "EARTH_POLAR_RADIUS",
     "EARTH_MEAN_RADIUS",
     "GRAVITATIONAL_CONSTANT",
+    "UNIX_EPOCH_AS_MODIFIED_JULIAN_DATE",
     "add",
     "angle",
     "convert_ecef_to_eci",
