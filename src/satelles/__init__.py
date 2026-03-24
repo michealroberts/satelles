@@ -15,7 +15,9 @@ from .common import (
 )
 from .constants import (
     GRAVITATIONAL_CONSTANT,
+    SPEED_OF_LIGHT,
     G,
+    c,
 )
 from .coordinates import (
     convert_ecef_to_eci,
@@ -139,9 +141,11 @@ __all__: list[str] = [
     "EARTH_MEAN_RADIUS",
     "GRAVITATIONAL_CONSTANT",
     "G",
+    "SPEED_OF_LIGHT",
     "UNIX_EPOCH_AS_MODIFIED_JULIAN_DATE",
     "add",
     "angle",
+    "c",
     "convert_ecef_to_eci",
     "convert_ecef_to_enu",
     "convert_ecef_to_lla",
