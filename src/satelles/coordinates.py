@@ -7,6 +7,7 @@
 
 from datetime import datetime
 from math import asin, atan2, cos, degrees, pi, pow, radians, sin, sqrt
+from typing import TypedDict
 
 from celerity.constants import c as SPEED_OF_LIGHT
 from celerity.coordinates import (
@@ -23,6 +24,14 @@ from .common import CartesianCoordinate, TopocentricCoordinate
 from .earth import EARTH_EQUATORIAL_RADIUS, EARTH_FLATTENING_FACTOR
 from .orbit import get_orbital_radius
 from .vector import rotate
+
+# **************************************************************************************
+
+
+class PolarMotionParameters(TypedDict):
+    x: float
+    y: float
+
 
 # **************************************************************************************
 
@@ -138,6 +147,11 @@ def convert_eci_to_perifocal(
 def convert_ecef_to_eci(
     ecef: CartesianCoordinate,
     when: datetime,
+    *,
+    polar_motion: PolarMotionParameters = PolarMotionParameters(
+        x=0.0,
+        y=0.0,
+    ),
 ) -> CartesianCoordinate:
     """
     Convert Earth-Centered Earth-Fixed (ECEF) coordinates back to
@@ -158,11 +172,29 @@ def convert_ecef_to_eci(
         dut1=dut1,
     )
 
+    x_polar_motion = radians(polar_motion["x"])
+
+    y_polar_motion = radians(polar_motion["y"])
+
+    θ = radians(GMST * 15)
+
+    x1 = ecef["x"]
+
+    y1 = ecef["y"] * cos(y_polar_motion) + ecef["z"] * sin(y_polar_motion)
+
+    z1 = -ecef["y"] * sin(y_polar_motion) + ecef["z"] * cos(y_polar_motion)
+
+    x2 = x1 * cos(x_polar_motion) - z1 * sin(x_polar_motion)
+
+    y2 = y1
+
+    z2 = x1 * sin(x_polar_motion) + z1 * cos(x_polar_motion)
+
     # Rotate around Z-axis (from ECEF to ECI) using the GMST:
     return CartesianCoordinate(
-        x=ecef["x"] * cos(radians(GMST * 15)) - ecef["y"] * sin(radians(GMST * 15)),
-        y=ecef["x"] * sin(radians(GMST * 15)) + ecef["y"] * cos(radians(GMST * 15)),
-        z=ecef["z"],
+        x=x2 * cos(θ) - y2 * sin(θ),
+        y=x2 * sin(θ) + y2 * cos(θ),
+        z=z2,
     )
 
 
