@@ -160,6 +160,7 @@ def convert_ecef_to_eci(
     Args:
         ecef (CartesianCoordinate): The ECEF coordinates (x, y, z).
         when (datetime): The date and time for the conversion.
+        polar_motion (PolarMotionParameters): The polar motion parameters (in degrees).
 
     Returns:
         CartesianCoordinate: The ECI coordinates (x, y, z).
@@ -204,6 +205,11 @@ def convert_ecef_to_eci(
 def convert_eci_to_ecef(
     eci: CartesianCoordinate,
     when: datetime,
+    *,
+    polar_motion: PolarMotionParameters = PolarMotionParameters(
+        x=0.0,
+        y=0.0,
+    ),
 ) -> CartesianCoordinate:
     """
     Convert Earth-Centered Inertial (ECI) coordinates to Earth-Centered Earth Fixed (ECEF)
@@ -212,6 +218,7 @@ def convert_eci_to_ecef(
     Args:
         eci (CartesianCoordinate): The ECI coordinates (x, y, z).
         when (datetime): The date and time for the conversion.
+        polar_motion (PolarMotionParameters): The polar motion parameters (in degrees).
 
     Returns:
         CartesianCoordinate: The ECEF coordinates (x, y, z).
@@ -224,11 +231,29 @@ def convert_eci_to_ecef(
         dut1=dut1,
     )
 
+    x_polar_motion = radians(polar_motion["x"])
+
+    y_polar_motion = radians(polar_motion["y"])
+
+    θ = radians(GMST * 15)
+
+    x1 = eci["x"] * cos(x_polar_motion) + eci["z"] * sin(x_polar_motion)
+
+    y1 = eci["y"]
+
+    z1 = -eci["x"] * sin(x_polar_motion) + eci["z"] * cos(x_polar_motion)
+
+    x2 = x1
+
+    y2 = y1 * cos(y_polar_motion) - z1 * sin(y_polar_motion)
+
+    z2 = y1 * sin(y_polar_motion) + z1 * cos(y_polar_motion)
+
     # Rotate around Z-axis (from ECI to ECEF) using the GMST:
     return CartesianCoordinate(
-        x=(eci["x"] * cos(radians(GMST * 15))) + (eci["y"] * sin(radians(GMST * 15))),
-        y=-(eci["x"] * sin(radians(GMST * 15))) + (eci["y"] * cos(radians(GMST * 15))),
-        z=eci["z"],
+        x=x2 * cos(θ) + y2 * sin(θ),
+        y=-x2 * sin(θ) + y2 * cos(θ),
+        z=z2,
     )
 
 
