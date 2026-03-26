@@ -61,3 +61,25 @@ def get_rotation_matrix_y(angle: float) -> Matrix3x3:
 
 
 # **************************************************************************************
+
+
+def get_rotation_matrix_z(angle: float) -> Matrix3x3:
+    """
+    Create a right-handed active rotation matrix about the Z-axis.
+
+    Args:
+        angle (float): The rotation angle, (in degrees).
+
+    Returns:
+        Matrix3x3: The rotation matrix about the Z-axis.
+    """
+    θ = radians(angle)
+
+    return (
+        (cos(θ), -sin(θ), 0.0),
+        (sin(θ), cos(θ), 0.0),
+        (0.0, 0.0, 1.0),
+    )
+
+
+# **************************************************************************************
