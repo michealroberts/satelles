@@ -13,11 +13,11 @@ wheels = [
 
 [[package]]
 name = "celerity"
-version = "0.41.0"
+version = "0.43.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/64/f2/743e04990459c374c285c5175c0fdd07ad9bb22fe40e36549a47304e4a86/celerity-0.41.0.tar.gz", hash = "sha256:f3491525cfe6bb7a27e0655607f627cf3a8be74a29d2e4f9d7ab154dc48ed470", size = 660785, upload-time = "2026-01-20T14:16:49.876Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/1e/62/a0f61ba8dfc463325952a1dc2bb1d655da8a878d79590a7686b161c359c8/celerity-0.43.0.tar.gz", hash = "sha256:37e33c3fd13eea2dc742cecfff40224a3bbb529b39591a807d412eca1e58eb7b", size = 664257, upload-time = "2026-03-26T19:04:05.597Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/1f/05/934ce18ab2296ff32d0f067222d63aab842d7935cae40a6d5d79ecfdc703/celerity-0.41.0-py3-none-any.whl", hash = "sha256:7f7ef6322609283ea8097d1944d058fa43a29613783fa23ccce1610c8d481826", size = 701747, upload-time = "2026-01-20T14:16:48.564Z" },
+    { url = "https://files.pythonhosted.org/packages/49/cd/f2923f9d53d96cef2509caa4eed1d12c7f5f5ede0ad146a6eaadfd3e479a/celerity-0.43.0-py3-none-any.whl", hash = "sha256:02b34b80e66d278001ce1459435f8d2c6eaed875cedb0f82106249d0cc16af51", size = 705951, upload-time = "2026-03-26T19:04:03.893Z" },
 ]
 
 [[package]]
@@ -453,7 +453,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "celerity", specifier = ">=0.41.0" },
+    { name = "celerity", specifier = ">=0.43.0" },
     { name = "pydantic", specifier = ">=2.12.4" },
 ]
 
