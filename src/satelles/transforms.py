@@ -7,6 +7,7 @@
 
 from datetime import datetime
 
+from celerity.equinox import get_equation_of_the_equinoxes
 from celerity.temporal import get_greenwich_sidereal_time
 
 from .common import CartesianCoordinate
@@ -118,6 +119,42 @@ def eci_to_ecef_transform_provider(when: datetime) -> Transform:
     return Transform(
         rotation=rotation,
         translation=translation,
+    )
+
+
+# **************************************************************************************
+
+
+def teme_to_eci_transform_provider(when: datetime) -> Transform:
+    """
+    Transform from TEME to ECI using the equation of the equinoxes.
+
+    Args:
+        when (datetime): The time at which to compute the transform.
+
+    Returns:
+        Transform: The transform from TEME to ECI.
+    """
+    axis = CartesianCoordinate(
+        x=0.0,
+        y=0.0,
+        z=1.0,
+    )
+
+    rotation = Quaternion.from_axis_angle(
+        axis=axis,
+        angle=get_equation_of_the_equinoxes(
+            date=when,
+        ),
+    )
+
+    return Transform(
+        rotation=rotation,
+        translation=CartesianCoordinate(
+            x=0.0,
+            y=0.0,
+            z=0.0,
+        ),
     )
 
 
