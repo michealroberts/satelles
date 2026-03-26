@@ -102,6 +102,7 @@ from .transforms import (
     ecef_to_eci_transform_provider,
     eci_to_ecef_transform_provider,
     identity_transform_provider,
+    teme_to_eci_transform_provider,
 )
 from .vector import (
     Vector,
@@ -214,6 +215,7 @@ __all__: list[str] = [
     "TopocentricCoordinate",
     "Transform",
     "TransformProvider",
+    "teme_to_eci_transform_provider",
     "Vector",
     "Velocity",
     "VerletPropagationParameters",

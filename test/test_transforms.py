@@ -14,6 +14,7 @@ from satelles.transforms import (
     ecef_to_eci_transform_provider,
     eci_to_ecef_transform_provider,
     identity_transform_provider,
+    teme_to_eci_transform_provider,
 )
 
 # **************************************************************************************
@@ -217,6 +218,91 @@ class TestECIToECEFTransformProvider(unittest.TestCase):
         when = datetime(2025, 6, 1, 0, 0, 0, tzinfo=timezone.utc)
 
         transform = eci_to_ecef_transform_provider(when)
+
+        self.assertEqual(transform.translation["x"], 0.0)
+        self.assertEqual(transform.translation["y"], 0.0)
+        self.assertEqual(transform.translation["z"], 0.0)
+
+
+# **************************************************************************************
+
+
+class TestTEMEToECITransformProvider(unittest.TestCase):
+    def test_teme_to_eci_rotates_about_z_axis(self) -> None:
+        """
+        Test that the TEME to ECI transform is a small rotation about the Z-axis.
+        """
+        when = datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+
+        transform = teme_to_eci_transform_provider(when)
+
+        expected_rotation = Quaternion(
+            w=0.9999999999998531,
+            x=0.0,
+            y=0.0,
+            z=5.419365470642385e-07,
+        )
+
+        self.assertAlmostEqual(
+            transform.rotation.w,
+            expected_rotation.w,
+            places=12,
+        )
+        self.assertAlmostEqual(
+            transform.rotation.x,
+            expected_rotation.x,
+            places=15,
+        )
+        self.assertAlmostEqual(
+            transform.rotation.y,
+            expected_rotation.y,
+            places=15,
+        )
+        self.assertAlmostEqual(
+            transform.rotation.z,
+            expected_rotation.z,
+            places=6,
+        )
+
+        when = datetime(2025, 6, 1, 0, 0, 0, tzinfo=timezone.utc)
+
+        transform = teme_to_eci_transform_provider(when)
+
+        expected_rotation = Quaternion(
+            w=0.9999999999960894,
+            x=0.0,
+            y=0.0,
+            z=2.79665571465075e-06,
+        )
+
+        self.assertAlmostEqual(
+            transform.rotation.w,
+            expected_rotation.w,
+            places=12,
+        )
+        self.assertAlmostEqual(
+            transform.rotation.x,
+            expected_rotation.x,
+            places=15,
+        )
+        self.assertAlmostEqual(
+            transform.rotation.y,
+            expected_rotation.y,
+            places=15,
+        )
+        self.assertAlmostEqual(
+            transform.rotation.z,
+            expected_rotation.z,
+            places=6,
+        )
+
+    def test_teme_to_eci_has_zero_translation(self) -> None:
+        """
+        Test that the TEME to ECI transform has zero translation.
+        """
+        when = datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+
+        transform = teme_to_eci_transform_provider(when)
 
         self.assertEqual(transform.translation["x"], 0.0)
         self.assertEqual(transform.translation["y"], 0.0)
