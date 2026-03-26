@@ -70,6 +70,7 @@ from .matrix import (
     Matrix3x3,
     get_rotation_matrix_x,
     get_rotation_matrix_y,
+    get_rotation_matrix_z,
 )
 from .mjd import (
     UNIX_EPOCH_AS_MODIFIED_JULIAN_DATE,
@@ -183,6 +184,7 @@ __all__: list[str] = [
     "get_true_anomaly",
     "get_rotation_matrix_x",
     "get_rotation_matrix_y",
+    "get_rotation_matrix_z",
     "identity_transform_provider",
     "is_visible",
     "normalise",
