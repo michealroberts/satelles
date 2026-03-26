@@ -71,6 +71,7 @@ from .matrix import (
     get_rotation_matrix_x,
     get_rotation_matrix_y,
     get_rotation_matrix_z,
+    multiply,
 )
 from .mjd import (
     UNIX_EPOCH_AS_MODIFIED_JULIAN_DATE,
@@ -189,6 +190,7 @@ __all__: list[str] = [
     "is_visible",
     "normalise",
     "magnitude",
+    "multiply",
     "perform_checksum_compute",
     "propagate_rk4",
     "propagate_verlet",
