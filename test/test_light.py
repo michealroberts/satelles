@@ -9,6 +9,7 @@ import unittest
 
 from satelles import (
     convert_distance_to_light_travel_time,
+    convert_light_travel_time_to_distance,
 )
 
 # **************************************************************************************
@@ -31,6 +32,27 @@ class TestConvertDistanceToLightTravelTime(unittest.TestCase):
     def test_convert_distance_to_light_travel_time_for_negative_distance(self) -> None:
         with self.assertRaises(ValueError):
             convert_distance_to_light_travel_time(-1.0)
+
+
+# **************************************************************************************
+
+
+class TestConvertLightTravelTimeToDistance(unittest.TestCase):
+    def test_convert_light_travel_time_to_distance_for_zero_time(self) -> None:
+        self.assertEqual(
+            convert_light_travel_time_to_distance(0.0),
+            0.0,
+        )
+
+    def test_convert_light_travel_time_to_distance_for_one_second(self) -> None:
+        self.assertEqual(
+            convert_light_travel_time_to_distance(1.0),
+            299792458.0,
+        )
+
+    def test_convert_light_travel_time_to_distance_for_negative_time(self) -> None:
+        with self.assertRaises(ValueError):
+            convert_light_travel_time_to_distance(-1.0)
 
 
 # **************************************************************************************

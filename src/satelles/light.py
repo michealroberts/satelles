@@ -31,3 +31,26 @@ def convert_distance_to_light_travel_time(distance: float | int) -> float:
 
 
 # **************************************************************************************
+
+
+def convert_light_travel_time_to_distance(time: float | int) -> float:
+    """
+    Convert a time in seconds to the distance light travels in that time.
+
+    Args:
+        time: The time in seconds.
+
+    Returns:
+        float: The distance in meters that light travels in the given time.
+
+    Raises:
+        ValueError: If time is negative.
+    """
+    # Guard against negative times:
+    if time < 0:
+        raise ValueError("Time must be non-negative.")
+
+    return time * c
+
+
+# **************************************************************************************

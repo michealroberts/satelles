@@ -68,6 +68,7 @@ from .kepler import (
 )
 from .light import (
     convert_distance_to_light_travel_time,
+    convert_light_travel_time_to_distance,
 )
 from .matrix import (
     Matrix3x3,
@@ -164,6 +165,7 @@ __all__: list[str] = [
     "convert_eci_to_topocentric",
     "convert_enu_to_horizontal",
     "convert_lla_to_ecef",
+    "convert_light_travel_time_to_distance",
     "convert_mjd_as_parts_to_datetime",
     "convert_mjd_to_datetime",
     "convert_perifocal_to_eci",
