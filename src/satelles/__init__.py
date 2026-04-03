@@ -66,6 +66,9 @@ from .kepler import (
     get_semi_major_axis,
     get_true_anomaly,
 )
+from .light import (
+    convert_distance_to_light_travel_time,
+)
 from .matrix import (
     Matrix3x3,
     get_rotation_matrix_x,
@@ -151,6 +154,7 @@ __all__: list[str] = [
     "add",
     "angle",
     "c",
+    "convert_distance_to_light_travel_time",
     "convert_ecef_to_eci",
     "convert_ecef_to_enu",
     "convert_ecef_to_lla",
