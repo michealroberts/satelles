@@ -183,32 +183,32 @@ class TestECIToECEFTransformProvider(unittest.TestCase):
         transform = eci_to_ecef_transform_provider(when)
 
         expected_rotation = Quaternion(
-            w=-0.7737981347150147,
+            w=-0.7737985519624722,
             x=0.0,
             y=0.0,
-            z=-0.6334322747631067,
+            z=-0.6334317650550698,
         )
 
-        self.assertEqual(transform.rotation.w, expected_rotation.w)
-        self.assertEqual(transform.rotation.x, expected_rotation.x)
-        self.assertEqual(transform.rotation.y, expected_rotation.y)
-        self.assertEqual(transform.rotation.z, expected_rotation.z)
+        self.assertAlmostEqual(transform.rotation.w, expected_rotation.w, places=15)
+        self.assertAlmostEqual(transform.rotation.x, expected_rotation.x, places=15)
+        self.assertAlmostEqual(transform.rotation.y, expected_rotation.y, places=15)
+        self.assertAlmostEqual(transform.rotation.z, expected_rotation.z, places=15)
 
         when = datetime(2025, 6, 1, 0, 0, 0, tzinfo=timezone.utc)
 
         transform = eci_to_ecef_transform_provider(when)
 
         expected_rotation = Quaternion(
-            w=-0.5716613583006416,
+            w=-0.5716637145329766,
             x=0.0,
             y=0.0,
-            z=-0.8204896656423318,
+            z=-0.8204880239749752,
         )
 
-        self.assertEqual(transform.rotation.w, expected_rotation.w)
-        self.assertEqual(transform.rotation.x, expected_rotation.x)
-        self.assertEqual(transform.rotation.y, expected_rotation.y)
-        self.assertEqual(transform.rotation.z, expected_rotation.z)
+        self.assertAlmostEqual(transform.rotation.w, expected_rotation.w, places=15)
+        self.assertAlmostEqual(transform.rotation.x, expected_rotation.x, places=15)
+        self.assertAlmostEqual(transform.rotation.y, expected_rotation.y, places=15)
+        self.assertAlmostEqual(transform.rotation.z, expected_rotation.z, places=15)
 
     def test_eci_to_ecef_has_zero_translation(self) -> None:
         """

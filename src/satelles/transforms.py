@@ -111,6 +111,13 @@ def eci_to_ecef_transform_provider(when: datetime) -> Transform:
     # degrees):
     GMST = get_greenwich_sidereal_time(date=when) * 15
 
+    # Get the equation of the equinoxes (in degrees):
+    E = get_equation_of_the_equinoxes(date=when)
+
+    # The library's current ECI frame is true-of-date, so use Greenwich apparent
+    # sidereal time for the Earth-rotation step:
+    GAST = GMST + E
+
     # Create the rotation coordinate axis (Z-axis):
     axis = CartesianCoordinate(
         x=0.0,
@@ -118,10 +125,10 @@ def eci_to_ecef_transform_provider(when: datetime) -> Transform:
         z=1.0,
     )
 
-    # Create the rotation quaternion for the negative GMST angle about the Z-axis:
+    # Create the rotation quaternion for the negative GAST angle about the Z-axis:
     rotation = Quaternion.from_axis_angle(
         axis=axis,
-        angle=-GMST,
+        angle=-GAST,
     )
 
     # No translation between ECEF and ECI origins:
