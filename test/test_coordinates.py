@@ -327,8 +327,8 @@ class TestConvertECIToECEF(unittest.TestCase):
         result = convert_eci_to_ecef(eci, when)
         expected: CartesianCoordinate = CartesianCoordinate(
             {
-                "x": 1.7748277327858684,
-                "y": -1.3601420951261578,
+                "x": 1.7748262585634051,
+                "y": -1.3601440188133849,
                 "z": 3.0,
             }
         )
@@ -374,8 +374,8 @@ class TestConvertECIToECEF(unittest.TestCase):
 
         expected: CartesianCoordinate = CartesianCoordinate(
             {
-                "x": -0.270401038619395,
-                "y": -1.3881222130322506,
+                "x": -0.2704026305470004,
+                "y": -1.3881219029297327,
                 "z": eci["z"],
             }
         )

@@ -241,11 +241,20 @@ def convert_eci_to_ecef(
         dut1=dut1,
     )
 
+    # Get the equation of the equinoxes (in degrees):
+    E = get_equation_of_the_equinoxes(
+        date=when,
+    )
+
+    # The library's current ECI frame is true-of-date, so use Greenwich apparent
+    # sidereal time:
+    GAST = GMST * 15 + E
+
     x_polar_motion = radians(polar_motion["x"])
 
     y_polar_motion = radians(polar_motion["y"])
 
-    θ = radians(GMST * 15)
+    θ = radians(GAST)
 
     x1 = eci["x"] * cos(x_polar_motion) + eci["z"] * sin(x_polar_motion)
 
@@ -259,7 +268,7 @@ def convert_eci_to_ecef(
 
     z2 = y1 * sin(y_polar_motion) + z1 * cos(y_polar_motion)
 
-    # Rotate around Z-axis (from ECI to ECEF) using the GMST:
+    # Rotate around Z-axis (from ECI to ECEF) using the GAST:
     return CartesianCoordinate(
         x=x2 * cos(θ) + y2 * sin(θ),
         y=-x2 * sin(θ) + y2 * cos(θ),
