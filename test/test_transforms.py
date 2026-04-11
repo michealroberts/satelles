@@ -9,10 +9,16 @@ import unittest
 from datetime import datetime, timezone
 
 from satelles.coordinates import CartesianCoordinate
+from satelles.matrix import (
+    get_rotation_matrix_x,
+    get_rotation_matrix_z,
+    multiply,
+)
 from satelles.quaternion import Quaternion
 from satelles.transforms import (
     ecef_to_eci_transform_provider,
     eci_to_ecef_transform_provider,
+    eme2000_to_eci_transform_provider,
     identity_transform_provider,
     teme_to_eci_transform_provider,
 )
@@ -222,6 +228,147 @@ class TestECIToECEFTransformProvider(unittest.TestCase):
         self.assertEqual(transform.translation["x"], 0.0)
         self.assertEqual(transform.translation["y"], 0.0)
         self.assertEqual(transform.translation["z"], 0.0)
+
+
+# **************************************************************************************
+
+
+class TestEME2000ToECITransformProvider(unittest.TestCase):
+    def test_eme2000_to_eci_rotation_on_2025_01_01(self) -> None:
+        """
+        Test that the EME2000 to ECI transform is a small precession-nutation rotation.
+        """
+        when = datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+
+        transform = eme2000_to_eci_transform_provider(
+            when=when,
+        )
+
+        expected_rotation = Quaternion(
+            w=0.9999953534961247,
+            x=-2.06600742535606e-05,
+            y=0.0012143207914061056,
+            z=-0.0027960658679171907,
+        )
+
+        self.assertAlmostEqual(
+            transform.rotation.w,
+            expected_rotation.w,
+            places=9,
+        )
+        self.assertAlmostEqual(
+            transform.rotation.x,
+            expected_rotation.x,
+            places=9,
+        )
+        self.assertAlmostEqual(
+            transform.rotation.y,
+            expected_rotation.y,
+            places=9,
+        )
+        self.assertAlmostEqual(
+            transform.rotation.z,
+            expected_rotation.z,
+            places=9,
+        )
+
+    def test_eme2000_to_eci_rotation_on_2025_06_01(self) -> None:
+        """
+        Test that the EME2000 to ECI transform is a small precession-nutation rotation.
+        """
+        when = datetime(2025, 6, 1, 0, 0, 0, tzinfo=timezone.utc)
+
+        transform = eme2000_to_eci_transform_provider(
+            when=when,
+        )
+
+        expected_rotation = Quaternion(
+            w=0.9999951931898011,
+            x=-2.08272202209741e-05,
+            y=0.001233392837655694,
+            z=-0.002844627502388545,
+        )
+
+        self.assertAlmostEqual(
+            transform.rotation.w,
+            expected_rotation.w,
+            places=9,
+        )
+        self.assertAlmostEqual(
+            transform.rotation.x,
+            expected_rotation.x,
+            places=9,
+        )
+        self.assertAlmostEqual(
+            transform.rotation.y,
+            expected_rotation.y,
+            places=9,
+        )
+        self.assertAlmostEqual(
+            transform.rotation.z,
+            expected_rotation.z,
+            places=9,
+        )
+
+    def test_nutation_matrix_reduces_to_identity_when_nutation_is_zero(
+        self,
+    ) -> None:
+        """
+        Test that the nutation matrix is identity when nutation is zero.
+        """
+        rotation = Quaternion.from_rotation_matrix(
+            multiply(
+                get_rotation_matrix_x(-23.439292),
+                multiply(
+                    get_rotation_matrix_z(0.0),
+                    get_rotation_matrix_x(23.439292),
+                ),
+            )
+        )
+
+        self.assertAlmostEqual(
+            rotation.w,
+            1.0,
+            places=12,
+        )
+        self.assertAlmostEqual(
+            rotation.x,
+            0.0,
+            places=12,
+        )
+        self.assertAlmostEqual(
+            rotation.y,
+            0.0,
+            places=12,
+        )
+        self.assertAlmostEqual(
+            rotation.z,
+            0.0,
+            places=12,
+        )
+
+    def test_eme2000_to_eci_has_zero_translation(self) -> None:
+        """
+        Test that the EME2000 to ECI transform has zero translation.
+        """
+        when = datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+
+        transform = eme2000_to_eci_transform_provider(
+            when=when,
+        )
+
+        self.assertEqual(
+            transform.translation["x"],
+            0.0,
+        )
+        self.assertEqual(
+            transform.translation["y"],
+            0.0,
+        )
+        self.assertEqual(
+            transform.translation["z"],
+            0.0,
+        )
 
 
 # **************************************************************************************
