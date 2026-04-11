@@ -15,6 +15,7 @@ from celerity.coordinates import (
     GeographicCoordinate,
     HorizontalCoordinate,
 )
+from celerity.equinox import get_equation_of_the_equinoxes
 from celerity.temporal import get_greenwich_sidereal_time
 
 from satelles import (
@@ -238,12 +239,14 @@ class TestConvertECEFToECI(unittest.TestCase):
 
         GMST = get_greenwich_sidereal_time(date=when)
 
+        E = get_equation_of_the_equinoxes(date=when)
+
+        GAST = GMST * 15 + E
+
         ecef: CartesianCoordinate = CartesianCoordinate(
             {
-                "x": (eci["x"] * cos(radians(GMST * 15)))
-                + (eci["y"] * sin(radians(GMST * 15))),
-                "y": -(eci["x"] * sin(radians(GMST * 15)))
-                + (eci["y"] * cos(radians(GMST * 15))),
+                "x": (eci["x"] * cos(radians(GAST))) + (eci["y"] * sin(radians(GAST))),
+                "y": -(eci["x"] * sin(radians(GAST))) + (eci["y"] * cos(radians(GAST))),
                 "z": eci["z"],
             }
         )
