@@ -15,6 +15,7 @@ from celerity.coordinates import (
     GeographicCoordinate,
     HorizontalCoordinate,
 )
+from celerity.equinox import get_equation_of_the_equinoxes
 from celerity.temporal import (
     get_greenwich_sidereal_time,
     get_ut1_utc_offset,
@@ -173,11 +174,20 @@ def convert_ecef_to_eci(
         dut1=dut1,
     )
 
+    # Get the equation of the equinoxes (in degrees):
+    E = get_equation_of_the_equinoxes(
+        date=when,
+    )
+
+    # The library's current ECI frame is true-of-date, so use Greenwich apparent
+    # sidereal time:
+    GAST = GMST * 15 + E
+
     x_polar_motion = radians(polar_motion["x"])
 
     y_polar_motion = radians(polar_motion["y"])
 
-    θ = radians(GMST * 15)
+    θ = radians(GAST)
 
     x1 = ecef["x"]
 
@@ -191,7 +201,7 @@ def convert_ecef_to_eci(
 
     z2 = x1 * sin(x_polar_motion) + z1 * cos(x_polar_motion)
 
-    # Rotate around Z-axis (from ECEF to ECI) using the GMST:
+    # Rotate around Z-axis (from ECEF to ECI) using the GAST:
     return CartesianCoordinate(
         x=x2 * cos(θ) - y2 * sin(θ),
         y=x2 * sin(θ) + y2 * cos(θ),
