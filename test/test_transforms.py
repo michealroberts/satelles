@@ -20,6 +20,7 @@ from satelles.transforms import (
     eci_to_ecef_transform_provider,
     eme2000_to_eci_transform_provider,
     identity_transform_provider,
+    itrf_to_ecef_transform_provider,
     teme_to_eci_transform_provider,
 )
 
@@ -369,6 +370,38 @@ class TestEME2000ToECITransformProvider(unittest.TestCase):
             transform.translation["z"],
             0.0,
         )
+
+
+# **************************************************************************************
+
+
+class TestITRFToECEFTransformProvider(unittest.TestCase):
+    def test_itrf_to_ecef_is_identity(self) -> None:
+        """
+        Test that the ITRF to ECEF transform is currently coincident.
+        """
+        when = datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+
+        transform = itrf_to_ecef_transform_provider(when)
+
+        expected_rotation = Quaternion.identity()
+
+        self.assertEqual(transform.rotation.w, expected_rotation.w)
+        self.assertEqual(transform.rotation.x, expected_rotation.x)
+        self.assertEqual(transform.rotation.y, expected_rotation.y)
+        self.assertEqual(transform.rotation.z, expected_rotation.z)
+
+    def test_itrf_to_ecef_has_zero_translation(self) -> None:
+        """
+        Test that the ITRF to ECEF transform has zero translation.
+        """
+        when = datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+
+        transform = itrf_to_ecef_transform_provider(when)
+
+        self.assertEqual(transform.translation["x"], 0.0)
+        self.assertEqual(transform.translation["y"], 0.0)
+        self.assertEqual(transform.translation["z"], 0.0)
 
 
 # **************************************************************************************

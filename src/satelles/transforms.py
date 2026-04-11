@@ -193,6 +193,26 @@ def eme2000_to_eci_transform_provider(when: datetime) -> Transform:
 # **************************************************************************************
 
 
+def itrf_to_ecef_transform_provider(_: datetime) -> Transform:
+    """
+    Transform from ITRF to ECEF frame.
+
+    Returns:
+        Transform: The transform from ITRF to ECEF frame (identity transform).
+    """
+    return Transform(
+        rotation=Quaternion.identity(),
+        translation=CartesianCoordinate(
+            x=0.0,
+            y=0.0,
+            z=0.0,
+        ),
+    )
+
+
+# **************************************************************************************
+
+
 def teme_to_eci_transform_provider(when: datetime) -> Transform:
     """
     Transform from TEME to ECI using the equation of the equinoxes.
