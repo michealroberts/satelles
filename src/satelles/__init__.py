@@ -46,6 +46,11 @@ from .frame import (
     Transform,
     TransformProvider,
 )
+from .frames import (
+    ECEF,
+    ECI,
+    EME2000,
+)
 from .gravity import get_gravitational_acceleration
 from .hohmann import (
     HohmannTransferParameters,
@@ -152,6 +157,9 @@ __all__: list[str] = [
     "G",
     "SPEED_OF_LIGHT",
     "UNIX_EPOCH_AS_MODIFIED_JULIAN_DATE",
+    "ECEF",
+    "ECI",
+    "EME2000",
     "add",
     "angle",
     "c",
