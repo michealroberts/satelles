@@ -9,7 +9,12 @@ import unittest
 from datetime import datetime, timezone
 
 from satelles.common import CartesianCoordinate
-from satelles.frames import ECEF, ECI
+from satelles.frame import Reference
+from satelles.frames import (
+    ECEF,
+    ECI,
+    EME2000,
+)
 
 from .utils import SatellesTestCase
 
@@ -41,7 +46,7 @@ class TestECEFToECITransform(SatellesTestCase):
             }
         )
 
-        self.assertCoordinatesAlmostEqual(result, expected_position)
+        self.assertCoordinatesAlmostEqual(expected_position, result)
 
 
 # **************************************************************************************
@@ -72,7 +77,59 @@ class TestECIToECEFTransform(SatellesTestCase):
             }
         )
 
-        self.assertCoordinatesAlmostEqual(result, expected_position)
+        self.assertCoordinatesAlmostEqual(expected_position, result)
+
+
+# **************************************************************************************
+
+
+class TestEME2000Frame(SatellesTestCase):
+    def test_reference(self) -> None:
+        self.assertEqual(EME2000.reference, Reference.EME2000)
+
+    def test_is_inertial(self) -> None:
+        self.assertTrue(EME2000.is_inertial)
+
+    def test_parent(self) -> None:
+        self.assertIs(EME2000.parent, ECI)
+
+    def test_name(self) -> None:
+        self.assertEqual(EME2000.name, "Earth Mean Equator 2000")
+
+    def test_transform_to_eci(self) -> None:
+        """Verifies the EME2000 to ECI frame transform for a specific date and time."""
+        when = datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+
+        eme2000_position = CartesianCoordinate(
+            {
+                "x": 1.0,
+                "y": 0.0,
+                "z": 0.0,
+            }
+        )
+
+        transform = EME2000.transform_to(when=when, other=ECI)
+
+        result = transform.apply_to_position(eme2000_position)
+
+        expected_position = CartesianCoordinate(
+            {
+                "x": 0.9999814148813556,
+                "y": -0.005592155927888036,
+                "z": -0.002428514764262787,
+            }
+        )
+
+        self.assertCoordinatesAlmostEqual(expected_position, result)
+
+    def test_transform_to_eci_has_zero_translation(self) -> None:
+        when = datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+
+        transform = EME2000.transform_to(when=when, other=ECI)
+
+        self.assertEqual(transform.translation["x"], 0.0)
+        self.assertEqual(transform.translation["y"], 0.0)
+        self.assertEqual(transform.translation["z"], 0.0)
 
 
 # **************************************************************************************

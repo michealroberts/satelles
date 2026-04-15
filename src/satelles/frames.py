@@ -9,6 +9,7 @@ from .body import Body
 from .frame import Frame, Reference
 from .transforms import (
     eci_to_ecef_transform_provider,
+    eme2000_to_eci_transform_provider,
     identity_transform_provider,
 )
 
@@ -32,6 +33,19 @@ ECI = Frame(
     parent=ECEF,
     transform_to_parent=eci_to_ecef_transform_provider,
     name="Earth Centered Inertial",
+)
+
+
+# **************************************************************************************
+
+
+EME2000 = Frame(
+    reference=Reference.EME2000,
+    origin=Body.EARTH,
+    is_inertial=True,
+    parent=ECI,
+    transform_to_parent=eme2000_to_eci_transform_provider,
+    name="Earth Mean Equator 2000",
 )
 
 
