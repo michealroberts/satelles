@@ -12,6 +12,7 @@ from .transforms import (
     eme2000_to_eci_transform_provider,
     identity_transform_provider,
     itrf_to_ecef_transform_provider,
+    teme_to_eci_transform_provider,
 )
 
 # **************************************************************************************
@@ -60,6 +61,19 @@ ITRF = Frame(
     parent=ECEF,
     transform_to_parent=itrf_to_ecef_transform_provider,
     name="International Terrestrial Reference Frame",
+)
+
+
+# **************************************************************************************
+
+
+TEME = Frame(
+    reference=Reference.TEME,
+    origin=Body.EARTH,
+    is_inertial=True,
+    parent=ECI,
+    transform_to_parent=teme_to_eci_transform_provider,
+    name="True Equator Mean Equinox",
 )
 
 

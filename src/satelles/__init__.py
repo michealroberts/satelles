@@ -51,6 +51,7 @@ from .frames import (
     ECI,
     EME2000,
     ITRF,
+    TEME,
 )
 from .gravity import get_gravitational_acceleration
 from .hohmann import (
@@ -164,6 +165,7 @@ __all__: list[str] = [
     "ECI",
     "EME2000",
     "ITRF",
+    "TEME",
     "add",
     "angle",
     "c",

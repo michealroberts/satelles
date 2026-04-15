@@ -15,6 +15,7 @@ from satelles.frames import (
     ECI,
     EME2000,
     ITRF,
+    TEME,
 )
 
 from .utils import SatellesTestCase
@@ -179,6 +180,58 @@ class TestITRFFrame(SatellesTestCase):
         when = datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
 
         transform = ITRF.transform_to(when=when, other=ECEF)
+
+        self.assertEqual(transform.translation["x"], 0.0)
+        self.assertEqual(transform.translation["y"], 0.0)
+        self.assertEqual(transform.translation["z"], 0.0)
+
+
+# **************************************************************************************
+
+
+class TestTEMEFrame(SatellesTestCase):
+    def test_reference(self) -> None:
+        self.assertEqual(TEME.reference, Reference.TEME)
+
+    def test_is_inertial(self) -> None:
+        self.assertTrue(TEME.is_inertial)
+
+    def test_parent(self) -> None:
+        self.assertIs(TEME.parent, ECI)
+
+    def test_name(self) -> None:
+        self.assertEqual(TEME.name, "True Equator Mean Equinox")
+
+    def test_transform_to_eci(self) -> None:
+        """Verifies the TEME to ECI frame transform for a specific date and time."""
+        when = datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+
+        teme_position = CartesianCoordinate(
+            {
+                "x": 1.0,
+                "y": 0.0,
+                "z": 0.0,
+            }
+        )
+
+        transform = TEME.transform_to(when=when, other=ECI)
+
+        result = transform.apply_to_position(teme_position)
+
+        expected_position = CartesianCoordinate(
+            {
+                "x": 0.9999999999994125,
+                "y": 1.0838730941284775e-06,
+                "z": 0.0,
+            }
+        )
+
+        self.assertCoordinatesAlmostEqual(expected_position, result)
+
+    def test_transform_to_eci_has_zero_translation(self) -> None:
+        when = datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+
+        transform = TEME.transform_to(when=when, other=ECI)
 
         self.assertEqual(transform.translation["x"], 0.0)
         self.assertEqual(transform.translation["y"], 0.0)
