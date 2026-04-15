@@ -50,6 +50,7 @@ from .frames import (
     ECEF,
     ECI,
     EME2000,
+    ITRF,
 )
 from .gravity import get_gravitational_acceleration
 from .hohmann import (
@@ -114,7 +115,9 @@ from .tle import TLE
 from .transforms import (
     ecef_to_eci_transform_provider,
     eci_to_ecef_transform_provider,
+    eme2000_to_eci_transform_provider,
     identity_transform_provider,
+    itrf_to_ecef_transform_provider,
     teme_to_eci_transform_provider,
 )
 from .vector import (
@@ -160,6 +163,7 @@ __all__: list[str] = [
     "ECEF",
     "ECI",
     "EME2000",
+    "ITRF",
     "add",
     "angle",
     "c",
@@ -183,6 +187,7 @@ __all__: list[str] = [
     "dot",
     "ecef_to_eci_transform_provider",
     "eci_to_ecef_transform_provider",
+    "eme2000_to_eci_transform_provider",
     "get_eccentric_anomaly",
     "get_gravitational_acceleration",
     "get_hohmann_transfer_eccentricity",
@@ -201,6 +206,7 @@ __all__: list[str] = [
     "get_rotation_matrix_y",
     "get_rotation_matrix_z",
     "identity_transform_provider",
+    "itrf_to_ecef_transform_provider",
     "is_visible",
     "normalise",
     "magnitude",
