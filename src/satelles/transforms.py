@@ -166,11 +166,14 @@ def eme2000_to_eci_transform_provider(when: datetime) -> Transform:
 
     z = (2306.2181 * T + 1.09468 * T * T + 0.018203 * T * T * T) / 3600.0
 
+    # The IAU-76 precession matrix is P = ROT3(-z) · ROT2(θ) · ROT3(-ζ) in terms of
+    # passive (frame) rotations. Our rotation matrices are active (vector) rotations,
+    # where an active rotation by α is a passive rotation by -α, so the signs flip:
     precession = multiply(
-        get_rotation_matrix_z(-z),
+        get_rotation_matrix_z(z),
         multiply(
-            get_rotation_matrix_y(θ),
-            get_rotation_matrix_z(-ζ),
+            get_rotation_matrix_y(-θ),
+            get_rotation_matrix_z(ζ),
         ),
     )
 
@@ -182,11 +185,13 @@ def eme2000_to_eci_transform_provider(when: datetime) -> Transform:
         date=when,
     )
 
+    # The nutation matrix is N = ROT1(-ε_true) · ROT3(-Δψ) · ROT1(ε_mean) in terms of
+    # passive (frame) rotations, so again the signs flip for our active rotations:
     nutation = multiply(
-        get_rotation_matrix_x(-e),
+        get_rotation_matrix_x(e),
         multiply(
-            get_rotation_matrix_z(-Δψ),
-            get_rotation_matrix_x(ε),
+            get_rotation_matrix_z(Δψ),
+            get_rotation_matrix_x(-ε),
         ),
     )
 
