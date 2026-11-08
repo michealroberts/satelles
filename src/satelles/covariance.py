@@ -98,35 +98,35 @@ class Covariance(BaseModel):
         Field(description="Covariance derivative element CZ_DOT_Z"),
     ]
 
-    # Velocity covariance block (3x3) using second derivatives:
+    # Velocity covariance block (3x3):
     cx_dot_x_dot: Annotated[
         float,
-        Field(description="Second derivative covariance element CX_DOT_X_DOT"),
+        Field(description="Velocity covariance element CX_DOT_X_DOT"),
     ]
 
     cy_dot_x_dot: Annotated[
         float,
-        Field(description="Second derivative covariance element CY_DOT_X_DOT"),
+        Field(description="Velocity covariance element CY_DOT_X_DOT"),
     ]
 
     cy_dot_y_dot: Annotated[
         float,
-        Field(description="Second derivative covariance element CY_DOT_Y_DOT"),
+        Field(description="Velocity covariance element CY_DOT_Y_DOT"),
     ]
 
     cz_dot_x_dot: Annotated[
         float,
-        Field(description="Second derivative covariance element CZ_DOT_X_DOT"),
+        Field(description="Velocity covariance element CZ_DOT_X_DOT"),
     ]
 
     cz_dot_y_dot: Annotated[
         float,
-        Field(description="Second derivative covariance element CZ_DOT_Y_DOT"),
+        Field(description="Velocity covariance element CZ_DOT_Y_DOT"),
     ]
 
     cz_dot_z_dot: Annotated[
         float,
-        Field(description="Second derivative covariance element CZ_DOT_Z_DOT"),
+        Field(description="Velocity covariance element CZ_DOT_Z_DOT"),
     ]
 
     @field_validator("reference_frame")
@@ -151,6 +151,9 @@ class Covariance(BaseModel):
         Construct a full 6x6 symmetric covariance matrix from the OMM fields.
 
         The state vector order is assumed to be: [x, y, z, vx, vy, vz].
+
+        Per CCSDS 502.0-B, a field C<A>_<B> is cov(A, B) in the lower triangle, so
+        e.g. CX_DOT_Y = cov(vx, y) sits at M[3][1] and, by symmetry, M[1][3].
         """
         # Build the 6x6 matrix row by row and column by column:
         return [
@@ -159,44 +162,44 @@ class Covariance(BaseModel):
                 self.cy_x,
                 self.cz_x,
                 self.cx_dot_x,
-                self.cx_dot_y,
-                self.cx_dot_z,
+                self.cy_dot_x,
+                self.cz_dot_x,
             ],
             [
                 self.cy_x,
                 self.cy_y,
                 self.cz_y,
-                self.cy_dot_x,
+                self.cx_dot_y,
                 self.cy_dot_y,
-                self.cy_dot_z,
+                self.cz_dot_y,
             ],
             [
                 self.cz_x,
                 self.cz_y,
                 self.cz_z,
-                self.cz_dot_x,
-                self.cz_dot_y,
+                self.cx_dot_z,
+                self.cy_dot_z,
                 self.cz_dot_z,
             ],
             [
                 self.cx_dot_x,
-                self.cy_dot_x,
-                self.cz_dot_x,
+                self.cx_dot_y,
+                self.cx_dot_z,
                 self.cx_dot_x_dot,
                 self.cy_dot_x_dot,
                 self.cz_dot_x_dot,
             ],
             [
-                self.cx_dot_y,
+                self.cy_dot_x,
                 self.cy_dot_y,
-                self.cz_dot_y,
+                self.cy_dot_z,
                 self.cy_dot_x_dot,
                 self.cy_dot_y_dot,
                 self.cz_dot_y_dot,
             ],
             [
-                self.cx_dot_z,
-                self.cy_dot_z,
+                self.cz_dot_x,
+                self.cz_dot_y,
                 self.cz_dot_z,
                 self.cz_dot_x_dot,
                 self.cz_dot_y_dot,
