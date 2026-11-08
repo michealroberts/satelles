@@ -11,7 +11,11 @@ from celerity.astrometry import get_obliquity_of_the_ecliptic
 from celerity.ecliptic import get_true_obliquity_of_the_ecliptic
 from celerity.equinox import get_equation_of_the_equinoxes
 from celerity.nutation import get_nutation_in_longitude
-from celerity.temporal import get_greenwich_sidereal_time, get_julian_date
+from celerity.temporal import (
+    get_greenwich_sidereal_time,
+    get_julian_date,
+    get_ut1_utc_offset,
+)
 
 from .common import CartesianCoordinate
 from .frame import Transform
@@ -56,9 +60,12 @@ def ecef_to_eci_transform_provider(when: datetime) -> Transform:
     Returns:
         Transform: The transform from ECEF to ECI frame.
     """
-    # Get the Greenwich Mean Sidereal Time (GMST) for the given date (and convert to
-    # degrees):
-    GMST = get_greenwich_sidereal_time(date=when) * 15
+    # Get the UT1 - UTC offset (DUT1, in seconds) for the given date:
+    dut1 = get_ut1_utc_offset(when)
+
+    # Get the Greenwich Mean Sidereal Time (GMST) for the given date, applying DUT1 so
+    # that the Earth-rotation angle is evaluated in UT1 (and convert to degrees):
+    GMST = get_greenwich_sidereal_time(date=when, dut1=dut1) * 15
 
     # Get the equation of the equinoxes (in degrees):
     E = get_equation_of_the_equinoxes(date=when)
@@ -107,9 +114,12 @@ def eci_to_ecef_transform_provider(when: datetime) -> Transform:
     Returns:
         Transform: The transform from ECI to ECEF frame.
     """
-    # Get the Greenwich Mean Sidereal Time (GMST) for the given date (and convert to
-    # degrees):
-    GMST = get_greenwich_sidereal_time(date=when) * 15
+    # Get the UT1 - UTC offset (DUT1, in seconds) for the given date:
+    dut1 = get_ut1_utc_offset(when)
+
+    # Get the Greenwich Mean Sidereal Time (GMST) for the given date, applying DUT1 so
+    # that the Earth-rotation angle is evaluated in UT1 (and convert to degrees):
+    GMST = get_greenwich_sidereal_time(date=when, dut1=dut1) * 15
 
     # Get the equation of the equinoxes (in degrees):
     E = get_equation_of_the_equinoxes(date=when)

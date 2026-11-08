@@ -42,8 +42,8 @@ class TestECEFToECITransform(SatellesTestCase):
 
         expected_position = CartesianCoordinate(
             {
-                "x": 0.9999978322532244,
-                "y": 2.0000010838719193,
+                "x": 0.9999910845134437,
+                "y": 2.000004457718439,
                 "z": 3.0,
             }
         )
@@ -73,8 +73,8 @@ class TestECIToECEFTransform(SatellesTestCase):
 
         expected_position = CartesianCoordinate(
             {
-                "x": 1.774830847495764,
-                "y": -1.3601380307812398,
+                "x": 1.7748262585632713,
+                "y": -1.3601440188135594,
                 "z": 3.0,
             }
         )
