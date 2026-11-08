@@ -46,3 +46,6 @@ dev = [
 [tool.pytest.ini_options]
 pythonpath = [".", "src"]
 asyncio_default_fixture_loop_scope = "session"
+
+[tool.uv]
+required-version = ">=0.13.7"
