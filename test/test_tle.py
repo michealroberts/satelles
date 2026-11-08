@@ -23,38 +23,38 @@ from satelles.tle import (
 
 
 iss2LE: str = """        
-  1 25544U 98067A   20062.59097222  .00016717  00000-0  10270-3 0  9006
-  2 25544  51.6442 147.1064 0004607  95.6506 329.8285 15.49249062  2423
+  1 25544U 98067A   20062.59097222  .00016717  00000-0  10270-3 0  9003
+  2 25544  51.6442 147.1064 0004607  95.6506 329.8285 15.49249062  2422
 """
 
 iss3LE: str = """
   ISS (ZARYA)             
-  1 25544U 98067A   20062.59097222  .00016717  00000-0  10270-3 0  9006
-  2 25544  51.6442 147.1064 0004607  95.6506 329.8285 15.49249062  2423
+  1 25544U 98067A   20062.59097222  .00016717  00000-0  10270-3 0  9003
+  2 25544  51.6442 147.1064 0004607  95.6506 329.8285 15.49249062  2422
 """
 
 iss3LEClassified: str = """
   ISS (ZARYA)             
-  1 25544C 98067A   20062.59097222  .00016717  00000-0  10270-3 0  9006
-  2 25544  51.6442 147.1064 0004607  95.6506 329.8285 15.49249062  2423
+  1 25544C 98067A   20062.59097222  .00016717  00000-0  10270-3 0  9003
+  2 25544  51.6442 147.1064 0004607  95.6506 329.8285 15.49249062  2422
 """
 
 iss3LESecret: str = """
   ISS (ZARYA)             
-  1 25544S 98067A   20062.59097222  .00016717  00000-0  10270-3 0  9006
-  2 25544  51.6442 147.1064 0004607  95.6506 329.8285 15.49249062  2423
+  1 25544S 98067A   20062.59097222  .00016717  00000-0  10270-3 0  9003
+  2 25544  51.6442 147.1064 0004607  95.6506 329.8285 15.49249062  2422
 """
 
 iss3LEWithAlpha5: str = """
   ISS (ZARYA)             
-  1 E5544U 98067A   20062.59097222  .00016717  00000-0  10270-3 0  9006
-  2 E5544  51.6442 147.1064 0004607  95.6506 329.8285 15.49249062  2423
+  1 E5544U 98067A   20062.59097222  .00016717  00000-0  10270-3 0  9001
+  2 E5544  51.6442 147.1064 0004607  95.6506 329.8285 15.49249062  2420
 """
 
 iss3LEWithAlpha5Zeroth: str = """
   0 ISS (ZARYA)             
-  1 E5544U 98067A   20062.59097222  .00016717  00000-0  10270-3 0  9006
-  2 E5544  51.6442 147.1064 0004607  95.6506 329.8285 15.49249062  2423
+  1 E5544U 98067A   20062.59097222  .00016717  00000-0  10270-3 0  9001
+  2 E5544  51.6442 147.1064 0004607  95.6506 329.8285 15.49249062  2420
 """
 
 iss3LEWithIncorrectSpacing: str = """
@@ -66,7 +66,7 @@ ISS (ZARYA)
 starlink5833: str = """
   0 STARLINK-5833
   1 55773U 23028AJ  25098.97241231  .00000576  00000-0  56023-4 0  9993
-  2 55773  70.0000 348.4786 0001618 274.5576  85.5398 14.98332157  6399                                               
+  2 55773  70.0000 348.4786 0001618 274.5576  85.5398 14.98332157  6397                                               
 """
 
 
@@ -136,7 +136,7 @@ class TestTLERegex(unittest.TestCase):
             "drag": "10270-3",
             "ephemeris": "0",
             "set": "900",
-            "checksum": "6",
+            "checksum": "3",
         }
         expected_line2 = {
             "id": "25544",
@@ -147,7 +147,7 @@ class TestTLERegex(unittest.TestCase):
             "mean_anomaly": "329.8285",
             "mean_motion": "15.49249062",
             "number_of_revolutions": "242",
-            "checksum": "3",
+            "checksum": "2",
         }
         self.check_line1(line1, expected_line1)
         self.check_line2(line2, expected_line2)
@@ -166,7 +166,7 @@ class TestTLERegex(unittest.TestCase):
             "drag": "10270-3",
             "ephemeris": "0",
             "set": "900",
-            "checksum": "6",
+            "checksum": "3",
         }
         expected_line2 = {
             "id": "25544",
@@ -177,7 +177,7 @@ class TestTLERegex(unittest.TestCase):
             "mean_anomaly": "329.8285",
             "mean_motion": "15.49249062",
             "number_of_revolutions": "242",
-            "checksum": "3",
+            "checksum": "2",
         }
         self.check_line1(line1, expected_line1)
         self.check_line2(line2, expected_line2)
@@ -195,7 +195,7 @@ class TestTLERegex(unittest.TestCase):
             "drag": "10270-3",
             "ephemeris": "0",
             "set": "900",
-            "checksum": "6",
+            "checksum": "3",
         }
         expected_line2 = {
             "id": "25544",
@@ -206,7 +206,7 @@ class TestTLERegex(unittest.TestCase):
             "mean_anomaly": "329.8285",
             "mean_motion": "15.49249062",
             "number_of_revolutions": "242",
-            "checksum": "3",
+            "checksum": "2",
         }
         self.check_line1(line1, expected_line1)
         self.check_line2(line2, expected_line2)
@@ -224,7 +224,7 @@ class TestTLERegex(unittest.TestCase):
             "drag": "10270-3",
             "ephemeris": "0",
             "set": "900",
-            "checksum": "6",
+            "checksum": "3",
         }
         expected_line2 = {
             "id": "25544",
@@ -235,7 +235,7 @@ class TestTLERegex(unittest.TestCase):
             "mean_anomaly": "329.8285",
             "mean_motion": "15.49249062",
             "number_of_revolutions": "242",
-            "checksum": "3",
+            "checksum": "2",
         }
         self.check_line1(line1, expected_line1)
         self.check_line2(line2, expected_line2)
@@ -253,7 +253,7 @@ class TestTLERegex(unittest.TestCase):
             "drag": "10270-3",
             "ephemeris": "0",
             "set": "900",
-            "checksum": "6",
+            "checksum": "1",
         }
         expected_line2 = {
             "id": "E5544",
@@ -264,7 +264,7 @@ class TestTLERegex(unittest.TestCase):
             "mean_anomaly": "329.8285",
             "mean_motion": "15.49249062",
             "number_of_revolutions": "242",
-            "checksum": "3",
+            "checksum": "0",
         }
         self.check_line1(line1, expected_line1)
         self.check_line2(line2, expected_line2)
@@ -282,7 +282,7 @@ class TestTLERegex(unittest.TestCase):
             "drag": "10270-3",
             "ephemeris": "0",
             "set": "900",
-            "checksum": "6",
+            "checksum": "1",
         }
         expected_line2 = {
             "id": "E5544",
@@ -293,7 +293,7 @@ class TestTLERegex(unittest.TestCase):
             "mean_anomaly": "329.8285",
             "mean_motion": "15.49249062",
             "number_of_revolutions": "242",
-            "checksum": "3",
+            "checksum": "0",
         }
         self.check_line1(line1, expected_line1)
         self.check_line2(line2, expected_line2)
@@ -335,11 +335,11 @@ class TestTLERegex(unittest.TestCase):
         self.assertEqual(parts[0], "")
         self.assertEqual(
             parts[1],
-            "1 25544U 98067A   20062.59097222  .00016717  00000-0  10270-3 0  9006",
+            "1 25544U 98067A   20062.59097222  .00016717  00000-0  10270-3 0  9003",
         )
         self.assertEqual(
             parts[2],
-            "2 25544  51.6442 147.1064 0004607  95.6506 329.8285 15.49249062  2423",
+            "2 25544  51.6442 147.1064 0004607  95.6506 329.8285 15.49249062  2422",
         )
 
     def test_serialize_to_parts_iss3LEWithAlpha5(self) -> None:
@@ -351,11 +351,11 @@ class TestTLERegex(unittest.TestCase):
         self.assertEqual(parts[0], "ISS (ZARYA)")
         self.assertEqual(
             parts[1],
-            "1 E5544U 98067A   20062.59097222  .00016717  00000-0  10270-3 0  9006",
+            "1 E5544U 98067A   20062.59097222  .00016717  00000-0  10270-3 0  9001",
         )
         self.assertEqual(
             parts[2],
-            "2 E5544  51.6442 147.1064 0004607  95.6506 329.8285 15.49249062  2423",
+            "2 E5544  51.6442 147.1064 0004607  95.6506 329.8285 15.49249062  2420",
         )
 
 
@@ -461,6 +461,24 @@ class TestTLEParser(unittest.TestCase):
         # Columns 64-68 of line 2 hold the revolution number, column 69 the checksum:
         self.assertEqual(satellite.number_of_revolutions, 56353)
         self.assertAlmostEqual(satellite.mean_motion, 15.72125391)
+
+    def test_parse_rejects_invalid_line1_checksum(self):
+        tle = iss3LEWithIncorrectSpacing.replace(" 0  2927", " 0  2928")
+        with self.assertRaisesRegex(ValueError, "line 1 checksum: expected 7, got 8"):
+            parse_tle(tle)
+
+    def test_parse_rejects_invalid_line2_checksum(self):
+        tle = iss3LEWithIncorrectSpacing.replace(
+            "15.72125391563537", "15.72125391563530"
+        )
+        with self.assertRaisesRegex(ValueError, "line 2 checksum: expected 7, got 0"):
+            parse_tle(tle)
+
+    def test_parse_rejects_corrupted_digit_with_unchanged_checksum(self):
+        # A single corrupted digit (inclination 51.6416 -> 51.6417) must be detected:
+        tle = iss3LEWithIncorrectSpacing.replace(" 51.6416 ", " 51.6417 ")
+        with self.assertRaisesRegex(ValueError, "line 2 checksum"):
+            parse_tle(tle)
 
     def test_invalid_tle(self):
         with self.assertRaises(ValueError, msg="Invalid TLE format"):
@@ -728,6 +746,11 @@ class TestTLE(unittest.TestCase):
     def test_invalid_tle(self):
         with self.assertRaises(ValueError):
             TLE("")
+
+    def test_invalid_checksum(self):
+        tle = iss3LEWithIncorrectSpacing.replace(" 0  2927", " 0  2928")
+        with self.assertRaisesRegex(ValueError, "Invalid TLE string: .*checksum"):
+            TLE(tle)
 
 
 # **************************************************************************************
