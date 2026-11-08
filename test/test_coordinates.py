@@ -36,6 +36,32 @@ from satelles import (
     get_eccentric_anomaly,
     get_perifocal_coordinate,
 )
+from satelles.coordinates import PolarMotionParameters
+
+# **************************************************************************************
+
+# The polar motion from Vallado, "Fundamentals of Astrodynamics and Applications",
+# Example 3-15 (xp = -0.140682″, yp = 0.333309″), converted to degrees:
+VALLADO_POLAR_MOTION: PolarMotionParameters = PolarMotionParameters(
+    x=-0.140682 / 3600,
+    y=0.333309 / 3600,
+)
+
+# The pseudo Earth-fixed (PEF) position from Vallado, Example 3-15 (in meters):
+VALLADO_PEF: CartesianCoordinate = CartesianCoordinate(
+    x=-1033475.0312,
+    y=7901305.5856,
+    z=6380344.5327,
+)
+
+# The ITRF position, r_ITRF = rpom · r_PEF, where rpom is ERFA's pom00(xp, yp, 0)
+# (pyerfa 2.0.1.5) for the Vallado polar motion above (in meters). This agrees with
+# Vallado's published r_ITRF (-1033.4793830, 7901.2952754, 6380.3565958) km to 0.12 mm:
+ERFA_ITRF: CartesianCoordinate = CartesianCoordinate(
+    x=-1033479.3828855654,
+    y=7901295.275415788,
+    z=6380356.595751133,
+)
 
 # **************************************************************************************
 
@@ -304,6 +330,26 @@ class TestConvertECEFToECI(unittest.TestCase):
 
         self.assertAlmostEqual(result["z"], -sin(radians(1.0)), places=6)
 
+    def test_polar_motion_matches_erfa_pom00_transpose(self) -> None:
+        """
+        The polar motion step (ITRF → PEF) should match the transpose of ERFA's pom00
+        for the Vallado Example 3-15 polar motion.
+        """
+        when = datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+
+        eci = convert_ecef_to_eci(
+            ecef=ERFA_ITRF,
+            when=when,
+            polar_motion=VALLADO_POLAR_MOTION,
+        )
+
+        # Undo the sidereal rotation alone to recover the PEF position:
+        result = convert_eci_to_ecef(eci=eci, when=when)
+
+        self.assertAlmostEqual(result["x"], VALLADO_PEF["x"], delta=1e-4)
+        self.assertAlmostEqual(result["y"], VALLADO_PEF["y"], delta=1e-4)
+        self.assertAlmostEqual(result["z"], VALLADO_PEF["z"], delta=1e-4)
+
 
 # **************************************************************************************
 
@@ -385,16 +431,15 @@ class TestConvertECIToECEF(unittest.TestCase):
 
     def test_x_polar_motion_affects_z_component(self) -> None:
         """
-        X polar motion should tilt ECI +x toward -z before the sidereal rotation.
+        X polar motion should tilt PEF +x toward -z after the sidereal rotation.
         """
-        eci: CartesianCoordinate = CartesianCoordinate(
-            {
-                "x": 1.0,
-                "y": 0.0,
-                "z": 0.0,
-            }
-        )
         when = datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+
+        # The ECI vector that the sidereal rotation alone carries onto PEF +x:
+        eci = convert_ecef_to_eci(
+            ecef=CartesianCoordinate(x=1.0, y=0.0, z=0.0),
+            when=when,
+        )
 
         result = convert_eci_to_ecef(
             eci=eci,
@@ -406,16 +451,15 @@ class TestConvertECIToECEF(unittest.TestCase):
 
     def test_y_polar_motion_affects_z_component(self) -> None:
         """
-        Y polar motion should tilt ECI +y toward +z before the sidereal rotation.
+        Y polar motion should tilt PEF +y toward +z after the sidereal rotation.
         """
-        eci: CartesianCoordinate = CartesianCoordinate(
-            {
-                "x": 0.0,
-                "y": 1.0,
-                "z": 0.0,
-            }
-        )
         when = datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+
+        # The ECI vector that the sidereal rotation alone carries onto PEF +y:
+        eci = convert_ecef_to_eci(
+            ecef=CartesianCoordinate(x=0.0, y=1.0, z=0.0),
+            when=when,
+        )
 
         result = convert_eci_to_ecef(
             eci=eci,
@@ -424,6 +468,54 @@ class TestConvertECIToECEF(unittest.TestCase):
         )
 
         self.assertAlmostEqual(result["z"], sin(radians(1.0)), places=6)
+
+    def test_polar_motion_matches_erfa_pom00(self) -> None:
+        """
+        The polar motion step (PEF → ITRF) should match ERFA's pom00 for the Vallado
+        Example 3-15 polar motion.
+        """
+        when = datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+
+        # The ECI position that the sidereal rotation alone carries onto the PEF position:
+        eci = convert_ecef_to_eci(ecef=VALLADO_PEF, when=when)
+
+        result = convert_eci_to_ecef(
+            eci=eci,
+            when=when,
+            polar_motion=VALLADO_POLAR_MOTION,
+        )
+
+        self.assertAlmostEqual(result["x"], ERFA_ITRF["x"], delta=1e-4)
+        self.assertAlmostEqual(result["y"], ERFA_ITRF["y"], delta=1e-4)
+        self.assertAlmostEqual(result["z"], ERFA_ITRF["z"], delta=1e-4)
+
+    def test_round_trip_with_polar_motion_is_identity(self) -> None:
+        """
+        ECI → ECEF → ECI with non-zero polar motion should return the original position.
+        """
+        when = datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+
+        eci: CartesianCoordinate = CartesianCoordinate(
+            x=5102508.958,
+            y=6123011.401,
+            z=6378136.928,
+        )
+
+        ecef = convert_eci_to_ecef(
+            eci=eci,
+            when=when,
+            polar_motion=VALLADO_POLAR_MOTION,
+        )
+
+        result = convert_ecef_to_eci(
+            ecef=ecef,
+            when=when,
+            polar_motion=VALLADO_POLAR_MOTION,
+        )
+
+        self.assertAlmostEqual(result["x"], eci["x"], delta=1e-4)
+        self.assertAlmostEqual(result["y"], eci["y"], delta=1e-4)
+        self.assertAlmostEqual(result["z"], eci["z"], delta=1e-4)
 
 
 # **************************************************************************************
