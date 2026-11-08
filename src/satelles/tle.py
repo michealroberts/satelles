@@ -9,6 +9,7 @@ import re
 from datetime import datetime, timedelta, timezone
 from typing import Any, Final, Optional, Tuple
 
+from .checksum import perform_checksum_compute
 from .constants import GRAVITATIONAL_CONSTANT
 from .earth import EARTH_MASS
 from .satellite import Satellite
@@ -373,6 +374,18 @@ def parse_tle(tle: str) -> Satellite:
 
     if not m1 or not m2:
         raise ValueError("Invalid TLE format")
+
+    # Validate the modulo-10 checksum (the final character) of each line, computed
+    # over every preceding character in the line:
+    for number, line, match in ((1, line1, m1), (2, line2, m2)):
+        expected = perform_checksum_compute(line[:-1])
+
+        actual = match.group("checksum")
+
+        if actual != expected:
+            raise ValueError(
+                f"Invalid line {number} checksum: expected {expected}, got {actual}"
+            )
 
     id_field = m1.group("id")
     classification_field = m1.group("classification")

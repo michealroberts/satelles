@@ -26,8 +26,8 @@ if __name__ == "__main__":
     # Define a TLE string for the ISS (International Space Station) as an example:
     tle_string = """
     0 ISS (ZARYA)
-    1 25544U 98067A   23274.64916667  .00001234  00000-0  41828-5 0  9993
-    2 25544  51.6456  16.5711 0002280  15.8555 344.1575 15.50105970368857
+    1 25544U 98067A   23274.64916667  .00001234  00000-0  41828-5 0  9991
+    2 25544  51.6456  16.5711 0002280  15.8555 344.1575 15.50105970368853
     """
 
     # Create a TLE object from the string, and get the satellite object:
