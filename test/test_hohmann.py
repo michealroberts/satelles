@@ -7,6 +7,7 @@
 
 
 import unittest
+from math import degrees, pi, sqrt
 
 from satelles import (
     HohmannTransferParameters,
@@ -25,6 +26,36 @@ LEO_RADIUS_IN_METERS = 3_000_000  # (approx. 300 km altitude)
 
 # The approximate radii for GEO orbits (in meters):
 GEO_RADIUS_IN_METERS = 35_786_000  # (approx. 35,786 km altitude)
+
+# **************************************************************************************
+
+# The standard gravitational parameter of the Earth, GM (in m³/s²):
+EARTH_GM = 3.986004418e14
+
+# **************************************************************************************
+
+
+def get_target_offset_from_arrival_point(r1: float, r2: float, φ: float) -> float:
+    """
+    Propagate the target analytically over the Hohmann time of flight, starting φ
+    degrees ahead of the chaser, and return its angular offset (in degrees, folded
+    into [0, 180]) from the transfer arrival point, which lies 180° from the chaser's
+    departure point.
+    """
+    # The time of flight is half the period of the transfer ellipse (Kepler's third law):
+    tof = pi * sqrt(((r1 + r2) / 2) ** 3 / EARTH_GM)
+
+    # The target moves on a circular orbit of radius r2 at its mean motion:
+    n = sqrt(EARTH_GM / r2**3)
+
+    # The target's angle at arrival, measured from the chaser's departure point:
+    θ = φ + degrees(n * tof)
+
+    # Angular offset from the arrival point (180°), modulo 360°:
+    δ = (θ - 180) % 360
+
+    return min(δ, 360 - δ)
+
 
 # **************************************************************************************
 
@@ -141,27 +172,85 @@ class TestGetHohmannTransferPhaseAngle(unittest.TestCase):
             r2=LEO_RADIUS_IN_METERS,
         )
 
-        # Phase angle should be negative for descent (target behind):
-        self.assertLess(φ, 0)
+        # The target sweeps ~2958.41° during the transfer, so the unwrapped phase angle
+        # is 180° - 2958.41° = -2778.41°, which wraps to +101.59°:
+        self.assertAlmostEqual(φ, 101.591652637, places=6)
 
-        # Should be symmetric with the ascent case:
-        self.assertAlmostEqual(φ, -108.19, delta=1.0)
-
-    def test_phase_angle_symmetry(self) -> None:
+    def test_phase_angle_descent_2_to_1_ratio(self) -> None:
         """
-        Test that ascent and descent phase angles are symmetric (opposite signs).
+        Test phase angle for a 2:1 orbital radius ratio descent.
         """
-        φ_ascent = get_hohmann_transfer_phase_angle(
-            r1=7_000_000,
-            r2=14_000_000,
-        )
-
-        φ_descent = get_hohmann_transfer_phase_angle(
+        φ = get_hohmann_transfer_phase_angle(
             r1=14_000_000,
             r2=7_000_000,
         )
 
-        self.assertAlmostEqual(φ_ascent, -φ_descent, places=9)
+        # φ = 180° * (1 - (3 / 2)^(3/2)), so the target must start behind the chaser:
+        self.assertAlmostEqual(φ, -150.681115276, places=6)
+
+    def test_phase_angle_descent_large_ratio_wraps(self) -> None:
+        """
+        Test that a large descent phase angle is wrapped into [-180, 180).
+        """
+        φ = get_hohmann_transfer_phase_angle(
+            r1=30_000_000,
+            r2=10_000_000,
+        )
+
+        # φ = 180° * (1 - 2^(3/2)) = -329.12°, which wraps to +30.88°:
+        self.assertAlmostEqual(φ, 30.883117546, places=6)
+
+    def test_phase_angle_diametrically_opposite_maps_to_minus_180(self) -> None:
+        """
+        Test that a phase angle of exactly ±180° is returned as -180°.
+        """
+        φ = get_hohmann_transfer_phase_angle(
+            r1=70_000_000,
+            r2=10_000_000,
+        )
+
+        # For r1 = 7 * r2, a / r2 = 4, so φ = 180° * (1 - 4^(3/2)) = -1260° ≡ ±180°:
+        self.assertEqual(φ, -180.0)
+
+    def test_phase_angle_ascent_target_arrives_at_transfer_apoapsis(self) -> None:
+        """
+        Test that, starting φ ahead, the target reaches the transfer apoapsis at arrival.
+        """
+        for r1, r2 in [
+            (7_000_000, 7_500_000),
+            (7_000_000, 14_000_000),
+            (7_000_000, 70_000_000),
+            (6_678_000, 42_164_000),
+            (LEO_RADIUS_IN_METERS, GEO_RADIUS_IN_METERS),
+        ]:
+            with self.subTest(r1=r1, r2=r2):
+                φ = get_hohmann_transfer_phase_angle(r1=r1, r2=r2)
+
+                self.assertLess(
+                    get_target_offset_from_arrival_point(r1=r1, r2=r2, φ=φ), 1e-9
+                )
+
+    def test_phase_angle_descent_target_arrives_at_transfer_periapsis(self) -> None:
+        """
+        Test that, starting φ ahead, the target reaches the transfer periapsis at arrival.
+        """
+        for r1, r2 in [
+            (7_500_000, 7_000_000),
+            (14_000_000, 7_000_000),
+            (30_000_000, 10_000_000),
+            (70_000_000, 10_000_000),
+            (42_164_000, 6_678_000),
+            (GEO_RADIUS_IN_METERS, LEO_RADIUS_IN_METERS),
+        ]:
+            with self.subTest(r1=r1, r2=r2):
+                φ = get_hohmann_transfer_phase_angle(r1=r1, r2=r2)
+
+                self.assertLess(
+                    get_target_offset_from_arrival_point(r1=r1, r2=r2, φ=φ), 1e-9
+                )
+
+                self.assertGreaterEqual(φ, -180)
+                self.assertLess(φ, 180)
 
     def test_phase_angle_small_transfer(self) -> None:
         """
@@ -369,16 +458,16 @@ class TestGetHohmannTransferParameters(unittest.TestCase):
 
         self.assertAlmostEqual(result.T, 13438.4289, delta=1.0)
 
-    def test_geo_to_leo_returns_negative_phase_angle(self) -> None:
+    def test_geo_to_leo_returns_correct_phase_angle(self) -> None:
         """
-        Test that GEO to LEO transfer returns negative phase angle.
+        Test that GEO to LEO transfer returns the wrapped descent phase angle.
         """
         result = get_hohmann_transfer_parameters(
             r1=GEO_RADIUS_IN_METERS,
             r2=LEO_RADIUS_IN_METERS,
         )
 
-        self.assertAlmostEqual(result.φ, -108.19, delta=0.1)
+        self.assertAlmostEqual(result.φ, 101.591652637, places=6)
 
     def test_2_to_1_ratio_returns_correct_semi_major_axis(self) -> None:
         """
@@ -560,21 +649,16 @@ class TestGetHohmannTransferParameters(unittest.TestCase):
 
         self.assertEqual(ascent.T, descent.T)
 
-    def test_phase_angle_antisymmetric(self) -> None:
+    def test_large_ratio_descent_returns_wrapped_phase_angle(self) -> None:
         """
-        Test that phase angle has opposite sign for ascent and descent.
+        Test that a large-ratio descent returns a phase angle wrapped into [-180, 180).
         """
-        ascent = get_hohmann_transfer_parameters(
-            r1=LEO_RADIUS_IN_METERS,
-            r2=GEO_RADIUS_IN_METERS,
+        result = get_hohmann_transfer_parameters(
+            r1=30_000_000,
+            r2=10_000_000,
         )
 
-        descent = get_hohmann_transfer_parameters(
-            r1=GEO_RADIUS_IN_METERS,
-            r2=LEO_RADIUS_IN_METERS,
-        )
-
-        self.assertAlmostEqual(ascent.φ, -descent.φ, places=9)
+        self.assertAlmostEqual(result.φ, 30.883117546, places=6)
 
     def test_total_delta_v_is_positive(self) -> None:
         """

@@ -5,7 +5,7 @@
 
 # **************************************************************************************
 
-from math import degrees, pi, sqrt
+from math import pi, sqrt
 from typing import Annotated
 
 from pydantic import BaseModel, Field
@@ -169,14 +169,28 @@ def get_hohmann_transfer_phase_angle(
     Calculate the required phase angle (φ) for a Hohmann transfer rendezvous.
 
     The phase angle is the angular separation between the target and the spacecraft at
-    the time of the departure burn, measured in the direction of orbital motion.
+    the time of the departure burn, measured in the direction of orbital motion, such
+    that a positive angle means the target is ahead and a negative angle means it is
+    behind.
+
+    During the transfer the spacecraft sweeps 180°, while the target, on its circular
+    orbit of radius r2, sweeps n_target * TOF, where TOF = π √(a³ / μ) and
+    n_target = √(μ / r2³). The gravitational parameter μ cancels, so for both ascent
+    (r2 > r1) and descent (r2 < r1) transfers:
+
+        φ = 180° * (1 - (a / r2)^(3/2)), where a = (r1 + r2) / 2
 
     Args:
         r1: Radius of the initial circular orbit (in meters).
         r2: Radius of the final circular orbit (in meters).
 
     Returns:
-        The required phase angle φ (in degrees).
+        The required phase angle φ (in degrees), wrapped into the half-open interval
+        [-180, 180). A phase angle of exactly ±180° (the target diametrically opposite
+        the spacecraft) is returned as -180°.
+
+    Raises:
+        ValueError: If r1 is not positive, if r2 is not positive, or if r1 equals r2.
     """
     # Guard against non-positive orbit radii for the initial orbit:
     if r1 <= 0:
@@ -190,28 +204,17 @@ def get_hohmann_transfer_phase_angle(
     if r1 == r2:
         raise ValueError("Initial and final orbit radii must be different.")
 
-    # Ratio of radii (always express as outer/inner for the formula):
-    if r2 > r1:
-        # Transfer to higher orbit: therefore the target must be ahead:
-        ratio = r1 / r2
+    # Calculate the semi-major axis of the transfer orbit:
+    a = get_hohmann_transfer_semi_major_axis(r1=r1, r2=r2)
 
-        # Angular travel of target during transfer:
-        α = pi * sqrt(((1 + ratio) / 2) ** 3)
+    # Angular travel of the target during the transfer, n_target * TOF (in degrees):
+    α = 180 * sqrt((a / r2) ** 3)
 
-        # Phase angle for ascent phase:
-        φ = pi - α
-    else:
-        # Transfer to lower orbit: therefore the target must be behind:
-        ratio = r2 / r1
+    # The target must arrive where the spacecraft does, 180° from the departure point:
+    φ = (180 - α) % 360
 
-        # Angular travel of target during transfer:
-        α = pi * sqrt(((1 + ratio) / 2) ** 3)
-
-        # Phase angle for descent phase:
-        φ = α - pi
-
-    # Convert to degrees (result is already in range [-180, 180] due to the formula):
-    return degrees(φ)
+    # Wrap into [-180, 180), so that exactly ±180° is returned as -180°:
+    return φ - 360 if φ >= 180 else φ
 
 
 # **************************************************************************************
