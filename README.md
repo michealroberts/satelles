@@ -425,7 +425,7 @@ uv run ruff format
 ```
 
 ```bash
-uv run mypy ./src/satelles --config mypy.ini
+uv run ty check ./src/satelles
 ```
 
 Some tests fetch DUT1 from IERS, so the test suite needs network access.
