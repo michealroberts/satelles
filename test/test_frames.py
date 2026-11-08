@@ -114,11 +114,12 @@ class TestEME2000Frame(SatellesTestCase):
 
         result = transform.apply_to_position(eme2000_position)
 
+        # The J2000 equinox precesses to RA ≈ +0.32° and Dec ≈ +0.14° by 2025:
         expected_position = CartesianCoordinate(
             {
-                "x": 0.9999814148813556,
-                "y": -0.005592155927888036,
-                "z": -0.002428514764262787,
+                "x": 0.9999814139457394,
+                "y": 0.005591752557943704,
+                "z": 0.0024298284735236346,
             }
         )
 
