@@ -137,7 +137,10 @@ from .vector import (
     subtract,
 )
 from .velocity import get_perifocal_velocity
-from .visibility import is_visible
+from .visibility import (
+    is_illuminated,
+    is_visible,
+)
 
 # **************************************************************************************
 
@@ -209,6 +212,7 @@ __all__: list[str] = [
     "get_rotation_matrix_z",
     "identity_transform_provider",
     "itrf_to_ecef_transform_provider",
+    "is_illuminated",
     "is_visible",
     "normalise",
     "magnitude",
