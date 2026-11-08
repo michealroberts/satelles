@@ -122,10 +122,10 @@ class TestECEFToECITransformProvider(unittest.TestCase):
         transform = ecef_to_eci_transform_provider(when)
 
         expected_rotation = Quaternion(
-            w=-0.7737985519624722,
+            w=-0.7737985519625099,
             x=0.0,
             y=0.0,
-            z=0.6334317650550698,
+            z=0.6334317650550239,
         )
 
         self.assertAlmostEqual(transform.rotation.w, expected_rotation.w, places=15)
@@ -138,10 +138,10 @@ class TestECEFToECITransformProvider(unittest.TestCase):
         transform = ecef_to_eci_transform_provider(when)
 
         expected_rotation = Quaternion(
-            w=-0.5716637145329766,
+            w=-0.5716637145331898,
             x=0.0,
             y=0.0,
-            z=0.8204880239749752,
+            z=0.8204880239748267,
         )
 
         self.assertAlmostEqual(transform.rotation.w, expected_rotation.w, places=15)
@@ -183,10 +183,10 @@ class TestECIToECEFTransformProvider(unittest.TestCase):
         transform = eci_to_ecef_transform_provider(when)
 
         expected_rotation = Quaternion(
-            w=-0.7737985519624722,
+            w=-0.7737985519625099,
             x=0.0,
             y=0.0,
-            z=-0.6334317650550698,
+            z=-0.6334317650550239,
         )
 
         self.assertAlmostEqual(transform.rotation.w, expected_rotation.w, places=15)
@@ -199,10 +199,10 @@ class TestECIToECEFTransformProvider(unittest.TestCase):
         transform = eci_to_ecef_transform_provider(when)
 
         expected_rotation = Quaternion(
-            w=-0.5716637145329766,
+            w=-0.5716637145331898,
             x=0.0,
             y=0.0,
-            z=-0.8204880239749752,
+            z=-0.8204880239748267,
         )
 
         self.assertAlmostEqual(transform.rotation.w, expected_rotation.w, places=15)
@@ -246,10 +246,10 @@ class TestEME2000ToECITransformProvider(unittest.TestCase):
         )
 
         expected_rotation = Quaternion(
-            w=0.9999953534961247,
-            x=-2.06600742535606e-05,
-            y=0.0012143207914061056,
-            z=-0.0027960658679171907,
+            w=0.999995353726039,
+            x=-2.0660320068660085e-05,
+            y=0.001214364707909048,
+            z=-0.0027959645637348767,
         )
 
         self.assertAlmostEqual(
@@ -284,10 +284,10 @@ class TestEME2000ToECITransformProvider(unittest.TestCase):
         )
 
         expected_rotation = Quaternion(
-            w=0.9999951931898011,
-            x=-2.08272202209741e-05,
-            y=0.001233392837655694,
-            z=-0.002844627502388545,
+            w=0.9999951918754822,
+            x=-2.0825816935255278e-05,
+            y=0.0012331462106853334,
+            z=-0.002845196412534039,
         )
 
         self.assertAlmostEqual(
