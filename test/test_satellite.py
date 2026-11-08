@@ -5,17 +5,17 @@
 
 # **************************************************************************************
 
-import os
 import time
 import unittest
-from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, Iterator
+from typing import Any, Dict
 
 from pydantic import ValidationError
 
 from satelles import TLE
 from satelles.satellite import ID, OrbitalElements, Satellite
+
+from .utils import host_timezone
 
 # **************************************************************************************
 
@@ -201,29 +201,6 @@ class TestSatelliteOptionalFields(unittest.TestCase):
         satellite = Satellite(**data)
         self.assertIsNone(satellite.reference_frame)
         self.assertIsNone(satellite.center)
-
-
-# **************************************************************************************
-
-
-@contextmanager
-def host_timezone(name: str) -> Iterator[None]:
-    """
-    Temporarily set the host (process) timezone, restoring the original afterwards.
-    """
-    previous = os.environ.get("TZ")
-
-    os.environ["TZ"] = name
-    time.tzset()
-
-    try:
-        yield
-    finally:
-        if previous is None:
-            del os.environ["TZ"]
-        else:
-            os.environ["TZ"] = previous
-        time.tzset()
 
 
 # **************************************************************************************
