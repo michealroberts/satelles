@@ -9,9 +9,9 @@ from datetime import datetime, timezone
 from warnings import warn
 
 from celerity.common import GeographicCoordinate
-from celerity.coordinates import convert_equatorial_to_horizontal
 from celerity.temporal import get_julian_date
 
+from .coordinates import convert_eci_to_topocentric
 from .satellite import Satellite
 
 # **************************************************************************************
@@ -22,12 +22,17 @@ def is_visible(
     satellite: Satellite,
     observer: GeographicCoordinate,
     horizon: float = 0.0,
-):
+) -> bool:
     """
-    Check if the satellite is visible from the given location.
+    Check if the satellite is above the horizon for the given observer.
+
+    The check uses the observer's topocentric altitude of the satellite, i.e., it
+    accounts for the parallax between the observer and the Earth's centre, which is
+    significant for satellites (e.g., up to ~70° for a satellite in low Earth orbit).
 
     Args:
-        when (datetime): The time of the observation.
+        when (datetime): The time of the observation (a naive datetime is treated
+            as UTC).
         satellite (Satellite): The satellite to check.
         observer (GeographicCoordinate): The observer's location.
         horizon (float): The minimum altitude above the horizon that the satellite must
@@ -65,6 +70,13 @@ def is_visible(
             stacklevel=2,
         )
 
+    # Treat a naive datetime as UTC, otherwise convert an aware datetime to UTC:
+    when = (
+        when.replace(tzinfo=timezone.utc)
+        if when.tzinfo is None
+        else when.astimezone(tz=timezone.utc)
+    )
+
     # Get the Julian date at the epoch:
     JD = get_julian_date(date=when)
 
@@ -83,19 +95,21 @@ def is_visible(
             """
         )
 
-    # Set the epoch of the observation to the specified time:
-    satellite.at(when=when.astimezone(tz=timezone.utc))
+    # Propagate a copy of the satellite, so the caller's satellite is left untouched:
+    target = satellite.model_copy()
 
-    # Convert the equatorial coordinate of the satellite to horizontal (observed topocentric)
-    # coordinates:
-    horizontal = convert_equatorial_to_horizontal(
-        date=when,
+    # Set the epoch of the observation to the specified time:
+    target.at(when=when)
+
+    # Convert the satellite's position to the observer's topocentric coordinates:
+    topocentric = convert_eci_to_topocentric(
+        eci=target.eci_coordinate,
+        when=when,
         observer=observer,
-        target=satellite.equatorial_coordinate,
     )
 
     # If the satellite is above the horizon, it is visible:
-    return horizontal["alt"] > horizon
+    return topocentric["altitude"] > horizon
 
 
 # **************************************************************************************
