@@ -607,13 +607,13 @@ class TestTLE(unittest.TestCase):
 
         eci = tle._satellite.eci_coordinate
 
-        self.assertAlmostEqualFloat(eci["x"], -2999918.0003107865)
-        self.assertAlmostEqualFloat(eci["y"], -3039494.659567604)
+        self.assertAlmostEqualFloat(eci["x"], -3000153.7526251976)
+        self.assertAlmostEqualFloat(eci["y"], -3039261.958886992)
         self.assertAlmostEqualFloat(eci["z"], 5283984.920004229)
 
         equatorial = tle._satellite.equatorial_coordinate
 
-        self.assertAlmostEqualFloat(equatorial["ra"], 225.37545, tol=1e-5)
+        self.assertAlmostEqualFloat(equatorial["ra"], 225.37101, tol=1e-5)
         self.assertAlmostEqualFloat(equatorial["dec"], 51.054300, tol=1e-5)
 
     def test_parse_3le_unclassified(self):
@@ -663,13 +663,13 @@ class TestTLE(unittest.TestCase):
 
         eci = tle._satellite.eci_coordinate
 
-        self.assertAlmostEqualFloat(eci["x"], -2999918.0003107865)
-        self.assertAlmostEqualFloat(eci["y"], -3039494.659567604)
+        self.assertAlmostEqualFloat(eci["x"], -3000153.7526251976)
+        self.assertAlmostEqualFloat(eci["y"], -3039261.958886992)
         self.assertAlmostEqualFloat(eci["z"], 5283984.920004229)
 
         equatorial = tle._satellite.equatorial_coordinate
 
-        self.assertAlmostEqualFloat(equatorial["ra"], 225.37545, tol=1e-5)
+        self.assertAlmostEqualFloat(equatorial["ra"], 225.37101, tol=1e-5)
         self.assertAlmostEqualFloat(equatorial["dec"], 51.054300, tol=1e-5)
 
     def test_parse_3le_classified(self):
@@ -719,13 +719,13 @@ class TestTLE(unittest.TestCase):
 
         eci = tle._satellite.eci_coordinate
 
-        self.assertAlmostEqualFloat(eci["x"], -2999918.0003107865)
-        self.assertAlmostEqualFloat(eci["y"], -3039494.659567604)
+        self.assertAlmostEqualFloat(eci["x"], -3000153.7526251976)
+        self.assertAlmostEqualFloat(eci["y"], -3039261.958886992)
         self.assertAlmostEqualFloat(eci["z"], 5283984.920004229)
 
         equatorial = tle._satellite.equatorial_coordinate
 
-        self.assertAlmostEqualFloat(equatorial["ra"], 225.37545, tol=1e-5)
+        self.assertAlmostEqualFloat(equatorial["ra"], 225.37101, tol=1e-5)
         self.assertAlmostEqualFloat(equatorial["dec"], 51.054300, tol=1e-5)
 
     def test_parse_3le_secret(self):
@@ -775,13 +775,13 @@ class TestTLE(unittest.TestCase):
 
         eci = tle._satellite.eci_coordinate
 
-        self.assertAlmostEqualFloat(eci["x"], -2999918.0003107865)
-        self.assertAlmostEqualFloat(eci["y"], -3039494.659567604)
+        self.assertAlmostEqualFloat(eci["x"], -3000153.7526251976)
+        self.assertAlmostEqualFloat(eci["y"], -3039261.958886992)
         self.assertAlmostEqualFloat(eci["z"], 5283984.920004229)
 
         equatorial = tle._satellite.equatorial_coordinate
 
-        self.assertAlmostEqualFloat(equatorial["ra"], 225.37545, tol=1e-5)
+        self.assertAlmostEqualFloat(equatorial["ra"], 225.37101, tol=1e-5)
         self.assertAlmostEqualFloat(equatorial["dec"], 51.054300, tol=1e-5)
 
     def test_parse_3le_with_alpha5(self):

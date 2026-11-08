@@ -8,11 +8,14 @@
 import time
 import unittest
 from datetime import datetime, timedelta, timezone
+from math import cos, degrees, sin, sqrt
 from typing import Any, Dict
 
 from pydantic import ValidationError
 
 from satelles import TLE
+from satelles.common import CartesianCoordinate
+from satelles.coordinates import convert_eci_to_equatorial, convert_perifocal_to_eci
 from satelles.satellite import ID, OrbitalElements, Satellite
 
 from .utils import host_timezone
@@ -239,6 +242,153 @@ class TestSatelliteAt(unittest.TestCase):
         utc = self.satellite.eci_coordinate
 
         self.assertEqual(shifted, utc)
+
+
+# **************************************************************************************
+
+
+class TestSatelliteECICoordinate(unittest.TestCase):
+    """
+    TLE elements are referred to the True Equator, Mean Equinox (TEME) frame, while the
+    library's ECI frame is true-of-date (TOD). The two differ by a rotation about the
+    z-axis through the equation of the equinoxes (EoE): r_TOD = ROT3(-EoE) · r_TEME.
+
+    Reference values are from ERFA (pyerfa 2.0.1.5) at 2021-05-15T00:00:00 UTC, i.e.,
+    TT = UTC + 69.184 s: eqeq94 gives EoE = -7.74605512156816e-05 rad (-15.977″), and
+    rxp(rz(-EoE), r_TEME) gives the TOD position below. The library evaluates the EoE
+    with an abbreviated nutation series that agrees with eqeq94 to 0.022″ here (about
+    0.45 m at this radius), so positions are compared to sub-metre.
+    """
+
+    # The equation of the equinoxes from ERFA eqeq94 (in radians):
+    EQUATION_OF_THE_EQUINOXES = -7.74605512156816e-05
+
+    # The TOD position from ERFA, rxp(rz(-EoE), r_TEME) (in meters):
+    ERFA_TRUE_OF_DATE = {
+        "x": -3000153.4322423385,
+        "y": -3039262.275147238,
+        "z": 5283984.920004229,
+    }
+
+    def setUp(self) -> None:
+        self.when = datetime(2021, 5, 15, 0, 0, 0, tzinfo=timezone.utc)
+
+        self.satellite = TLE(
+            tle_string="""
+            1 25544U 98067A   20062.59097222  .00016717  00000-0  10270-3 0  9003
+            2 25544  51.6442 147.1064 0004607  95.6506 329.8285 15.49249062  2422
+            """
+        ).as_satellite()
+
+        self.satellite.at(when=self.when)
+
+    def get_elements_frame_coordinate(
+        self, satellite: Satellite
+    ) -> CartesianCoordinate:
+        # Rotating the perifocal position by ω, i and Ω from the TLE elements gives
+        # the position in the frame of those elements, i.e., TEME:
+        return convert_perifocal_to_eci(
+            perifocal=satellite.perifocal_coordinate,
+            argument_of_perigee=satellite.argument_of_pericenter,
+            inclination=satellite.inclination,
+            raan=satellite.raan,
+        )
+
+    def get_distance(self, a: CartesianCoordinate, b: CartesianCoordinate) -> float:
+        return sqrt(
+            (a["x"] - b["x"]) ** 2 + (a["y"] - b["y"]) ** 2 + (a["z"] - b["z"]) ** 2
+        )
+
+    def test_eci_coordinate_matches_erfa_true_of_date_position(self) -> None:
+        eci = self.satellite.eci_coordinate
+
+        self.assertLess(self.get_distance(eci, self.ERFA_TRUE_OF_DATE), 1.0)
+
+    def test_eci_coordinate_is_teme_rotated_by_equation_of_the_equinoxes(self) -> None:
+        teme = self.get_elements_frame_coordinate(self.satellite)
+
+        E = self.EQUATION_OF_THE_EQUINOXES
+
+        # An active rotation by +EoE about the z-axis (passive ROT3(-EoE)):
+        expected = CartesianCoordinate(
+            x=teme["x"] * cos(E) - teme["y"] * sin(E),
+            y=teme["x"] * sin(E) + teme["y"] * cos(E),
+            z=teme["z"],
+        )
+
+        eci = self.satellite.eci_coordinate
+
+        self.assertLess(self.get_distance(eci, expected), 1.0)
+
+    def test_equatorial_right_ascension_shifts_by_equation_of_the_equinoxes(
+        self,
+    ) -> None:
+        teme = convert_eci_to_equatorial(
+            eci=self.get_elements_frame_coordinate(self.satellite)
+        )
+
+        equatorial = self.satellite.equatorial_coordinate
+
+        # The RA moves by the EoE (-0.0044382°); allow 0.05″ for the abbreviated
+        # nutation series used by the library:
+        self.assertAlmostEqual(
+            equatorial["ra"] - teme["ra"],
+            degrees(self.EQUATION_OF_THE_EQUINOXES),
+            delta=0.05 / 3600,
+        )
+
+    def test_equatorial_declination_unchanged_by_teme_rotation(self) -> None:
+        teme = convert_eci_to_equatorial(
+            eci=self.get_elements_frame_coordinate(self.satellite)
+        )
+
+        equatorial = self.satellite.equatorial_coordinate
+
+        # A rotation about the z-axis leaves the declination unchanged:
+        self.assertAlmostEqual(equatorial["dec"], teme["dec"], delta=1e-9)
+
+    def test_eci_coordinate_rotates_teme_stored_as_frame_code(self) -> None:
+        # The validator currently stores the long name ("True Equator, Mean Equinox");
+        # the rotation must still apply if the frame is stored as its code instead:
+        self.satellite.reference_frame = "TEME"
+
+        eci = self.satellite.eci_coordinate
+
+        self.assertLess(self.get_distance(eci, self.ERFA_TRUE_OF_DATE), 1.0)
+
+    def test_eci_coordinate_unchanged_for_non_teme_reference_frames(self) -> None:
+        data: Dict[str, Any] = {
+            "id": 25544,
+            "name": "ISS (ZARYA)",
+            "classification": "U",
+            "designator": "98067A",
+            "year": 2020,
+            "day": 62.59097222,
+            "jd": self.satellite.jd,
+            "ephemeris": 0,
+            "set": 900,
+            "drag": 0.00010270,
+            "raan": 147.1064,
+            "inclination": 51.6442,
+            "eccentricity": 0.0004607,
+            "argument_of_pericenter": 95.6506,
+            "mean_anomaly": 329.8285,
+            "mean_motion": 15.49249062,
+            "first_derivative_of_mean_motion": 0.00016717,
+            "second_derivative_of_mean_motion": 0.0,
+            "number_of_revolutions": 242,
+        }
+
+        for reference_frame in (None, "ICRF", "EME2000"):
+            with self.subTest(reference_frame=reference_frame):
+                satellite = Satellite(**data, reference_frame=reference_frame)
+
+                satellite.at(when=self.when)
+
+                self.assertEqual(
+                    satellite.eci_coordinate,
+                    self.get_elements_frame_coordinate(satellite),
+                )
 
 
 # **************************************************************************************
