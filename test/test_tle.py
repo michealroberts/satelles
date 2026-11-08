@@ -134,7 +134,8 @@ class TestTLERegex(unittest.TestCase):
             "second_derivative_of_mean_motion": "00000-0",
             "drag": "10270-3",
             "ephemeris": "0",
-            "set": "9006",
+            "set": "900",
+            "checksum": "6",
         }
         expected_line2 = {
             "id": "25544",
@@ -144,7 +145,8 @@ class TestTLERegex(unittest.TestCase):
             "argument_of_perigee": "95.6506",
             "mean_anomaly": "329.8285",
             "mean_motion": "15.49249062",
-            "number_of_revolutions": "2423",
+            "number_of_revolutions": "242",
+            "checksum": "3",
         }
         self.check_line1(line1, expected_line1)
         self.check_line2(line2, expected_line2)
@@ -162,7 +164,8 @@ class TestTLERegex(unittest.TestCase):
             "second_derivative_of_mean_motion": "00000-0",
             "drag": "10270-3",
             "ephemeris": "0",
-            "set": "9006",
+            "set": "900",
+            "checksum": "6",
         }
         expected_line2 = {
             "id": "25544",
@@ -172,7 +175,8 @@ class TestTLERegex(unittest.TestCase):
             "argument_of_perigee": "95.6506",
             "mean_anomaly": "329.8285",
             "mean_motion": "15.49249062",
-            "number_of_revolutions": "2423",
+            "number_of_revolutions": "242",
+            "checksum": "3",
         }
         self.check_line1(line1, expected_line1)
         self.check_line2(line2, expected_line2)
@@ -189,7 +193,8 @@ class TestTLERegex(unittest.TestCase):
             "second_derivative_of_mean_motion": "00000-0",
             "drag": "10270-3",
             "ephemeris": "0",
-            "set": "9006",
+            "set": "900",
+            "checksum": "6",
         }
         expected_line2 = {
             "id": "25544",
@@ -199,7 +204,8 @@ class TestTLERegex(unittest.TestCase):
             "argument_of_perigee": "95.6506",
             "mean_anomaly": "329.8285",
             "mean_motion": "15.49249062",
-            "number_of_revolutions": "2423",
+            "number_of_revolutions": "242",
+            "checksum": "3",
         }
         self.check_line1(line1, expected_line1)
         self.check_line2(line2, expected_line2)
@@ -216,7 +222,8 @@ class TestTLERegex(unittest.TestCase):
             "second_derivative_of_mean_motion": "00000-0",
             "drag": "10270-3",
             "ephemeris": "0",
-            "set": "9006",
+            "set": "900",
+            "checksum": "6",
         }
         expected_line2 = {
             "id": "25544",
@@ -226,7 +233,8 @@ class TestTLERegex(unittest.TestCase):
             "argument_of_perigee": "95.6506",
             "mean_anomaly": "329.8285",
             "mean_motion": "15.49249062",
-            "number_of_revolutions": "2423",
+            "number_of_revolutions": "242",
+            "checksum": "3",
         }
         self.check_line1(line1, expected_line1)
         self.check_line2(line2, expected_line2)
@@ -243,7 +251,8 @@ class TestTLERegex(unittest.TestCase):
             "second_derivative_of_mean_motion": "00000-0",
             "drag": "10270-3",
             "ephemeris": "0",
-            "set": "9006",
+            "set": "900",
+            "checksum": "6",
         }
         expected_line2 = {
             "id": "E5544",
@@ -253,7 +262,8 @@ class TestTLERegex(unittest.TestCase):
             "argument_of_perigee": "95.6506",
             "mean_anomaly": "329.8285",
             "mean_motion": "15.49249062",
-            "number_of_revolutions": "2423",
+            "number_of_revolutions": "242",
+            "checksum": "3",
         }
         self.check_line1(line1, expected_line1)
         self.check_line2(line2, expected_line2)
@@ -270,7 +280,8 @@ class TestTLERegex(unittest.TestCase):
             "second_derivative_of_mean_motion": "00000-0",
             "drag": "10270-3",
             "ephemeris": "0",
-            "set": "9006",
+            "set": "900",
+            "checksum": "6",
         }
         expected_line2 = {
             "id": "E5544",
@@ -280,7 +291,8 @@ class TestTLERegex(unittest.TestCase):
             "argument_of_perigee": "95.6506",
             "mean_anomaly": "329.8285",
             "mean_motion": "15.49249062",
-            "number_of_revolutions": "2423",
+            "number_of_revolutions": "242",
+            "checksum": "3",
         }
         self.check_line1(line1, expected_line1)
         self.check_line2(line2, expected_line2)
@@ -297,7 +309,8 @@ class TestTLERegex(unittest.TestCase):
             "second_derivative_of_mean_motion": "00000-0",
             "drag": "-11606-4",
             "ephemeris": "0",
-            "set": "2927",
+            "set": "292",
+            "checksum": "7",
         }
         expected_line2 = {
             "id": "25544",
@@ -307,7 +320,8 @@ class TestTLERegex(unittest.TestCase):
             "argument_of_perigee": "130.5360",
             "mean_anomaly": "325.0288",
             "mean_motion": "15.72125391",
-            "number_of_revolutions": "563537",
+            "number_of_revolutions": "56353",
+            "checksum": "7",
         }
         self.check_line1(line1, expected_line1)
         self.check_line2(line2, expected_line2)
@@ -368,7 +382,7 @@ class TestTLEParser(unittest.TestCase):
         self.assertAlmostEqual(satellite.mean_motion, 15.49249062)
         self.assertAlmostEqual(satellite.first_derivative_of_mean_motion, 0.00016717)
         self.assertAlmostEqual(satellite.second_derivative_of_mean_motion, 0.0)
-        self.assertEqual(satellite.number_of_revolutions, 2423)
+        self.assertEqual(satellite.number_of_revolutions, 242)
 
     def test_parse_3le_unclassified(self):
         satellite = parse_tle(iss3LE)
@@ -386,7 +400,7 @@ class TestTLEParser(unittest.TestCase):
         self.assertAlmostEqual(satellite.mean_motion, 15.49249062)
         self.assertAlmostEqual(satellite.first_derivative_of_mean_motion, 0.00016717)
         self.assertAlmostEqual(satellite.second_derivative_of_mean_motion, 0.0)
-        self.assertEqual(satellite.number_of_revolutions, 2423)
+        self.assertEqual(satellite.number_of_revolutions, 242)
 
     def test_parse_3le_classified(self):
         satellite = parse_tle(iss3LEClassified)
@@ -406,7 +420,7 @@ class TestTLEParser(unittest.TestCase):
         self.assertAlmostEqual(satellite.mean_motion, 15.49249062)
         self.assertAlmostEqual(satellite.first_derivative_of_mean_motion, 0.00016717)
         self.assertAlmostEqual(satellite.second_derivative_of_mean_motion, 0.0)
-        self.assertEqual(satellite.number_of_revolutions, 2423)
+        self.assertEqual(satellite.number_of_revolutions, 242)
 
     def test_parse_3le_secret(self):
         satellite = parse_tle(iss3LESecret)
@@ -426,7 +440,7 @@ class TestTLEParser(unittest.TestCase):
         self.assertAlmostEqual(satellite.mean_motion, 15.49249062)
         self.assertAlmostEqual(satellite.first_derivative_of_mean_motion, 0.00016717)
         self.assertAlmostEqual(satellite.second_derivative_of_mean_motion, 0.0)
-        self.assertEqual(satellite.number_of_revolutions, 2423)
+        self.assertEqual(satellite.number_of_revolutions, 242)
 
     def test_parse_3le_with_alpha5(self):
         satellite = parse_tle(iss3LEWithAlpha5)
@@ -438,6 +452,14 @@ class TestTLEParser(unittest.TestCase):
         # The id field is parsed using base-36 when the first character is a letter.
         # Expected value for "E5544" in base-36 is 23754532.
         self.assertEqual(satellite.id, 23754532)
+
+    def test_parse_3le_excludes_checksum_from_set_and_revolutions(self):
+        satellite = parse_tle(iss3LEWithIncorrectSpacing)
+        # Columns 65-68 of line 1 hold the element set number, column 69 the checksum:
+        self.assertEqual(satellite.set, 292)
+        # Columns 64-68 of line 2 hold the revolution number, column 69 the checksum:
+        self.assertEqual(satellite.number_of_revolutions, 56353)
+        self.assertAlmostEqual(satellite.mean_motion, 15.72125391)
 
     def test_invalid_tle(self):
         with self.assertRaises(ValueError, msg="Invalid TLE format"):
@@ -466,9 +488,9 @@ class TestTLE(unittest.TestCase):
         self.assertAlmostEqualFloat(tle.mean_motion, 15.49249062)
         self.assertAlmostEqualFloat(tle.first_derivative_of_mean_motion, 0.00016717)
         self.assertAlmostEqualFloat(tle.second_derivative_of_mean_motion, 0.0)
-        self.assertEqual(tle.number_of_revolutions, 2423)
+        self.assertEqual(tle.number_of_revolutions, 242)
         self.assertEqual(tle.ephemeris, 0)
-        self.assertEqual(tle.set, 9006)
+        self.assertEqual(tle.set, 900)
         # b_star_drag is parsed from "10270-3": 10270/1e5 * 10^-3 = 0.00010270
         self.assertAlmostEqualFloat(tle.b_star_drag, 0.00010270)
 
@@ -520,9 +542,9 @@ class TestTLE(unittest.TestCase):
         self.assertAlmostEqualFloat(tle.mean_motion, 15.49249062)
         self.assertAlmostEqualFloat(tle.first_derivative_of_mean_motion, 0.00016717)
         self.assertAlmostEqualFloat(tle.second_derivative_of_mean_motion, 0.0)
-        self.assertEqual(tle.number_of_revolutions, 2423)
+        self.assertEqual(tle.number_of_revolutions, 242)
         self.assertEqual(tle.ephemeris, 0)
-        self.assertEqual(tle.set, 9006)
+        self.assertEqual(tle.set, 900)
         self.assertAlmostEqualFloat(tle.b_star_drag, 0.00010270)
 
         with self.assertRaises(ValueError):
@@ -576,9 +598,9 @@ class TestTLE(unittest.TestCase):
         self.assertAlmostEqualFloat(tle.mean_motion, 15.49249062)
         self.assertAlmostEqualFloat(tle.first_derivative_of_mean_motion, 0.00016717)
         self.assertAlmostEqualFloat(tle.second_derivative_of_mean_motion, 0.0)
-        self.assertEqual(tle.number_of_revolutions, 2423)
+        self.assertEqual(tle.number_of_revolutions, 242)
         self.assertEqual(tle.ephemeris, 0)
-        self.assertEqual(tle.set, 9006)
+        self.assertEqual(tle.set, 900)
         self.assertAlmostEqualFloat(tle.b_star_drag, 0.00010270)
 
         with self.assertRaises(ValueError):
@@ -632,9 +654,9 @@ class TestTLE(unittest.TestCase):
         self.assertAlmostEqualFloat(tle.mean_motion, 15.49249062)
         self.assertAlmostEqualFloat(tle.first_derivative_of_mean_motion, 0.00016717)
         self.assertAlmostEqualFloat(tle.second_derivative_of_mean_motion, 0.0)
-        self.assertEqual(tle.number_of_revolutions, 2423)
+        self.assertEqual(tle.number_of_revolutions, 242)
         self.assertEqual(tle.ephemeris, 0)
-        self.assertEqual(tle.set, 9006)
+        self.assertEqual(tle.set, 900)
         self.assertAlmostEqualFloat(tle.b_star_drag, 0.00010270)
 
         with self.assertRaises(ValueError):
@@ -696,9 +718,9 @@ class TestTLE(unittest.TestCase):
         self.assertAlmostEqualFloat(tle.mean_motion, 14.98332157116399)
         self.assertAlmostEqualFloat(tle.first_derivative_of_mean_motion, 0.00000576)
         self.assertAlmostEqualFloat(tle.second_derivative_of_mean_motion, 0.0)
-        self.assertEqual(tle.number_of_revolutions, 6399)
+        self.assertEqual(tle.number_of_revolutions, 639)
         self.assertEqual(tle.ephemeris, 0)
-        self.assertEqual(tle.set, 9993)
+        self.assertEqual(tle.set, 999)
         self.assertAlmostEqualFloat(tle.b_star_drag, 0.000056023)
         # b_star_drag is parsed from "56023-4": 56023/1e5 * 10^-4 = 0.000056023
 

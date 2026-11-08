@@ -25,7 +25,9 @@ line1_regex = re.compile(
     r"(?P<second_derivative_of_mean_motion>[+-]?\d{5}[+-]\d)\s+"
     r"(?P<drag>[+-]?\d{5}[+-]\d)\s+"
     r"(?P<ephemeris>\d)\s+"
-    r"(?P<set>\d+)$"
+    # Columns 65-68 hold the element set number, and column 69 holds the checksum:
+    r"(?P<set>\d{1,4})"
+    r"(?P<checksum>\d)$"
 )
 
 # **************************************************************************************
@@ -39,7 +41,10 @@ line2_regex = re.compile(
     r"(?P<argument_of_perigee>\d+\.\d+)\s+"
     r"(?P<mean_anomaly>\d+\.\d+)\s+"
     r"(?P<mean_motion>\d+\.\d{8})\s*"
-    r"(?P<number_of_revolutions>\d+)$"
+    # Columns 64-68 hold the revolution number at epoch, and column 69 holds the
+    # checksum:
+    r"(?P<number_of_revolutions>\d{1,5})"
+    r"(?P<checksum>\d)$"
 )
 
 # **************************************************************************************
