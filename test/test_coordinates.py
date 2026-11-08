@@ -1414,6 +1414,116 @@ class TestConvertECEFToLLA(unittest.TestCase):
 
         self.assertGeographicAlmostEqual(result, original, places=2)
 
+    def assertGeographicWithinSubMillimetre(
+        self,
+        coord1: GeographicCoordinate,
+        coord2: GeographicCoordinate,
+    ) -> None:
+        # 1e-9 degrees of latitude is ~0.11 mm along the meridian:
+        self.assertAlmostEqual(coord1["latitude"], coord2["latitude"], delta=1e-9)
+        self.assertAlmostEqual(coord1["longitude"], coord2["longitude"], delta=1e-9)
+        self.assertAlmostEqual(coord1["elevation"], coord2["elevation"], delta=1e-4)
+
+    def test_equator_matches_erfa_gc2gd(self) -> None:
+        """
+        ECEF → LLA on the equator with height, against ERFA's gc2gd(1, xyz) for the
+        WGS-84 ellipsoid (pyerfa 2.0.1.5).
+        """
+        ecef = CartesianCoordinate(
+            {
+                "x": 1272164.1977329878,
+                "y": -6252886.801164353,
+                "z": 0.0,
+            }
+        )
+
+        result = convert_ecef_to_lla(ecef)
+
+        expected = GeographicCoordinate(
+            {
+                "latitude": 0.0,
+                "longitude": -78.5,
+                "elevation": 2849.999999998935,
+            }
+        )
+
+        self.assertGeographicWithinSubMillimetre(result, expected)
+
+    def test_mid_latitude_with_height_matches_erfa_gc2gd(self) -> None:
+        """
+        ECEF → LLA at a mid-latitude with height, against ERFA's gc2gd(1, xyz) for the
+        WGS-84 ellipsoid (pyerfa 2.0.1.5).
+        """
+        ecef = CartesianCoordinate(
+            {
+                "x": 3194919.1450605746,
+                "y": 3194919.145060574,
+                "z": 4488055.515647106,
+            }
+        )
+
+        result = convert_ecef_to_lla(ecef)
+
+        expected = GeographicCoordinate(
+            {
+                "latitude": 44.99999999999999,
+                "longitude": 45.0,
+                "elevation": 1000.0000000000925,
+            }
+        )
+
+        self.assertGeographicWithinSubMillimetre(result, expected)
+
+    def test_near_pole_matches_erfa_gc2gd(self) -> None:
+        """
+        ECEF → LLA near the North Pole with height, against ERFA's gc2gd(1, xyz) for the
+        WGS-84 ellipsoid (pyerfa 2.0.1.5).
+        """
+        ecef = CartesianCoordinate(
+            {
+                "x": 48368.064299624,
+                "y": 27925.314943569036,
+                "z": 6357008.618384691,
+            }
+        )
+
+        result = convert_ecef_to_lla(ecef)
+
+        expected = GeographicCoordinate(
+            {
+                "latitude": 89.5,
+                "longitude": 29.999999999999993,
+                "elevation": 499.99999999992247,
+            }
+        )
+
+        self.assertGeographicWithinSubMillimetre(result, expected)
+
+    def test_southern_hemisphere_matches_erfa_gc2gd(self) -> None:
+        """
+        ECEF → LLA in the southern hemisphere with height, against ERFA's gc2gd(1, xyz)
+        for the WGS-84 ellipsoid (pyerfa 2.0.1.5).
+        """
+        ecef = CartesianCoordinate(
+            {
+                "x": 1946449.0419438367,
+                "y": -5467592.60045204,
+                "z": -2642720.1365294475,
+            }
+        )
+
+        result = convert_ecef_to_lla(ecef)
+
+        expected = GeographicCoordinate(
+            {
+                "latitude": -24.627500000000005,
+                "longitude": -70.4044,
+                "elevation": 2634.9999999988618,
+            }
+        )
+
+        self.assertGeographicWithinSubMillimetre(result, expected)
+
 
 # **************************************************************************************
 
@@ -1536,6 +1646,115 @@ class TestConvertLLAToECEF(unittest.TestCase):
         self.assertAlmostEqual(dx, h * cos(phi) * cos(lam), places=6)
         self.assertAlmostEqual(dy, h * cos(phi) * sin(lam), places=6)
         self.assertAlmostEqual(dz, h * sin(phi), places=6)
+
+    def assertCoordinatesWithinSubMillimetre(
+        self,
+        coord1: CartesianCoordinate,
+        coord2: CartesianCoordinate,
+    ) -> None:
+        self.assertAlmostEqual(coord1["x"], coord2["x"], delta=1e-4)
+        self.assertAlmostEqual(coord1["y"], coord2["y"], delta=1e-4)
+        self.assertAlmostEqual(coord1["z"], coord2["z"], delta=1e-4)
+
+    def test_equator_matches_erfa_gd2gc(self) -> None:
+        """
+        LLA → ECEF on the equator with height, against ERFA's gd2gc(1, elong, phi,
+        height) for the WGS-84 ellipsoid (pyerfa 2.0.1.5).
+        """
+        lla = GeographicCoordinate(
+            {
+                "latitude": 0.0,
+                "longitude": -78.5,
+                "elevation": 2850.0,
+            }
+        )
+
+        result = convert_lla_to_ecef(lla)
+
+        expected = CartesianCoordinate(
+            {
+                "x": 1272164.1977329878,
+                "y": -6252886.801164353,
+                "z": 0.0,
+            }
+        )
+
+        self.assertCoordinatesWithinSubMillimetre(result, expected)
+
+    def test_mid_latitude_with_height_matches_erfa_gd2gc(self) -> None:
+        """
+        LLA → ECEF at a mid-latitude with height, against ERFA's gd2gc(1, elong, phi,
+        height) for the WGS-84 ellipsoid (pyerfa 2.0.1.5).
+        """
+        lla = GeographicCoordinate(
+            {
+                "latitude": 45.0,
+                "longitude": 45.0,
+                "elevation": 1000.0,
+            }
+        )
+
+        result = convert_lla_to_ecef(lla)
+
+        expected = CartesianCoordinate(
+            {
+                "x": 3194919.1450605746,
+                "y": 3194919.145060574,
+                "z": 4488055.515647106,
+            }
+        )
+
+        self.assertCoordinatesWithinSubMillimetre(result, expected)
+
+    def test_near_pole_matches_erfa_gd2gc(self) -> None:
+        """
+        LLA → ECEF near the North Pole with height, against ERFA's gd2gc(1, elong, phi,
+        height) for the WGS-84 ellipsoid (pyerfa 2.0.1.5).
+        """
+        lla = GeographicCoordinate(
+            {
+                "latitude": 89.5,
+                "longitude": 30.0,
+                "elevation": 500.0,
+            }
+        )
+
+        result = convert_lla_to_ecef(lla)
+
+        expected = CartesianCoordinate(
+            {
+                "x": 48368.064299624,
+                "y": 27925.314943569036,
+                "z": 6357008.618384691,
+            }
+        )
+
+        self.assertCoordinatesWithinSubMillimetre(result, expected)
+
+    def test_southern_hemisphere_matches_erfa_gd2gc(self) -> None:
+        """
+        LLA → ECEF in the southern hemisphere with height, against ERFA's gd2gc(1,
+        elong, phi, height) for the WGS-84 ellipsoid (pyerfa 2.0.1.5).
+        """
+        lla = GeographicCoordinate(
+            {
+                "latitude": -24.6275,
+                "longitude": -70.4044,
+                "elevation": 2635.0,
+            }
+        )
+
+        result = convert_lla_to_ecef(lla)
+
+        expected = CartesianCoordinate(
+            {
+                "x": 1946449.0419438367,
+                "y": -5467592.60045204,
+                "z": -2642720.1365294475,
+            }
+        )
+
+        self.assertCoordinatesWithinSubMillimetre(result, expected)
 
 
 # **************************************************************************************
