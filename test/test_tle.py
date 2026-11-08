@@ -454,6 +454,22 @@ class TestTLEParser(unittest.TestCase):
         # e.g., "E" is 14, so "E5544" is 14 * 10_000 + 5544 = 145544:
         self.assertEqual(satellite.id, 145544)
 
+    def test_parse_rejects_mismatched_catalog_numbers(self):
+        # "52544" keeps the same digit sum as "25544", so the checksum stays valid:
+        tle = iss3LEWithIncorrectSpacing.replace("2 25544 ", "2 52544 ")
+        with self.assertRaisesRegex(
+            ValueError, "Catalog number mismatch: line 1 is 25544, line 2 is 52544"
+        ):
+            parse_tle(tle)
+
+    def test_parse_rejects_mismatched_alpha5_catalog_numbers(self):
+        # Letters do not contribute to the checksum, so the checksum stays valid:
+        tle = iss3LEWithAlpha5.replace("2 E5544 ", "2 F5544 ")
+        with self.assertRaisesRegex(
+            ValueError, "Catalog number mismatch: line 1 is E5544, line 2 is F5544"
+        ):
+            parse_tle(tle)
+
     def test_parse_3le_excludes_checksum_from_set_and_revolutions(self):
         satellite = parse_tle(iss3LEWithIncorrectSpacing)
         # Columns 65-68 of line 1 hold the element set number, column 69 the checksum:
@@ -721,6 +737,13 @@ class TestTLE(unittest.TestCase):
         # The id field is parsed using Alpha-5 when the first character is a letter,
         # e.g., "E" is 14, so "E5544" is 14 * 10_000 + 5544 = 145544:
         self.assertEqual(tle._satellite.id, 145544)
+
+    def test_mismatched_catalog_numbers(self):
+        tle = iss3LEWithIncorrectSpacing.replace("2 25544 ", "2 52544 ")
+        with self.assertRaisesRegex(
+            ValueError, "Invalid TLE string: Catalog number mismatch"
+        ):
+            TLE(tle)
 
     def test_parse_starlink_5833(self):
         tle = TLE(starlink5833)

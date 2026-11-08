@@ -410,6 +410,12 @@ def parse_tle(tle: str) -> Satellite:
     if id is None:
         raise ValueError("Invalid ID field")
 
+    # The catalog number is repeated on line 2, and must match the one on line 1:
+    if parse_id_field(m2.group("id")) != id:
+        raise ValueError(
+            f"Catalog number mismatch: line 1 is {id_field}, line 2 is {m2.group('id')}"
+        )
+
     classification = parse_classification_field(classification_field)
 
     if classification is None:
