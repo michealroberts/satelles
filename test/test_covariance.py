@@ -156,11 +156,11 @@ class TestCovarianceFields(unittest.TestCase):
         )
         self.assertAlmostEqual(
             matrix[0][4],
-            self.valid_covariance_data["cx_dot_y"],
+            self.valid_covariance_data["cy_dot_x"],
         )
         self.assertAlmostEqual(
             matrix[0][5],
-            self.valid_covariance_data["cx_dot_z"],
+            self.valid_covariance_data["cz_dot_x"],
         )
         self.assertAlmostEqual(
             matrix[1][0],
@@ -176,7 +176,7 @@ class TestCovarianceFields(unittest.TestCase):
         )
         self.assertAlmostEqual(
             matrix[1][3],
-            self.valid_covariance_data["cy_dot_x"],
+            self.valid_covariance_data["cx_dot_y"],
         )
         self.assertAlmostEqual(
             matrix[1][4],
@@ -184,7 +184,7 @@ class TestCovarianceFields(unittest.TestCase):
         )
         self.assertAlmostEqual(
             matrix[1][5],
-            self.valid_covariance_data["cy_dot_z"],
+            self.valid_covariance_data["cz_dot_y"],
         )
         self.assertAlmostEqual(
             matrix[2][0],
@@ -200,11 +200,11 @@ class TestCovarianceFields(unittest.TestCase):
         )
         self.assertAlmostEqual(
             matrix[2][3],
-            self.valid_covariance_data["cz_dot_x"],
+            self.valid_covariance_data["cx_dot_z"],
         )
         self.assertAlmostEqual(
             matrix[2][4],
-            self.valid_covariance_data["cz_dot_y"],
+            self.valid_covariance_data["cy_dot_z"],
         )
         self.assertAlmostEqual(
             matrix[2][5],
@@ -216,11 +216,11 @@ class TestCovarianceFields(unittest.TestCase):
         )
         self.assertAlmostEqual(
             matrix[3][1],
-            self.valid_covariance_data["cy_dot_x"],
+            self.valid_covariance_data["cx_dot_y"],
         )
         self.assertAlmostEqual(
             matrix[3][2],
-            self.valid_covariance_data["cz_dot_x"],
+            self.valid_covariance_data["cx_dot_z"],
         )
         self.assertAlmostEqual(
             matrix[3][3],
@@ -236,7 +236,7 @@ class TestCovarianceFields(unittest.TestCase):
         )
         self.assertAlmostEqual(
             matrix[4][0],
-            self.valid_covariance_data["cx_dot_y"],
+            self.valid_covariance_data["cy_dot_x"],
         )
         self.assertAlmostEqual(
             matrix[4][1],
@@ -244,7 +244,7 @@ class TestCovarianceFields(unittest.TestCase):
         )
         self.assertAlmostEqual(
             matrix[4][2],
-            self.valid_covariance_data["cz_dot_y"],
+            self.valid_covariance_data["cy_dot_z"],
         )
         self.assertAlmostEqual(
             matrix[4][3],
@@ -260,11 +260,11 @@ class TestCovarianceFields(unittest.TestCase):
         )
         self.assertAlmostEqual(
             matrix[5][0],
-            self.valid_covariance_data["cx_dot_z"],
+            self.valid_covariance_data["cz_dot_x"],
         )
         self.assertAlmostEqual(
             matrix[5][1],
-            self.valid_covariance_data["cy_dot_z"],
+            self.valid_covariance_data["cz_dot_y"],
         )
         self.assertAlmostEqual(
             matrix[5][2],
@@ -282,6 +282,42 @@ class TestCovarianceFields(unittest.TestCase):
             matrix[5][5],
             self.valid_covariance_data["cz_dot_z_dot"],
         )
+
+    def test_to_matrix_follows_ccsds_field_layout(self) -> None:
+        # CCSDS 502.0-B (OMM): keyword C<A>_<B> is cov(A, B) in the lower triangle,
+        # i.e. index(A) >= index(B), for the state order [x, y, z, x_dot, y_dot, z_dot]:
+        labels = ["x", "y", "z", "x_dot", "y_dot", "z_dot"]
+
+        def ccsds_field(row: int, col: int) -> str:
+            return f"c{labels[max(row, col)]}_{labels[min(row, col)]}"
+
+        # Give each of the 21 lower-triangle fields a unique value encoding its
+        # (1-indexed) row and column, e.g. CX_DOT_Y = cov(x_dot, y) -> 42.0:
+        data: Dict[str, Any] = {
+            ccsds_field(row, col): float(10 * (row + 1) + (col + 1))
+            for row in range(6)
+            for col in range(row + 1)
+        }
+
+        self.assertEqual(len(data), 21)
+
+        matrix = Covariance(**data).to_matrix()
+
+        for row in range(6):
+            for col in range(6):
+                field = ccsds_field(row, col)
+                self.assertEqual(
+                    matrix[row][col],
+                    data[field],
+                    f"M[{row}][{col}] should hold {field.upper()}",
+                )
+
+    def test_to_matrix_is_symmetric(self) -> None:
+        matrix = Covariance(**self.valid_covariance_data).to_matrix()
+
+        for row in range(6):
+            for col in range(6):
+                self.assertEqual(matrix[row][col], matrix[col][row])
 
     def test_valid_optional_fields(self) -> None:
         covariance = Covariance(**self.valid_covariance_data)
