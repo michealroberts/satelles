@@ -16,6 +16,7 @@ from pydantic import ValidationError
 from satelles import TLE
 from satelles.common import CartesianCoordinate
 from satelles.coordinates import convert_eci_to_equatorial, convert_perifocal_to_eci
+from satelles.covariance import Covariance
 from satelles.satellite import ID, OrbitalElements, Satellite
 
 from .utils import host_timezone
@@ -389,6 +390,102 @@ class TestSatelliteECICoordinate(unittest.TestCase):
                     satellite.eci_coordinate,
                     self.get_elements_frame_coordinate(satellite),
                 )
+
+
+# **************************************************************************************
+
+
+class TestSatelliteRoundTrip(unittest.TestCase):
+    """
+    A validated Satellite must survive a dump / re-validate round trip, i.e., every
+    validator must accept the value it normalises to.
+    """
+
+    def setUp(self) -> None:
+        self.data: Dict[str, Any] = {
+            "id": 25544,
+            "name": "ISS (ZARYA)",
+            "classification": "U",
+            "designator": "1998-067A",
+            "year": 2021,
+            "day": 123.456789,
+            "jd": 2459365.456789,
+            "ephemeris": 0,
+            "set": 999,
+            "drag": 0.00002182,
+            "raan": 257.8333,
+            "inclination": 51.6433,
+            "eccentricity": 0.0001675,
+            "argument_of_pericenter": 296.7755,
+            "mean_anomaly": 73.3782,
+            "mean_motion": 15.542259,
+            "first_derivative_of_mean_motion": -0.00002182,
+            "second_derivative_of_mean_motion": 0.0,
+            "number_of_revolutions": 12345,
+            "reference_frame": "TEME",
+            "center": "EARTH",
+        }
+
+    def test_model_dump_round_trip(self) -> None:
+        satellite = Satellite(**self.data)
+
+        self.assertEqual(Satellite(**satellite.model_dump()), satellite)
+
+    def test_model_dump_json_round_trip(self) -> None:
+        satellite = Satellite(**self.data)
+
+        self.assertEqual(
+            Satellite.model_validate_json(satellite.model_dump_json()), satellite
+        )
+
+    def test_model_dump_round_trip_with_covariance(self) -> None:
+        covariance = Covariance(
+            reference_frame="TEME",
+            **{
+                name: float(index + 1)
+                for index, name in enumerate(Covariance.model_fields)
+                if name != "reference_frame"
+            },
+        )
+
+        satellite = Satellite(**self.data, covariance=covariance)
+
+        self.assertEqual(Satellite(**satellite.model_dump()), satellite)
+
+    def test_tle_satellite_model_dump_round_trip(self) -> None:
+        satellite = TLE(
+            tle_string="""
+            ISS (ZARYA)
+            1 25544U 98067A   08264.51782528 -.00002182  00000-0 -11606-4 0  2927
+            2 25544  51.6416 247.4627 0006703 130.5360 325.0288 15.72125391563537
+            """
+        ).as_satellite()
+
+        self.assertEqual(Satellite(**satellite.model_dump()), satellite)
+
+    def test_classification_accepts_normalised_value(self) -> None:
+        for code, name in (
+            ("U", "Unclassified"),
+            ("C", "Classified"),
+            ("S", "Secret"),
+        ):
+            with self.subTest(code=code):
+                satellite = Satellite(**{**self.data, "classification": name})
+                self.assertEqual(satellite.classification, name)
+
+    def test_reference_frame_accepts_normalised_value(self) -> None:
+        for name in (
+            "True Equator, Mean Equinox",
+            "International Celestial Reference Frame",
+            "Epoch Mean Equinox 2000",
+        ):
+            with self.subTest(name=name):
+                satellite = Satellite(**{**self.data, "reference_frame": name})
+                self.assertEqual(satellite.reference_frame, name)
+
+    def test_center_accepts_normalised_value(self) -> None:
+        satellite = Satellite(**{**self.data, "center": "Earth"})
+        self.assertEqual(satellite.center, "Earth")
 
 
 # **************************************************************************************

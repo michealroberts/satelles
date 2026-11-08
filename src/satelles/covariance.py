@@ -135,11 +135,14 @@ class Covariance(BaseModel):
             return None
 
         mapping = {
-            "KVN": "KVN",
             "TEME": "True Equator, Mean Equinox",
             "ICRF": "International Celestial Reference Frame",
             "EME2000": "Epoch Mean Equinox 2000",
         }
+
+        # Accept an already normalised value, e.g., when re-validating a dumped model:
+        if value in mapping.values():
+            return value
 
         if value is not None and value.upper() not in mapping.keys():
             raise ValueError(f"Reference frame must be one of {list(mapping.keys())}")

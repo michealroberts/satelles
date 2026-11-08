@@ -332,6 +332,45 @@ class TestCovarianceFields(unittest.TestCase):
 
 # **************************************************************************************
 
+
+class TestCovarianceReferenceFrame(unittest.TestCase):
+    def setUp(self) -> None:
+        self.elements: Dict[str, Any] = {
+            name: float(index + 1)
+            for index, name in enumerate(Covariance.model_fields)
+            if name != "reference_frame"
+        }
+
+    def test_model_dump_round_trip(self) -> None:
+        covariance = Covariance(reference_frame="TEME", **self.elements)
+
+        self.assertEqual(Covariance(**covariance.model_dump()), covariance)
+
+    def test_model_dump_json_round_trip(self) -> None:
+        covariance = Covariance(reference_frame="EME2000", **self.elements)
+
+        self.assertEqual(
+            Covariance.model_validate_json(covariance.model_dump_json()), covariance
+        )
+
+    def test_reference_frame_accepts_normalised_value(self) -> None:
+        for name in (
+            "True Equator, Mean Equinox",
+            "International Celestial Reference Frame",
+            "Epoch Mean Equinox 2000",
+        ):
+            with self.subTest(name=name):
+                covariance = Covariance(reference_frame=name, **self.elements)
+                self.assertEqual(covariance.reference_frame, name)
+
+    def test_kvn_is_not_a_reference_frame(self) -> None:
+        # KVN (Keyword = Value Notation) is a CCSDS message encoding, not a frame:
+        with self.assertRaises(ValidationError):
+            Covariance(reference_frame="KVN", **self.elements)
+
+
+# **************************************************************************************
+
 if __name__ == "__main__":
     unittest.main()
 

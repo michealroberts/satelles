@@ -101,6 +101,11 @@ class ID(BaseModel):
     @field_validator("classification")
     def validate_classification(cls, value: str) -> str:
         mapping = {"U": "Unclassified", "C": "Classified", "S": "Secret"}
+
+        # Accept an already normalised value, e.g., when re-validating a dumped model:
+        if value in mapping.values():
+            return value
+
         if value not in mapping.keys():
             raise ValueError(f"Classification must be one of {list(mapping.keys())}")
         return mapping[value]
@@ -248,6 +253,10 @@ class Satellite(ID, OrbitalElements):
             "ICRF": "International Celestial Reference Frame",
             "EME2000": "Epoch Mean Equinox 2000",
         }
+
+        # Accept an already normalised value, e.g., when re-validating a dumped model:
+        if value in mapping.values():
+            return value
 
         if value is not None and value.upper() not in mapping.keys():
             raise ValueError(f"Reference frame must be one of {list(mapping.keys())}")
