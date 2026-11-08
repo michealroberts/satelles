@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from enum import Enum
 from math import cos, isclose, radians, sin, sqrt
 from sys import float_info
-from typing import Dict, Literal, Tuple, TypedDict, cast
+from typing import Dict, Literal, Tuple, TypedDict
 
 from satelles.common import CartesianCoordinate
 from satelles.matrix import Matrix3x3
@@ -335,7 +335,7 @@ class Quaternion:
         factors: list[Quaternion] = []
 
         for axis in order.value:
-            angle, vector = angle_by_axis[cast(Literal["x", "y", "z"], axis)]
+            angle, vector = angle_by_axis[axis]
 
             factors.append(Quaternion.from_axis_angle(vector, angle))
 

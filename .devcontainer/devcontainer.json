@@ -7,16 +7,16 @@
   "customizations": {
     "vscode": {
       "extensions": [
+        "astral-sh.ty",
         "charliermarsh.ruff",
-        "ms-python.mypy-type-checker",
         "ms-python.python",
         "ms-toolsai.jupyter",
         "tamasfe.even-better-toml"
       ]
     },
     "recommendations": [
+      "astral-sh.ty",
       "charliermarsh.ruff",
-      "ms-python.mypy-type-checker",
       "ms-python.python",
       "ms-toolsai.jupyter",
       "tamasfe.even-better-toml"
