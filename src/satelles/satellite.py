@@ -22,6 +22,7 @@ from .coordinates import (
 from .covariance import Covariance
 from .earth import EARTH_MASS
 from .kepler import get_semi_major_axis, get_true_anomaly
+from .transforms import teme_to_eci_transform_provider
 from .velocity import get_perifocal_velocity
 
 # **************************************************************************************
@@ -403,18 +404,36 @@ class Satellite(ID, OrbitalElements):
             The date and time to calculate the position for should be set using the
             `at` method before calling this property.
 
+        Note:
+            The library's ECI frame is true-of-date (TOD), i.e., the frame assumed by
+            convert_eci_to_equatorial, convert_eci_to_ecef and is_visible. TLE elements
+            are referred to the True Equator, Mean Equinox (TEME) frame, so when the
+            reference frame is TEME the position is rotated into TOD by the equation of
+            the equinoxes. For any other reference frame (None, ICRF or EME2000), the
+            position is returned unrotated, in the frame of the orbital elements.
+
         Returns:
             A CartesianCoordinate representing the satellite's position in the ECI
             coordinate system.
         """
-        # Convert the perifocal coordinate to the Earth Centered Inertial (ECI)
-        # reference frame:
-        return convert_perifocal_to_eci(
+        # Convert the perifocal coordinate to the frame of the orbital elements:
+        position = convert_perifocal_to_eci(
             perifocal=self.perifocal_coordinate,
             inclination=self.inclination,
             raan=self.raan,
             argument_of_perigee=self.argument_of_pericenter,
         )
+
+        # The reference frame validator stores the long name, but also accept the code
+        # in case the validator is changed to store codes:
+        is_teme = self.reference_frame in ("TEME", "True Equator, Mean Equinox")
+
+        # Rotate a TEME position into the true-of-date ECI frame by the equation of the
+        # equinoxes, otherwise return the position in the frame of the elements:
+        if not is_teme or self._when is None:
+            return position
+
+        return teme_to_eci_transform_provider(self._when).apply_to_position(position)
 
     @property
     def equatorial_coordinate(self) -> EquatorialCoordinate:
