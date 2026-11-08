@@ -615,15 +615,14 @@ class TestConvertECIToTopocentric(unittest.TestCase):
 
         result = convert_eci_to_topocentric(eci=eci, when=when, observer=observer)
 
-        expected = TopocentricCoordinate(
-            at=when,
-            altitude=90.0,
-            azimuth=0.0,
-            range=400_000.0,
-            time_of_flight=2 * 400_000.0 / SPEED_OF_LIGHT,
+        # The azimuth is undefined at the zenith (the east and north components are
+        # only floating point residuals), so it is deliberately not asserted here:
+        self.assertEqual(result["at"], when)
+        self.assertAlmostEqual(result["altitude"], 90.0, places=4)
+        self.assertAlmostEqual(result["range"], 400_000.0, places=4)
+        self.assertAlmostEqual(
+            result["time_of_flight"], 2 * 400_000.0 / SPEED_OF_LIGHT, places=4
         )
-
-        self.assertTopocentricAlmostEqual(result, expected)
 
     def test_pure_east(self) -> None:
         """
