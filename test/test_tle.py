@@ -15,6 +15,7 @@ from satelles import TLE
 from satelles.tle import (
     line1_regex,
     line2_regex,
+    parse_id_field,
     parse_tle,
 )
 
@@ -449,9 +450,9 @@ class TestTLEParser(unittest.TestCase):
         )
         self.assertEqual(satellite.name, "ISS (ZARYA)")
         self.assertEqual(satellite.classification, "Unclassified")
-        # The id field is parsed using base-36 when the first character is a letter.
-        # Expected value for "E5544" in base-36 is 23754532.
-        self.assertEqual(satellite.id, 23754532)
+        # The id field is parsed using Alpha-5 when the first character is a letter,
+        # e.g., "E" is 14, so "E5544" is 14 * 10_000 + 5544 = 145544:
+        self.assertEqual(satellite.id, 145544)
 
     def test_parse_3le_excludes_checksum_from_set_and_revolutions(self):
         satellite = parse_tle(iss3LEWithIncorrectSpacing)
@@ -699,9 +700,9 @@ class TestTLE(unittest.TestCase):
         tle = TLE(iss3LEWithAlpha5)
         self.assertEqual(tle._satellite.name, "ISS (ZARYA)")
         self.assertEqual(tle._satellite.classification, "Unclassified")
-        # The id field is parsed using base-36 when the first character is a letter.
-        # Expected value for "E5544" in base-36 is 23754532.
-        self.assertEqual(tle._satellite.id, 23754532)
+        # The id field is parsed using Alpha-5 when the first character is a letter,
+        # e.g., "E" is 14, so "E5544" is 14 * 10_000 + 5544 = 145544:
+        self.assertEqual(tle._satellite.id, 145544)
 
     def test_parse_starlink_5833(self):
         tle = TLE(starlink5833)
@@ -727,6 +728,53 @@ class TestTLE(unittest.TestCase):
     def test_invalid_tle(self):
         with self.assertRaises(ValueError):
             TLE("")
+
+
+# **************************************************************************************
+
+
+class TestParseIdField(unittest.TestCase):
+    def test_parses_numeric_catalog_number(self) -> None:
+        self.assertEqual(parse_id_field("25544"), 25544)
+
+    def test_parses_numeric_catalog_number_with_leading_zeros(self) -> None:
+        self.assertEqual(parse_id_field("00005"), 5)
+
+    def test_parses_alpha5_lower_bound(self) -> None:
+        self.assertEqual(parse_id_field("A0000"), 100000)
+
+    def test_parses_alpha5_letter_before_skipped_i(self) -> None:
+        self.assertEqual(parse_id_field("H9999"), 179999)
+
+    def test_parses_alpha5_skips_letter_i(self) -> None:
+        self.assertEqual(parse_id_field("J0000"), 180000)
+
+    def test_parses_alpha5_letter_before_skipped_o(self) -> None:
+        self.assertEqual(parse_id_field("N9999"), 229999)
+
+    def test_parses_alpha5_skips_letter_o(self) -> None:
+        self.assertEqual(parse_id_field("P0000"), 230000)
+
+    def test_parses_alpha5_upper_bound(self) -> None:
+        self.assertEqual(parse_id_field("Z9999"), 339999)
+
+    def test_rejects_alpha5_letter_i(self) -> None:
+        self.assertIsNone(parse_id_field("I0000"))
+
+    def test_rejects_alpha5_letter_o(self) -> None:
+        self.assertIsNone(parse_id_field("O0000"))
+
+    def test_rejects_alpha5_with_non_digit_suffix(self) -> None:
+        self.assertIsNone(parse_id_field("EA544"))
+
+    def test_rejects_alpha5_with_wrong_length(self) -> None:
+        self.assertIsNone(parse_id_field("E554"))
+
+    def test_rejects_numeric_with_embedded_letter(self) -> None:
+        self.assertIsNone(parse_id_field("25A44"))
+
+    def test_rejects_non_string(self) -> None:
+        self.assertIsNone(parse_id_field(25544))
 
 
 # **************************************************************************************

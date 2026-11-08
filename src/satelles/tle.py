@@ -7,11 +7,17 @@
 
 import re
 from datetime import datetime, timedelta, timezone
-from typing import Any, Optional, Tuple
+from typing import Any, Final, Optional, Tuple
 
 from .constants import GRAVITATIONAL_CONSTANT
 from .earth import EARTH_MASS
 from .satellite import Satellite
+
+# **************************************************************************************
+
+# The Alpha-5 leading letters, in order, where "A" is 10 and "Z" is 33 (the letters
+# "I" and "O" are skipped to avoid confusion with the digits "1" and "0"):
+ALPHA5_LETTERS: Final[str] = "ABCDEFGHJKLMNPQRSTUVWXYZ"
 
 # **************************************************************************************
 
@@ -82,21 +88,34 @@ def parse_scientific_notation(value: str) -> float:
 
 def parse_id_field(value: Any) -> Optional[int]:
     """
-    Parse a string as an integer, with support for base-36 encoding.
+    Parse a catalog number string as an integer, with support for Alpha-5 encoding.
+
+    Alpha-5 replaces the first two digits of a six digit catalog number with a single
+    letter (A=10 through Z=33, skipping "I" and "O"), e.g., "A0000" is 100000 and
+    "Z9999" is 339999.
 
     Args:
         value: The value to parse.
 
     Returns:
-        The value as an integer, or None if the value is not a valid integer
+        The value as an integer, or None if the value is not a valid catalog number.
     """
     if not isinstance(value, str):
         return None
+
     try:
         if value and value[0].isalpha():
-            return int(value, 36)
-        else:
-            return int(value, 10)
+            # Alpha-5 encoding is always a single letter followed by four digits:
+            index = ALPHA5_LETTERS.find(value[0])
+
+            suffix = value[1:]
+
+            if index < 0 or len(suffix) != 4 or not suffix.isdigit():
+                return None
+
+            return (index + 10) * 10_000 + int(suffix, 10)
+
+        return int(value, 10)
     except ValueError:
         return None
 
