@@ -439,9 +439,16 @@ class Satellite(ID, OrbitalElements):
         Set the TLE to a specific date and time (in UTC).
 
         Args:
-            when: The date and time to set the TLE to.
+            when: The date and time to set the TLE to. A naive datetime is treated as
+                UTC; an aware datetime is converted to UTC.
         """
-        self._when = when.astimezone(timezone.utc)
+        # Treat a naive datetime as UTC (calling astimezone() on a naive datetime would
+        # interpret it as host-local time), otherwise convert an aware datetime to UTC:
+        self._when = (
+            when.replace(tzinfo=timezone.utc)
+            if when.tzinfo is None
+            else when.astimezone(timezone.utc)
+        )
 
 
 # **************************************************************************************

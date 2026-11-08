@@ -5,11 +5,16 @@
 
 # **************************************************************************************
 
+import os
+import time
 import unittest
-from typing import Any, Dict
+from contextlib import contextmanager
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, Iterator
 
 from pydantic import ValidationError
 
+from satelles import TLE
 from satelles.satellite import ID, OrbitalElements, Satellite
 
 # **************************************************************************************
@@ -196,6 +201,67 @@ class TestSatelliteOptionalFields(unittest.TestCase):
         satellite = Satellite(**data)
         self.assertIsNone(satellite.reference_frame)
         self.assertIsNone(satellite.center)
+
+
+# **************************************************************************************
+
+
+@contextmanager
+def host_timezone(name: str) -> Iterator[None]:
+    """
+    Temporarily set the host (process) timezone, restoring the original afterwards.
+    """
+    previous = os.environ.get("TZ")
+
+    os.environ["TZ"] = name
+    time.tzset()
+
+    try:
+        yield
+    finally:
+        if previous is None:
+            del os.environ["TZ"]
+        else:
+            os.environ["TZ"] = previous
+        time.tzset()
+
+
+# **************************************************************************************
+
+
+@unittest.skipUnless(hasattr(time, "tzset"), "requires time.tzset (POSIX only)")
+class TestSatelliteAt(unittest.TestCase):
+    def setUp(self) -> None:
+        self.satellite = TLE(
+            tle_string="""
+            ISS (ZARYA)
+            1 25544U 98067A   08264.51782528 -.00002182  00000-0 -11606-4 0  2927
+            2 25544  51.6416 247.4627 0006703 130.5360 325.0288 15.72125391563537
+            """
+        ).as_satellite()
+
+    def test_at_treats_naive_datetime_as_utc(self) -> None:
+        # Use a host timezone well away from UTC, so a local-time interpretation of the
+        # naive datetime would shift the position by several hours of orbital motion:
+        with host_timezone("America/New_York"):
+            self.satellite.at(when=datetime(2008, 9, 20, 12, 0, 0))
+            naive = self.satellite.eci_coordinate
+
+            self.satellite.at(when=datetime(2008, 9, 20, 12, 0, 0, tzinfo=timezone.utc))
+            aware = self.satellite.eci_coordinate
+
+        self.assertEqual(naive, aware)
+
+    def test_at_converts_aware_datetime_to_utc(self) -> None:
+        offset = timezone(timedelta(hours=5))
+
+        self.satellite.at(when=datetime(2008, 9, 20, 17, 0, 0, tzinfo=offset))
+        shifted = self.satellite.eci_coordinate
+
+        self.satellite.at(when=datetime(2008, 9, 20, 12, 0, 0, tzinfo=timezone.utc))
+        utc = self.satellite.eci_coordinate
+
+        self.assertEqual(shifted, utc)
 
 
 # **************************************************************************************
