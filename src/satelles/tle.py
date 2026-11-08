@@ -336,6 +336,40 @@ def parse_number_of_revolutions_field(value: Any) -> Optional[int]:
 # **************************************************************************************
 
 
+def do_split_tle_lines(tle: str) -> Tuple[str, str, str]:
+    """
+    Split a TLE string into its name, line 1 and line 2 parts.
+
+    The TLE string can be in one of two formats:
+      - Three-line set (name, line1, line2), where the name may be prefixed with "0 ".
+      - Two-line set (line1, line2), in which case the name is an empty string.
+
+    Any lines after the first three are ignored.
+
+    Args:
+        tle: The TLE string to split.
+
+    Raises:
+        ValueError: If the TLE string has fewer than two non-empty lines.
+
+    Returns:
+        A tuple containing the name (without any "0 " prefix), line1, and line2.
+    """
+    # Split the TLE into lines and remove any empty lines:
+    lines = [line.strip() for line in tle.splitlines() if line.strip()]
+
+    if len(lines) == 2:
+        return "", lines[0], lines[1]
+
+    if len(lines) >= 3:
+        return lines[0].removeprefix("0 "), lines[1], lines[2]
+
+    raise ValueError("Invalid TLE format")
+
+
+# **************************************************************************************
+
+
 def parse_tle(tle: str) -> Satellite:
     """
     Parse a TLE string and return a Satellite instance if successful, otherwise raise a
@@ -354,17 +388,8 @@ def parse_tle(tle: str) -> Satellite:
     Returns:
         A Satellite instance if parsing is successful.
     """
-    # Split the TLE into lines and remove any empty lines:
-    lines = [line.strip() for line in tle.splitlines() if line.strip()]
-
-    if len(lines) == 2:
-        name = ""
-        line1, line2 = lines
-    elif len(lines) >= 3:
-        name = lines[0].removeprefix("0 ")
-        line1, line2 = lines[1], lines[2]
-    else:
-        raise ValueError("Invalid TLE format")
+    # Split the TLE into its name, line 1 and line 2 parts:
+    name, line1, line2 = do_split_tle_lines(tle)
 
     # Match the TLE to the line 1 regular expression:
     m1 = line1_regex.match(line1)
@@ -626,27 +651,10 @@ class TLE:
         Serialize our parsed TLE back to its original parts.
 
         Returns:
-            A tuple containing the name, line1, and line2 of the TLE.
+            A tuple containing the name (without any "0 " prefix, matching `name`),
+            line1, and line2 of the TLE.
         """
-        lines = [line.strip() for line in self._tle.splitlines() if line.strip()]
-
-        # TLE lines start with "1" or "2"
-        tle_lines = [
-            line
-            for line in lines
-            if line.startswith("1") or line.startswith("2") or line is not None
-        ]
-
-        if len(tle_lines) < 2:
-            raise ValueError("Not enough TLE lines found")
-
-        if len(tle_lines) == 3:
-            return tle_lines[0], tle_lines[1], tle_lines[2]
-
-        if len(tle_lines) == 2:
-            return "", tle_lines[0], tle_lines[1]
-
-        raise ValueError("Invalid TLE format")
+        return do_split_tle_lines(self._tle)
 
 
 # **************************************************************************************

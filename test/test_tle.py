@@ -13,6 +13,7 @@ from typing import Dict, Optional, Tuple
 
 from satelles import TLE
 from satelles.tle import (
+    do_split_tle_lines,
     line1_regex,
     line2_regex,
     parse_id_field,
@@ -357,6 +358,59 @@ class TestTLERegex(unittest.TestCase):
             parts[2],
             "2 E5544  51.6442 147.1064 0004607  95.6506 329.8285 15.49249062  2420",
         )
+
+    def test_serialize_to_parts_strips_zeroth_line_prefix(self) -> None:
+        tle = TLE(tle_string=iss3LEWithAlpha5Zeroth)
+
+        parts = tle.serialize_to_parts()
+
+        # The name part must match the parsed name, i.e., without the "0 " prefix:
+        self.assertEqual(parts[0], "ISS (ZARYA)")
+        self.assertEqual(parts[0], tle.name)
+        self.assertEqual(
+            parts[1],
+            "1 E5544U 98067A   20062.59097222  .00016717  00000-0  10270-3 0  9001",
+        )
+        self.assertEqual(
+            parts[2],
+            "2 E5544  51.6442 147.1064 0004607  95.6506 329.8285 15.49249062  2420",
+        )
+
+    def test_serialize_to_parts_ignores_trailing_lines(self) -> None:
+        # The parser only reads the first three lines, so serialization must too:
+        tle = TLE(tle_string=f"{iss3LEWithIncorrectSpacing}\nTRAILING LINE\n")
+
+        parts = tle.serialize_to_parts()
+
+        self.assertEqual(
+            parts,
+            (
+                "ISS (ZARYA)",
+                "1 25544U 98067A   08264.51782528 -.00002182  00000-0 -11606-4 0  2927",
+                "2 25544  51.6416 247.4627 0006703 130.5360 325.0288 15.72125391563537",
+            ),
+        )
+
+
+# **************************************************************************************
+
+
+class TestDoSplitTLELines(unittest.TestCase):
+    def test_two_line_element_set_has_empty_name(self) -> None:
+        name, line1, line2 = do_split_tle_lines(iss2LE)
+        self.assertEqual(name, "")
+        self.assertTrue(line1.startswith("1 25544U"))
+        self.assertTrue(line2.startswith("2 25544 "))
+
+    def test_three_line_element_set_strips_zeroth_line_prefix(self) -> None:
+        name, line1, line2 = do_split_tle_lines(iss3LEWithAlpha5Zeroth)
+        self.assertEqual(name, "ISS (ZARYA)")
+        self.assertTrue(line1.startswith("1 E5544U"))
+        self.assertTrue(line2.startswith("2 E5544 "))
+
+    def test_too_few_lines_raises_value_error(self) -> None:
+        with self.assertRaisesRegex(ValueError, "Invalid TLE format"):
+            do_split_tle_lines("1 25544U 98067A   20062.59097222")
 
 
 # **************************************************************************************
