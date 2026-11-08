@@ -256,23 +256,24 @@ def convert_eci_to_ecef(
 
     θ = radians(GAST)
 
-    x1 = eci["x"] * cos(x_polar_motion) + eci["z"] * sin(x_polar_motion)
+    # Rotate around Z-axis (from ECI to PEF) using the GAST:
+    x1 = eci["x"] * cos(θ) + eci["y"] * sin(θ)
 
-    y1 = eci["y"]
+    y1 = -eci["x"] * sin(θ) + eci["y"] * cos(θ)
 
-    z1 = -eci["x"] * sin(x_polar_motion) + eci["z"] * cos(x_polar_motion)
+    z1 = eci["z"]
 
-    x2 = x1
+    # Apply the polar motion (from PEF to ECEF), r_ECEF = R1(-yp) · R2(-xp) · r_PEF:
+    x2 = x1 * cos(x_polar_motion) + z1 * sin(x_polar_motion)
 
-    y2 = y1 * cos(y_polar_motion) - z1 * sin(y_polar_motion)
+    y2 = y1
 
-    z2 = y1 * sin(y_polar_motion) + z1 * cos(y_polar_motion)
+    z2 = -x1 * sin(x_polar_motion) + z1 * cos(x_polar_motion)
 
-    # Rotate around Z-axis (from ECI to ECEF) using the GAST:
     return CartesianCoordinate(
-        x=x2 * cos(θ) + y2 * sin(θ),
-        y=-x2 * sin(θ) + y2 * cos(θ),
-        z=z2,
+        x=x2,
+        y=y2 * cos(y_polar_motion) - z2 * sin(y_polar_motion),
+        z=y2 * sin(y_polar_motion) + z2 * cos(y_polar_motion),
     )
 
 
